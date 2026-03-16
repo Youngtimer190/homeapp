@@ -117,18 +117,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
     if (signInError) return { error: 'Nieprawidłowe hasło. Spróbuj ponownie.' };
 
-    // Krok 2: Wywołaj funkcję SQL która usuwa dane + konto z auth.users
-    const { error: rpcError } = await supabase.rpc('delete_user_account');
+    // Krok 2: Pobierz aktualny token sesji
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) return { error: 'Brak aktywnej sesji.' };
 
-    if (rpcError) {
-      // Fallback — ręczne usunięcie danych z tabel (bez usunięcia konta auth)
-      const tables = ['shopping_lists', 'members', 'pets', 'vehicles', 'meals', 'tasks', 'transactions', 'families'];
-      for (const table of tables) {
-        await supabase.from(table).delete().eq('user_id', user.id);
-      }
+    // Krok 3: Usuń dane z wszystkich tabel przez RPC
+    await supabase.rpc('delete_user_data');
+
+    // Krok 4: Usuń konto przez Edge Function (wymaga service_role)
+    const { error: fnError } = await supabase.functions.invoke('delete-user', {
+      headers: {
+        Authorization: `Bearer ${session.access_token}`,
+      },
+    });
+
+    if (fnError) {
+      // Fallback — wyloguj użytkownika nawet jeśli usunięcie konta nie powiodło się
+      await supabase.auth.signOut();
+      return { error: 'Dane zostały usunięte, ale konto nie mogło zostać całkowicie usunięte. Skontaktuj się z administratorem.' };
     }
 
-    // Krok 3: Wyloguj niezależnie od wyniku
+    // Krok 5: Wyloguj
     await supabase.auth.signOut();
     return { error: null };
   };
