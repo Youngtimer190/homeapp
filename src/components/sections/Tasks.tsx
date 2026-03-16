@@ -201,20 +201,26 @@ export default function Tasks({ tasks, setTasks, members }: Props) {
                 />
               </div>
               <div className="grid grid-cols-2 gap-3">
-                <select
-                  value={form.priority}
-                  onChange={e => setForm(f => ({ ...f, priority: e.target.value as Task['priority'] }))}
-                  className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white"
-                >
-                  {priorities.map(p => <option key={p} value={p}>{priorityLabel[p]}</option>)}
-                </select>
-                <select
-                  value={form.status}
-                  onChange={e => setForm(f => ({ ...f, status: e.target.value as Task['status'] }))}
-                  className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white"
-                >
-                  {statuses.map(s => <option key={s} value={s}>{statusLabel[s]}</option>)}
-                </select>
+                <div className="flex flex-col gap-1">
+                  <label className="text-sm font-medium text-gray-700">Priorytet</label>
+                  <select
+                    value={form.priority}
+                    onChange={e => setForm(f => ({ ...f, priority: e.target.value as Task['priority'] }))}
+                    className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white"
+                  >
+                    {priorities.map(p => <option key={p} value={p}>{priorityLabel[p]}</option>)}
+                  </select>
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-sm font-medium text-gray-700">Status</label>
+                  <select
+                    value={form.status}
+                    onChange={e => setForm(f => ({ ...f, status: e.target.value as Task['status'] }))}
+                    className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white"
+                  >
+                    {statuses.map(s => <option key={s} value={s}>{statusLabel[s]}</option>)}
+                  </select>
+                </div>
               </div>
             </div>
             <div className="p-5 pt-0 flex gap-3">

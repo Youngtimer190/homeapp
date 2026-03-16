@@ -442,16 +442,22 @@ export default function Budget({ transactions, setTransactions, memberNames }: P
               </div>
               <div>
                 <label className="block text-xs text-gray-500 mb-1 font-medium">Dodał(a)</label>
-                <select
-                  value={form.addedBy}
-                  onChange={e => setForm(f => ({ ...f, addedBy: e.target.value }))}
-                  className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 bg-white"
-                >
-                  <option value="">— nie wybrano —</option>
-                  {memberNames.map(name => (
-                    <option key={name} value={name}>{name}</option>
-                  ))}
-                </select>
+                {memberNames.length === 0 ? (
+                  <select disabled className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm bg-gray-100 text-gray-400 cursor-not-allowed">
+                    <option>Najpierw dodaj członka rodziny</option>
+                  </select>
+                ) : (
+                  <select
+                    value={form.addedBy}
+                    onChange={e => setForm(f => ({ ...f, addedBy: e.target.value }))}
+                    className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 bg-white"
+                  >
+                    <option value="">Wybierz osobę</option>
+                    {memberNames.map(name => (
+                      <option key={name} value={name}>{name}</option>
+                    ))}
+                  </select>
+                )}
               </div>
             </div>
             <div className="p-5 pt-0 flex gap-3">
