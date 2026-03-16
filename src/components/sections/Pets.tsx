@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Pet } from '../../types';
 import ConfirmDialog from '../ConfirmDialog';
+import Modal from '../Modal';
 
 interface Props {
   pets: Pet[];
@@ -391,16 +392,12 @@ export default function Pets({ pets, setPets }: Props) {
       )}
 
       {/* Modal – dodaj / edytuj */}
-      {showForm && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white z-10">
-              <h3 className="text-lg font-bold text-gray-900">
-                {editingId ? '✏️ Edytuj zwierzę' : '🐾 Nowe zwierzę'}
-              </h3>
-              <button onClick={closeModal} className="text-gray-400 hover:text-gray-600 text-2xl leading-none">×</button>
-            </div>
-            <div className="p-6 space-y-4">
+      <Modal
+        isOpen={showForm}
+        onClose={closeModal}
+        title={editingId ? '✏️ Edytuj zwierzę' : '🐾 Nowe zwierzę'}
+      >
+        <div className="p-5 space-y-4">
 
               {/* Podstawowe dane */}
               <input type="text" placeholder="Imię *" value={form.name}
@@ -498,17 +495,15 @@ export default function Pets({ pets, setPets }: Props) {
                   ))}
                 </div>
               </div>
-            </div>
-
-            <div className="p-6 pt-0 flex gap-3">
-              <button onClick={closeModal} className="flex-1 border border-gray-200 text-gray-700 py-2.5 rounded-xl text-sm font-semibold hover:bg-gray-50 transition">Anuluj</button>
-              <button onClick={handleSave} className="flex-1 bg-amber-500 hover:bg-amber-600 text-white py-2.5 rounded-xl text-sm font-semibold transition shadow">
-                {editingId ? 'Zapisz zmiany' : 'Dodaj zwierzę'}
-              </button>
-            </div>
-          </div>
         </div>
-      )}
+
+        <div className="px-5 pb-5 flex gap-3">
+          <button onClick={closeModal} className="flex-1 border border-gray-200 text-gray-700 py-2.5 rounded-xl text-sm font-semibold hover:bg-gray-50 transition">Anuluj</button>
+          <button onClick={handleSave} className="flex-1 bg-amber-500 hover:bg-amber-600 text-white py-2.5 rounded-xl text-sm font-semibold transition shadow">
+            {editingId ? 'Zapisz zmiany' : 'Dodaj zwierzę'}
+          </button>
+        </div>
+      </Modal>
 
       <ConfirmDialog
         isOpen={confirmId !== null}
