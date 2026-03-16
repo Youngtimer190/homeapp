@@ -105,16 +105,7 @@ export default function Settings({ userEmail, onSignOut, onDeleteAccount, isLoca
             <span className="text-sm text-gray-600">Wersja</span>
             <span className="text-sm font-medium text-gray-900">1.0.0</span>
           </div>
-          <div className="flex items-center justify-between py-2 border-t border-gray-50">
-            <span className="text-sm text-gray-600">Sekcje</span>
-            <span className="text-sm font-medium text-gray-900">Budżet, Zadania, Zakupy, Posiłki, Pojazdy, Zwierzęta, Członkowie</span>
-          </div>
-          <div className="flex items-center justify-between py-2 border-t border-gray-50">
-            <span className="text-sm text-gray-600">Tryb</span>
-            <span className={`text-sm font-medium ${isLocalMode ? 'text-amber-600' : 'text-emerald-600'}`}>
-              {isLocalMode ? '💾 Lokalny' : '☁️ Supabase'}
-            </span>
-          </div>
+
         </div>
       </div>
 

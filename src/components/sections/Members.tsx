@@ -267,7 +267,7 @@ export default function Members({ members, setMembers, familyName, setFamilyName
                           )}
                         </div>
                       </div>
-                      <div className="flex gap-2">
+                      <div className="flex flex-col gap-2">
                         <button
                           onClick={() => openEdit(current)}
                           className="bg-white/20 hover:bg-white/30 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition flex-shrink-0"
