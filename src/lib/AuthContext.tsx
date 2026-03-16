@@ -118,27 +118,39 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (signInError) return { error: 'Nieprawidłowe hasło. Spróbuj ponownie.' };
 
     // Krok 2: Pobierz aktualny token sesji
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) return { error: 'Brak aktywnej sesji.' };
+    const { data: { session: currentSession } } = await supabase.auth.getSession();
+    if (!currentSession) return { error: 'Brak aktywnej sesji.' };
 
-    // Krok 3: Usuń dane z wszystkich tabel przez RPC
-    await supabase.rpc('delete_user_data');
-
-    // Krok 4: Usuń konto przez Edge Function (wymaga service_role)
-    const { error: fnError } = await supabase.functions.invoke('delete-user', {
-      headers: {
-        Authorization: `Bearer ${session.access_token}`,
-      },
-    });
-
-    if (fnError) {
-      // Fallback — wyloguj użytkownika nawet jeśli usunięcie konta nie powiodło się
-      await supabase.auth.signOut();
-      return { error: 'Dane zostały usunięte, ale konto nie mogło zostać całkowicie usunięte. Skontaktuj się z administratorem.' };
+    // Krok 3: Usuń dane użytkownika z tabel przez RPC
+    const { error: dataError } = await supabase.rpc('delete_user_data');
+    if (dataError) {
+      console.error('Błąd usuwania danych:', dataError);
     }
 
-    // Krok 5: Wyloguj
+    // Krok 4: Usuń konto z auth.users przez natywny endpoint Supabase
+    try {
+      const supabaseUrl = (supabase as any).supabaseUrl || 
+        import.meta.env.VITE_SUPABASE_URL;
+      
+      const response = await fetch(`${supabaseUrl}/auth/v1/user`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${currentSession.access_token}`,
+          'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        console.error('Błąd usuwania konta:', await response.text());
+      }
+    } catch (err) {
+      console.error('Błąd fetch:', err);
+    }
+
+    // Krok 5: Wyloguj niezależnie od wyniku
     await supabase.auth.signOut();
+
     return { error: null };
   };
 
