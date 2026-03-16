@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { Session, User } from '@supabase/supabase-js';
-import { supabase, isSupabaseConfigured } from './supabase';
+import { supabase, supabaseAdmin, isSupabaseConfigured } from './supabase';
 
 interface AuthContextType {
   session: Session | null;
@@ -117,38 +117,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
     if (signInError) return { error: 'Nieprawidłowe hasło. Spróbuj ponownie.' };
 
-    // Krok 2: Pobierz aktualny token sesji
-    const { data: { session: currentSession } } = await supabase.auth.getSession();
-    if (!currentSession) return { error: 'Brak aktywnej sesji.' };
-
-    // Krok 3: Usuń dane użytkownika z tabel przez RPC
+    // Krok 2: Usuń dane użytkownika z tabel przez RPC
     const { error: dataError } = await supabase.rpc('delete_user_data');
     if (dataError) {
       console.error('Błąd usuwania danych:', dataError);
     }
 
-    // Krok 4: Usuń konto z auth.users przez natywny endpoint Supabase
-    try {
-      const supabaseUrl = (supabase as any).supabaseUrl || 
-        import.meta.env.VITE_SUPABASE_URL;
-      
-      const response = await fetch(`${supabaseUrl}/auth/v1/user`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${currentSession.access_token}`,
-          'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        console.error('Błąd usuwania konta:', await response.text());
+    // Krok 3: Usuń konto z auth.users przez supabaseAdmin (service_role)
+    if (supabaseAdmin) {
+      const { error: adminError } = await supabaseAdmin.auth.admin.deleteUser(user.id);
+      if (adminError) {
+        console.error('Błąd usuwania konta przez admin:', adminError);
+        await supabase.auth.signOut();
+        return { error: 'Dane usunięte, ale konto nie mogło zostać usunięte. Skontaktuj się z administratorem.' };
       }
-    } catch (err) {
-      console.error('Błąd fetch:', err);
+    } else {
+      // Fallback jeśli brak service_role key — wyloguj i poinformuj
+      await supabase.auth.signOut();
+      return { error: 'Brak klucza VITE_SUPABASE_SERVICE_ROLE_KEY w pliku .env. Dodaj go aby umożliwić usuwanie konta.' };
     }
 
-    // Krok 5: Wyloguj niezależnie od wyniku
+    // Krok 4: Wyloguj
     await supabase.auth.signOut();
 
     return { error: null };
