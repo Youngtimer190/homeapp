@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Member } from '../../types';
 import ConfirmDialog from '../ConfirmDialog';
+import Modal from '../Modal';
 
 interface Props {
   members: Member[];
@@ -323,67 +324,62 @@ export default function Members({ members, setMembers, familyName, setFamilyName
       )}
 
       {/* Modal */}
-      {showForm && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-screen overflow-y-auto">
-            <div className="p-6 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white">
-              <h3 className="text-lg font-bold text-gray-900">
-                {editingMember ? 'Edytuj członka' : 'Nowy członek rodziny'}
-              </h3>
-              <button onClick={() => { setShowForm(false); setEditingMember(null); setForm(emptyForm()); }} className="text-gray-400 hover:text-gray-600 text-2xl leading-none">×</button>
-            </div>
-            <div className="p-6 space-y-4">
-              <div>
-                <label className="block text-xs text-gray-500 mb-2 ml-1">Avatar</label>
-                <div className="flex gap-2 flex-wrap">
-                  {avatarOptions.map(a => (
-                    <button key={a} onClick={() => setForm(f => ({ ...f, avatar: a }))}
-                      className={`w-10 h-10 rounded-xl text-xl transition ${form.avatar === a ? 'bg-rose-100 ring-2 ring-rose-400 scale-110' : 'bg-gray-50 hover:bg-gray-100'}`}>
-                      {a}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <input type="text" placeholder="Imię i nazwisko *" value={form.name}
-                onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
-                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-rose-400" />
-              <div className="grid grid-cols-2 gap-3">
-                <input type="text" placeholder="Typ członka (np. Tata)" value={form.role}
-                  onChange={e => setForm(f => ({ ...f, role: e.target.value }))}
-                  className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-rose-400" />
-                <input type="number" placeholder="Wiek" value={form.age || ''}
-                  onChange={e => setForm(f => ({ ...f, age: parseInt(e.target.value) || 0 }))}
-                  className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-rose-400" />
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <input type="email" placeholder="Email" value={form.email}
-                  onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
-                  className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-rose-400" />
-                <input type="tel" placeholder="Telefon" value={form.phone}
-                  onChange={e => setForm(f => ({ ...f, phone: e.target.value }))}
-                  className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-rose-400" />
-              </div>
-              <div>
-                <label className="block text-xs text-gray-500 mb-1 ml-1">Data urodzin</label>
-                <input type="date" value={form.birthday}
-                  onChange={e => setForm(f => ({ ...f, birthday: e.target.value }))}
-                  className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-rose-400" />
-              </div>
-              <input type="text" placeholder="Obowiązki (oddzielone przecinkiem)" value={form.responsibilities}
-                onChange={e => setForm(f => ({ ...f, responsibilities: e.target.value }))}
-                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-rose-400" />
-            </div>
-            <div className="p-6 pt-0 flex gap-3">
-              <button onClick={() => { setShowForm(false); setEditingMember(null); setForm(emptyForm()); }}
-                className="flex-1 border border-gray-200 text-gray-700 py-2.5 rounded-xl text-sm font-semibold hover:bg-gray-50 transition">Anuluj</button>
-              <button onClick={editingMember ? handleEdit : handleAdd}
-                className="flex-1 bg-rose-500 hover:bg-rose-600 text-white py-2.5 rounded-xl text-sm font-semibold transition shadow">
-                {editingMember ? 'Zapisz zmiany' : 'Dodaj'}
-              </button>
+      <Modal
+        isOpen={showForm}
+        onClose={() => { setShowForm(false); setEditingMember(null); setForm(emptyForm()); }}
+        title={editingMember ? '✏️ Edytuj członka' : '👤 Nowy członek rodziny'}
+        maxWidth="max-w-lg"
+      >
+        <div className="p-5 space-y-4">
+          <div>
+            <label className="block text-xs text-gray-500 mb-2 ml-1">Avatar</label>
+            <div className="flex gap-2 flex-wrap">
+              {avatarOptions.map(a => (
+                <button key={a} onClick={() => setForm(f => ({ ...f, avatar: a }))}
+                  className={`w-10 h-10 rounded-xl text-xl transition ${form.avatar === a ? 'bg-rose-100 ring-2 ring-rose-400 scale-110' : 'bg-gray-50 hover:bg-gray-100'}`}>
+                  {a}
+                </button>
+              ))}
             </div>
           </div>
+          <input type="text" placeholder="Imię i nazwisko *" value={form.name}
+            onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
+            className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-rose-400" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <input type="text" placeholder="Typ członka (np. Tata)" value={form.role}
+              onChange={e => setForm(f => ({ ...f, role: e.target.value }))}
+              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-rose-400" />
+            <input type="number" placeholder="Wiek" value={form.age || ''}
+              onChange={e => setForm(f => ({ ...f, age: parseInt(e.target.value) || 0 }))}
+              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-rose-400" />
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <input type="email" placeholder="Email" value={form.email}
+              onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
+              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-rose-400" />
+            <input type="tel" placeholder="Telefon" value={form.phone}
+              onChange={e => setForm(f => ({ ...f, phone: e.target.value }))}
+              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-rose-400" />
+          </div>
+          <div>
+            <label className="block text-xs text-gray-500 mb-1 ml-1">Data urodzin</label>
+            <input type="date" value={form.birthday}
+              onChange={e => setForm(f => ({ ...f, birthday: e.target.value }))}
+              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-rose-400" />
+          </div>
+          <input type="text" placeholder="Obowiązki (oddzielone przecinkiem)" value={form.responsibilities}
+            onChange={e => setForm(f => ({ ...f, responsibilities: e.target.value }))}
+            className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-rose-400" />
         </div>
-      )}
+        <div className="px-5 pb-5 flex gap-3">
+          <button onClick={() => { setShowForm(false); setEditingMember(null); setForm(emptyForm()); }}
+            className="flex-1 border border-gray-200 text-gray-700 py-2.5 rounded-xl text-sm font-semibold hover:bg-gray-50 transition">Anuluj</button>
+          <button onClick={editingMember ? handleEdit : handleAdd}
+            className="flex-1 bg-rose-500 hover:bg-rose-600 text-white py-2.5 rounded-xl text-sm font-semibold transition shadow">
+            {editingMember ? 'Zapisz zmiany' : 'Dodaj'}
+          </button>
+        </div>
+      </Modal>
 
       <ConfirmDialog
         isOpen={confirmId !== null}
