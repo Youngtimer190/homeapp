@@ -104,16 +104,18 @@ export default function Vehicles({ vehicles, setVehicles }: Props) {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900">Pojazdy</h2>
-          <p className="text-gray-500 text-sm mt-0.5">Zarządzaj flotą rodziny</p>
+      <div className="flex items-center justify-between gap-3">
+        <div className="min-w-0">
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Pojazdy</h2>
+          <p className="text-gray-500 text-sm mt-0.5 hidden sm:block">Zarządzaj flotą rodziny</p>
         </div>
         <button
           onClick={openAdd}
-          className="flex items-center gap-2 bg-violet-600 hover:bg-violet-700 text-white px-4 py-2.5 rounded-xl text-sm font-semibold shadow transition"
+          className="flex items-center gap-1.5 bg-violet-600 hover:bg-violet-700 text-white px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl text-sm font-semibold shadow transition flex-shrink-0"
         >
-          <span className="text-lg">+</span> Dodaj pojazd
+          <span className="text-lg leading-none">+</span>
+          <span className="hidden sm:inline">Dodaj pojazd</span>
+          <span className="sm:hidden">Dodaj</span>
         </button>
       </div>
 

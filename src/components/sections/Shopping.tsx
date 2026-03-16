@@ -127,10 +127,10 @@ export default function Shopping({ lists, setLists, members }: Props) {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900">🛒 Lista zakupów</h2>
-          <p className="text-sm text-gray-500 mt-0.5">Zarządzaj listami zakupów dla całej rodziny</p>
+      <div className="flex items-center justify-between gap-3">
+        <div className="min-w-0">
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900">🛒 Lista zakupów</h2>
+          <p className="text-sm text-gray-500 mt-0.5 hidden sm:block">Zarządzaj listami zakupów dla całej rodziny</p>
         </div>
         <button
           onClick={() => { setListForm(emptyList); setShowListModal(true); }}

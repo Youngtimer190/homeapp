@@ -35,7 +35,7 @@ export default function Sidebar({ active, onChange, mobileOpen, onClose, familyN
       {/* Mobile overlay */}
       {mobileOpen && (
         <div
-          className="fixed inset-0 bg-black/40 z-30 lg:hidden"
+          className="fixed inset-0 bg-black/50 z-30 lg:hidden"
           onClick={onClose}
         />
       )}
@@ -43,25 +43,32 @@ export default function Sidebar({ active, onChange, mobileOpen, onClose, familyN
       <aside
         className={`
           fixed top-0 left-0 h-full w-64 z-40 flex flex-col
-          bg-white border-r border-gray-100 shadow-xl
+          bg-white border-r border-gray-100 shadow-2xl
           transition-transform duration-300 ease-in-out
           ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}
-          lg:relative lg:translate-x-0 lg:shadow-none lg:z-auto
+          lg:relative lg:translate-x-0 lg:shadow-none lg:z-auto lg:flex-shrink-0
         `}
       >
         {/* Logo */}
-        <div className="flex items-center gap-3 px-6 py-5 border-b border-gray-100">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-xl shadow">
+        <div className="flex items-center gap-3 px-4 py-4 border-b border-gray-100 flex-shrink-0">
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-lg shadow flex-shrink-0">
             🏠
           </div>
-          <div>
-            <h1 className="text-base font-bold text-gray-900 leading-tight">Dom Manager</h1>
-            <p className="text-xs text-gray-400">{familyName}</p>
+          <div className="min-w-0">
+            <h1 className="text-sm font-bold text-gray-900 leading-tight truncate">Dom Manager</h1>
+            <p className="text-xs text-gray-400 truncate">{familyName}</p>
           </div>
+          {/* Close button mobile */}
+          <button
+            onClick={onClose}
+            className="ml-auto lg:hidden w-7 h-7 rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500 flex-shrink-0 transition"
+          >
+            ✕
+          </button>
         </div>
 
         {/* Nav */}
-        <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+        <nav className="flex-1 px-2 py-3 space-y-0.5 overflow-y-auto">
           {navItems.map((item) => {
             const isActive = active === item.id;
             return (
@@ -69,7 +76,7 @@ export default function Sidebar({ active, onChange, mobileOpen, onClose, familyN
                 key={item.id}
                 onClick={() => { onChange(item.id); onClose(); }}
                 className={`
-                  w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left
+                  w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left
                   transition-all duration-150 font-medium text-sm
                   ${isActive
                     ? `${item.bg} ${item.color} shadow-sm`
@@ -77,21 +84,21 @@ export default function Sidebar({ active, onChange, mobileOpen, onClose, familyN
                   }
                 `}
               >
-                <span className="text-lg leading-none">{item.icon}</span>
-                <span>{item.label}</span>
+                <span className="text-base leading-none flex-shrink-0">{item.icon}</span>
+                <span className="truncate">{item.label}</span>
                 {isActive && (
-                  <span className="ml-auto w-1.5 h-5 rounded-full bg-current opacity-70" />
+                  <span className="ml-auto w-1.5 h-4 rounded-full bg-current opacity-70 flex-shrink-0" />
                 )}
               </button>
             );
           })}
 
           {/* Separator */}
-          <div className="pt-3 mt-3 border-t border-gray-100">
+          <div className="pt-2 mt-2 border-t border-gray-100">
             <button
               onClick={() => { onChange('settings'); onClose(); }}
               className={`
-                w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left
+                w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left
                 transition-all duration-150 font-medium text-sm
                 ${active === 'settings'
                   ? 'bg-gray-100 text-gray-800 shadow-sm'
@@ -99,22 +106,14 @@ export default function Sidebar({ active, onChange, mobileOpen, onClose, familyN
                 }
               `}
             >
-              <span className="text-lg leading-none">⚙️</span>
-              <span>Ustawienia</span>
+              <span className="text-base leading-none flex-shrink-0">⚙️</span>
+              <span className="truncate">Ustawienia</span>
               {active === 'settings' && (
-                <span className="ml-auto w-1.5 h-5 rounded-full bg-current opacity-70" />
+                <span className="ml-auto w-1.5 h-4 rounded-full bg-current opacity-70 flex-shrink-0" />
               )}
             </button>
           </div>
         </nav>
-
-        {/* Footer */}
-        <div className="px-5 py-4 border-t border-gray-100">
-          <div className="flex items-center gap-2 text-xs text-gray-400">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            Wszystko pod kontrolą
-          </div>
-        </div>
       </aside>
     </>
   );

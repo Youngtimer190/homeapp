@@ -136,21 +136,23 @@ export default function Meals({ meals, setMeals }: Props) {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900">Plan posiłków</h2>
-          <p className="text-gray-500 text-sm mt-0.5">Jadłospis rodziny według dat</p>
+      <div className="flex items-center justify-between gap-3">
+        <div className="min-w-0">
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Plan posiłków</h2>
+          <p className="text-gray-500 text-sm mt-0.5 hidden sm:block">Jadłospis rodziny według dat</p>
         </div>
         <button
           onClick={openAdd}
-          className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-4 py-2.5 rounded-xl text-sm font-semibold shadow transition"
+          className="flex items-center gap-1.5 bg-orange-500 hover:bg-orange-600 text-white px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl text-sm font-semibold shadow transition flex-shrink-0"
         >
-          <span className="text-lg">+</span> Dodaj posiłek
+          <span className="text-lg leading-none">+</span>
+          <span className="hidden sm:inline">Dodaj posiłek</span>
+          <span className="sm:hidden">Dodaj</span>
         </button>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-3 gap-2 sm:gap-3">
         <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm text-center">
           <p className="text-2xl font-bold text-orange-500">{dayMeals.length}</p>
           <p className="text-xs text-gray-500 mt-0.5">posiłków tego dnia</p>
@@ -167,7 +169,7 @@ export default function Meals({ meals, setMeals }: Props) {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 sm:gap-6">
         {/* Calendar */}
         <div className="lg:col-span-2 bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
           {/* Month navigation */}

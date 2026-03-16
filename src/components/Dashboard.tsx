@@ -82,34 +82,34 @@ export default function Dashboard({ transactions, tasks, meals, vehicles, pets, 
   const alertIcon = { error: '🚨', warning: '⚠️', info: 'ℹ️' };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Welcome */}
-      <div className="bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 rounded-3xl p-8 text-white shadow-xl relative overflow-hidden">
+      <div className="bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 rounded-2xl sm:rounded-3xl p-5 sm:p-8 text-white shadow-xl relative overflow-hidden">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute -right-20 -top-20 w-80 h-80 rounded-full bg-white" />
           <div className="absolute right-20 bottom-0 w-40 h-40 rounded-full bg-white" />
         </div>
         <div className="relative">
-          <h2 className="text-3xl font-bold">Witaj w domu! 🏠</h2>
-          <p className="text-white/80 mt-1">
+          <h2 className="text-xl sm:text-3xl font-bold">Witaj w domu! 🏠</h2>
+          <p className="text-white/80 mt-1 text-xs sm:text-sm">
             {new Date().toLocaleDateString('pl-PL', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
           </p>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6">
-            <div className="bg-white/15 rounded-2xl p-4 backdrop-blur-sm">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4 mt-4 sm:mt-6">
+            <div className="bg-white/15 rounded-xl sm:rounded-2xl p-3 sm:p-4 backdrop-blur-sm">
               <p className="text-white/70 text-xs">Saldo</p>
-              <p className="text-xl font-bold mt-0.5">{fmt(balance)}</p>
+              <p className="text-base sm:text-xl font-bold mt-0.5 truncate">{fmt(balance)}</p>
             </div>
-            <div className="bg-white/15 rounded-2xl p-4 backdrop-blur-sm">
+            <div className="bg-white/15 rounded-xl sm:rounded-2xl p-3 sm:p-4 backdrop-blur-sm">
               <p className="text-white/70 text-xs">Zadania</p>
-              <p className="text-xl font-bold mt-0.5">{doneTasks.length}/{tasks.length}</p>
+              <p className="text-base sm:text-xl font-bold mt-0.5">{doneTasks.length}/{tasks.length}</p>
             </div>
-            <div className="bg-white/15 rounded-2xl p-4 backdrop-blur-sm">
+            <div className="bg-white/15 rounded-xl sm:rounded-2xl p-3 sm:p-4 backdrop-blur-sm">
               <p className="text-white/70 text-xs">Pojazdy</p>
-              <p className="text-xl font-bold mt-0.5">{vehicles.length}</p>
+              <p className="text-base sm:text-xl font-bold mt-0.5">{vehicles.length}</p>
             </div>
-            <div className="bg-white/15 rounded-2xl p-4 backdrop-blur-sm">
+            <div className="bg-white/15 rounded-xl sm:rounded-2xl p-3 sm:p-4 backdrop-blur-sm">
               <p className="text-white/70 text-xs">Członkowie</p>
-              <p className="text-xl font-bold mt-0.5">{members.length}</p>
+              <p className="text-base sm:text-xl font-bold mt-0.5">{members.length}</p>
             </div>
           </div>
         </div>
@@ -134,7 +134,7 @@ export default function Dashboard({ transactions, tasks, meals, vehicles, pets, 
       )}
 
       {/* Quick overview grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4">
         {/* Budget card */}
         <button onClick={() => onNavigate('budget')} className="bg-white rounded-2xl border border-gray-100 p-5 text-left shadow-sm hover:shadow-md transition group">
           <div className="flex items-center justify-between mb-4">

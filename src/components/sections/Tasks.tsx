@@ -65,28 +65,30 @@ export default function Tasks({ tasks, setTasks, members }: Props) {
   const fmtDate = (d: string) => new Date(d).toLocaleDateString('pl-PL');
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900">Lista zadań</h2>
-          <p className="text-gray-500 text-sm mt-0.5">Organizuj zadania domowe</p>
+      <div className="flex items-center justify-between gap-3">
+        <div className="min-w-0">
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Lista zadań</h2>
+          <p className="text-gray-500 text-sm mt-0.5 hidden sm:block">Organizuj zadania domowe</p>
         </div>
         <button
           onClick={() => setShowForm(true)}
-          className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl text-sm font-semibold shadow transition"
+          className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl text-sm font-semibold shadow transition flex-shrink-0"
         >
-          <span className="text-lg">+</span> Nowe zadanie
+          <span className="text-lg leading-none">+</span>
+          <span className="hidden sm:inline">Nowe zadanie</span>
+          <span className="sm:hidden">Nowe</span>
         </button>
       </div>
 
       {/* Status filters */}
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-1.5 sm:gap-2">
         {(['all', ...statuses] as const).map(s => (
           <button
             key={s}
             onClick={() => setFilterStatus(s)}
-            className={`px-4 py-2 rounded-xl text-sm font-medium transition border ${filterStatus === s
+            className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-medium transition border ${filterStatus === s
               ? 'bg-blue-600 text-white border-blue-600 shadow'
               : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'
             }`}
@@ -97,7 +99,7 @@ export default function Tasks({ tasks, setTasks, members }: Props) {
       </div>
 
       {/* Tasks grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4">
         {filtered.map(task => (
           <div
             key={task.id}

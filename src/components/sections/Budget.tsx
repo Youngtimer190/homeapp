@@ -146,16 +146,18 @@ export default function Budget({ transactions, setTransactions, memberNames }: P
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between flex-wrap gap-3">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900">Budżet domowy</h2>
-          <p className="text-gray-500 text-sm mt-0.5">Śledź przychody i wydatki rodziny</p>
+      <div className="flex items-center justify-between gap-3">
+        <div className="min-w-0">
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Budżet domowy</h2>
+          <p className="text-gray-500 text-sm mt-0.5 hidden sm:block">Śledź przychody i wydatki rodziny</p>
         </div>
         <button
           onClick={openAdd}
-          className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-xl text-sm font-semibold shadow transition"
+          className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl text-sm font-semibold shadow transition flex-shrink-0"
         >
-          <span className="text-lg">+</span> Dodaj transakcję
+          <span className="text-lg leading-none">+</span>
+          <span className="hidden sm:inline">Dodaj transakcję</span>
+          <span className="sm:hidden">Dodaj</span>
         </button>
       </div>
 
@@ -223,30 +225,30 @@ export default function Budget({ transactions, setTransactions, memberNames }: P
       </div>
 
       {/* Summary cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl p-5 text-white shadow-lg">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4">
+        <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl sm:rounded-2xl p-3 sm:p-5 text-white shadow-lg">
           <p className="text-emerald-100 text-xs font-medium">Przychody</p>
-          <p className="text-2xl font-bold mt-1">{fmt(income)}</p>
-          <p className="text-emerald-200 text-xs mt-2">📈 Ten miesiąc</p>
+          <p className="text-base sm:text-2xl font-bold mt-1 truncate">{fmt(income)}</p>
+          <p className="text-emerald-200 text-xs mt-1 sm:mt-2">📈 Ten miesiąc</p>
         </div>
-        <div className="bg-gradient-to-br from-red-500 to-rose-600 rounded-2xl p-5 text-white shadow-lg">
+        <div className="bg-gradient-to-br from-red-500 to-rose-600 rounded-xl sm:rounded-2xl p-3 sm:p-5 text-white shadow-lg">
           <p className="text-red-100 text-xs font-medium">Wydatki</p>
-          <p className="text-2xl font-bold mt-1">{fmt(expense)}</p>
-          <p className="text-red-200 text-xs mt-2">📉 Ten miesiąc</p>
+          <p className="text-base sm:text-2xl font-bold mt-1 truncate">{fmt(expense)}</p>
+          <p className="text-red-200 text-xs mt-1 sm:mt-2">📉 Ten miesiąc</p>
         </div>
-        <div className={`bg-gradient-to-br ${balance >= 0 ? 'from-blue-500 to-indigo-600' : 'from-orange-500 to-red-600'} rounded-2xl p-5 text-white shadow-lg`}>
+        <div className={`bg-gradient-to-br ${balance >= 0 ? 'from-blue-500 to-indigo-600' : 'from-orange-500 to-red-600'} rounded-xl sm:rounded-2xl p-3 sm:p-5 text-white shadow-lg`}>
           <p className="text-blue-100 text-xs font-medium">Bilans miesiąca</p>
-          <p className="text-2xl font-bold mt-1">{fmt(balance)}</p>
-          <p className="text-blue-200 text-xs mt-2">{balance >= 0 ? '✅ Dodatni' : '⚠️ Ujemny'}</p>
+          <p className="text-base sm:text-2xl font-bold mt-1 truncate">{fmt(balance)}</p>
+          <p className="text-blue-200 text-xs mt-1 sm:mt-2">{balance >= 0 ? '✅ Dodatni' : '⚠️ Ujemny'}</p>
         </div>
-        <div className={`bg-gradient-to-br ${cumulativeBalance >= 0 ? 'from-violet-500 to-purple-600' : 'from-rose-600 to-red-700'} rounded-2xl p-5 text-white shadow-lg`}>
+        <div className={`bg-gradient-to-br ${cumulativeBalance >= 0 ? 'from-violet-500 to-purple-600' : 'from-rose-600 to-red-700'} rounded-xl sm:rounded-2xl p-3 sm:p-5 text-white shadow-lg`}>
           <p className="text-violet-100 text-xs font-medium">Saldo łączne</p>
-          <p className="text-2xl font-bold mt-1">{fmt(cumulativeBalance)}</p>
-          <p className="text-violet-200 text-xs mt-2">📊 Do końca miesiąca</p>
+          <p className="text-base sm:text-2xl font-bold mt-1 truncate">{fmt(cumulativeBalance)}</p>
+          <p className="text-violet-200 text-xs mt-1 sm:mt-2">📊 Do końca miesiąca</p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         {/* Transactions list */}
         <div className="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100">
           <div className="p-5 border-b border-gray-100 flex items-center justify-between flex-wrap gap-3">

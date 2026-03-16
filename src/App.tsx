@@ -57,39 +57,31 @@ function AppLayout({ data, isLocalMode, userEmail, onSignOut, onDeleteAccount, o
         onClose={() => setMobileOpen(false)}
         familyName={data.familyName}
       />
-      <div className="flex-1 flex flex-col min-w-0">
-        <header className="bg-white border-b border-gray-100 px-6 py-4 flex items-center gap-4 sticky top-0 z-20">
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+        <header className="bg-white border-b border-gray-100 px-3 sm:px-6 py-3 flex items-center gap-2 sm:gap-4 sticky top-0 z-20">
           <button
             onClick={() => setMobileOpen(true)}
             className="lg:hidden w-9 h-9 rounded-xl bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition flex-shrink-0"
           >
             <span className="text-gray-600 text-lg">☰</span>
           </button>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 min-w-0 flex-1">
             <button
               onClick={() => setActive('dashboard')}
-              className={`text-sm font-medium transition ${active === 'dashboard' ? 'text-gray-900' : 'text-gray-400 hover:text-gray-700'}`}
+              className={`text-sm font-medium transition flex-shrink-0 ${active === 'dashboard' ? 'text-gray-900' : 'text-gray-400 hover:text-gray-700'}`}
             >
               Dom Manager
             </button>
             {active !== 'dashboard' && (
               <>
-                <span className="text-gray-300">/</span>
-                <span className="text-sm font-semibold text-gray-900">
+                <span className="text-gray-300 flex-shrink-0">/</span>
+                <span className="text-sm font-semibold text-gray-900 truncate">
                   {sectionTitles[active].icon} {sectionTitles[active].label}
                 </span>
               </>
             )}
           </div>
-          <div className="ml-auto flex items-center gap-3">
-            <button
-              onClick={() => setActive('dashboard')}
-              className={`hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition ${
-                active === 'dashboard' ? 'bg-indigo-100 text-indigo-700' : 'text-gray-500 hover:bg-gray-100'
-              }`}
-            >
-              <span>🏠</span> Dashboard
-            </button>
+          <div className="flex items-center gap-2 flex-shrink-0">
             <div className="hidden md:flex items-center gap-2 text-xs text-gray-400 bg-gray-50 px-3 py-1.5 rounded-lg">
               <span>{data.tasks.filter(t => t.status !== 'done').length} zadań</span>
               <span className="text-gray-300">·</span>
@@ -132,8 +124,8 @@ function AppLayout({ data, isLocalMode, userEmail, onSignOut, onDeleteAccount, o
             )}
           </div>
         </header>
-        <main className="flex-1 p-6 overflow-y-auto">
-          <div className="max-w-7xl mx-auto">
+        <main className="flex-1 p-3 sm:p-4 lg:p-6 overflow-y-auto overflow-x-hidden">
+          <div className="max-w-7xl mx-auto w-full">
             {active === 'dashboard' && (
               <Dashboard
                 transactions={data.transactions}

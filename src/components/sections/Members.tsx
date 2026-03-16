@@ -112,16 +112,18 @@ export default function Members({ members, setMembers, familyName, setFamilyName
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900">Członkowie rodziny</h2>
-          <p className="text-gray-500 text-sm mt-0.5">Zarządzaj rodziną i jej nazwą</p>
+      <div className="flex items-center justify-between gap-3">
+        <div className="min-w-0">
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Członkowie rodziny</h2>
+          <p className="text-gray-500 text-sm mt-0.5 hidden sm:block">Zarządzaj rodziną i jej nazwą</p>
         </div>
         <button
           onClick={() => { setEditingMember(null); setForm(emptyForm()); setShowForm(true); }}
-          className="flex items-center gap-2 bg-rose-500 hover:bg-rose-600 text-white px-4 py-2.5 rounded-xl text-sm font-semibold shadow transition"
+          className="flex items-center gap-1.5 bg-rose-500 hover:bg-rose-600 text-white px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl text-sm font-semibold shadow transition flex-shrink-0"
         >
-          <span className="text-lg">+</span> Dodaj członka
+          <span className="text-lg leading-none">+</span>
+          <span className="hidden sm:inline">Dodaj członka</span>
+          <span className="sm:hidden">Dodaj</span>
         </button>
       </div>
 
