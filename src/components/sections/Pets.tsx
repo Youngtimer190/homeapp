@@ -499,7 +499,11 @@ export default function Pets({ pets, setPets }: Props) {
 
         <div className="px-5 pb-5 flex gap-3">
           <button onClick={closeModal} className="flex-1 border border-gray-200 text-gray-700 py-2.5 rounded-xl text-sm font-semibold hover:bg-gray-50 transition">Anuluj</button>
-          <button onClick={handleSave} className="flex-1 bg-amber-500 hover:bg-amber-600 text-white py-2.5 rounded-xl text-sm font-semibold transition shadow">
+          <button
+            onClick={handleSave}
+            disabled={!form.name.trim()}
+            className="flex-1 bg-amber-500 hover:bg-amber-600 disabled:opacity-50 disabled:cursor-not-allowed text-white py-2.5 rounded-xl text-sm font-semibold transition shadow"
+          >
             {editingId ? 'Zapisz zmiany' : 'Dodaj zwierzę'}
           </button>
         </div>

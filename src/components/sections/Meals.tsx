@@ -380,7 +380,8 @@ export default function Meals({ meals, setMeals }: Props) {
               </button>
               <button
                 onClick={handleSave}
-                className="flex-1 bg-orange-500 hover:bg-orange-600 text-white py-2.5 rounded-xl text-sm font-semibold transition shadow"
+                disabled={!form.name.trim()}
+                className="flex-1 bg-orange-500 hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed text-white py-2.5 rounded-xl text-sm font-semibold transition shadow"
               >
                 {editId ? 'Zapisz zmiany' : 'Dodaj posiłek'}
               </button>

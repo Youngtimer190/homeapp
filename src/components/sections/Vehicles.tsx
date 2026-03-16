@@ -358,7 +358,11 @@ export default function Vehicles({ vehicles, setVehicles }: Props) {
             </div>
             <div className="p-5 pt-0 flex gap-3">
               <button onClick={closeModal} className="flex-1 border border-gray-200 text-gray-700 py-2.5 rounded-xl text-sm font-semibold hover:bg-gray-50 transition">Anuluj</button>
-              <button onClick={handleSave} className="flex-1 bg-violet-600 hover:bg-violet-700 text-white py-2.5 rounded-xl text-sm font-semibold transition shadow">
+              <button
+                onClick={handleSave}
+                disabled={!form.brand.trim() || !form.model.trim()}
+                className="flex-1 bg-violet-600 hover:bg-violet-700 disabled:opacity-50 disabled:cursor-not-allowed text-white py-2.5 rounded-xl text-sm font-semibold transition shadow"
+              >
                 {editingId ? 'Zapisz zmiany' : 'Dodaj pojazd'}
               </button>
             </div>

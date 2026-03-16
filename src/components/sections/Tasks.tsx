@@ -219,7 +219,11 @@ export default function Tasks({ tasks, setTasks, members }: Props) {
             </div>
             <div className="p-5 pt-0 flex gap-3">
               <button onClick={() => setShowForm(false)} className="flex-1 border border-gray-200 text-gray-700 py-2.5 rounded-xl text-sm font-semibold hover:bg-gray-50 transition">Anuluj</button>
-              <button onClick={handleAdd} className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-xl text-sm font-semibold transition shadow">Dodaj</button>
+              <button
+                onClick={handleAdd}
+                disabled={!form.title.trim()}
+                className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white py-2.5 rounded-xl text-sm font-semibold transition shadow"
+              >Dodaj</button>
             </div>
       </Modal>
 
