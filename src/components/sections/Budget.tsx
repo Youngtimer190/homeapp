@@ -33,14 +33,15 @@ const MONTHS_PL = [
   'Lipiec', 'Sierpień', 'Wrzesień', 'Październik', 'Listopad', 'Grudzień',
 ];
 
-const emptyForm = (year: number, month: number): Omit<Transaction, 'id'> => {
-  const d = new Date(year, month, new Date().getDate());
+const emptyForm = (): Omit<Transaction, 'id'> => {
+  // Always use today's date as default
+  const today = new Date();
   return {
     type: 'expense',
     category: 'Inne',
     description: '',
     amount: 0,
-    date: d.toISOString().split('T')[0],
+    date: today.toISOString().split('T')[0],
     addedBy: '',
   };
 };
@@ -52,7 +53,7 @@ export default function Budget({ transactions, setTransactions, memberNames }: P
 
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
-  const [form, setForm] = useState<Omit<Transaction, 'id'>>(emptyForm(viewYear, viewMonth));
+  const [form, setForm] = useState<Omit<Transaction, 'id'>>(emptyForm());
   const [filterType, setFilterType] = useState<'all' | 'income' | 'expense'>('all');
 
   // Navigate months
@@ -112,7 +113,7 @@ export default function Budget({ transactions, setTransactions, memberNames }: P
 
   const openAdd = () => {
     setEditId(null);
-    setForm(emptyForm(viewYear, viewMonth));
+    setForm(emptyForm());
     setShowForm(true);
   };
 
@@ -129,7 +130,7 @@ export default function Budget({ transactions, setTransactions, memberNames }: P
     } else {
       setTransactions(prev => [...prev, { ...form, id: Date.now().toString() }]);
     }
-    setForm(emptyForm(viewYear, viewMonth));
+    setForm(emptyForm());
     setEditId(null);
     setShowForm(false);
   };

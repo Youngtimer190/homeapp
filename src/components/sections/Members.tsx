@@ -12,10 +12,13 @@ interface Props {
 
 const avatarOptions = ['👨', '👩', '👦', '👧', '👴', '👵', '🧑', '👮', '👷', '🧑‍💼', '🧑‍🎓', '🧑‍🍳'];
 
-const emptyForm = (): Omit<Member, 'id'> => ({
-  name: '', role: '', age: 0, email: '', phone: '',
-  avatar: '🧑', birthday: '', responsibilities: '',
-});
+const emptyForm = (): Omit<Member, 'id'> => {
+  const today = new Date().toISOString().split('T')[0];
+  return {
+    name: '', role: '', age: 0, email: '', phone: '',
+    avatar: '🧑', birthday: today, responsibilities: '',
+  };
+};
 
 export default function Members({ members, setMembers, familyName, setFamilyName }: Props) {
   const [showForm, setShowForm] = useState(false);

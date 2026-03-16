@@ -10,11 +10,14 @@ interface Props {
 
 const fuelTypes = ['Nie dotyczy', 'Benzyna', 'Diesel', 'LPG', 'Benzyna+LPG', 'Elektryczny', 'Hybryda'];
 
-const emptyForm = (): Omit<Vehicle, 'id'> => ({
-  name: '', brand: '', model: '', year: new Date().getFullYear(),
-  licensePlate: '', vin: '', fuelType: '', lastService: '', nextService: '',
-  unlimitedInspection: false, mileage: 0, insurance: '', policyNumber: '',
-});
+const emptyForm = (): Omit<Vehicle, 'id'> => {
+  const today = new Date().toISOString().split('T')[0];
+  return {
+    name: '', brand: '', model: '', year: new Date().getFullYear(),
+    licensePlate: '', vin: '', fuelType: '', lastService: today, nextService: today,
+    unlimitedInspection: false, mileage: 0, insurance: today, policyNumber: '',
+  };
+};
 
 export default function Vehicles({ vehicles, setVehicles }: Props) {
   const [showForm, setShowForm] = useState(false);

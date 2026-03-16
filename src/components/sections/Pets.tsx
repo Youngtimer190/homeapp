@@ -14,14 +14,17 @@ const speciesEmoji: Record<string, string> = {
 };
 const colors = ['#F59E0B', '#8B5CF6', '#3B82F6', '#10B981', '#EF4444', '#EC4899', '#6B7280', '#78716C'];
 
-const emptyForm = (): Omit<Pet, 'id'> => ({
-  name: '', species: 'Pies', breed: '', age: 0, weight: 0,
-  color: '#F59E0B', vet: '', lastVisit: '', nextVisit: '', noNextVisit: false,
-  vaccinations: '', vaccinationsDate: '',
-  deworming: '', dewormingDate: '',
-  tickProtection: '', tickProtectionDate: '',
-  notes: '',
-});
+const emptyForm = (): Omit<Pet, 'id'> => {
+  const today = new Date().toISOString().split('T')[0];
+  return {
+    name: '', species: 'Pies', breed: '', age: 0, weight: 0,
+    color: '#F59E0B', vet: '', lastVisit: today, nextVisit: today, noNextVisit: false,
+    vaccinations: '', vaccinationsDate: today,
+    deworming: '', dewormingDate: today,
+    tickProtection: '', tickProtectionDate: today,
+    notes: '',
+  };
+};
 
 export default function Pets({ pets, setPets }: Props) {
   const [showForm, setShowForm] = useState(false);
