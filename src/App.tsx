@@ -17,7 +17,7 @@ import { useLocalData } from './lib/useLocalData';
 import { isSupabaseConfigured } from './lib/supabase';
 
 type ActiveSection = Section | 'dashboard';
-type AppMode = 'loading' | 'auth' | 'demo' | 'app';
+type AppMode = 'auth' | 'demo' | 'app';
 
 const sectionTitles: Record<ActiveSection, { label: string; icon: string }> = {
   dashboard: { label: 'Przegląd',        icon: '🏠' },
@@ -180,19 +180,7 @@ function AppLayout({ data, isLocalMode, userEmail, onSignOut, onDeleteAccount, o
   );
 }
 
-// ── Loading Screen ─────────────────────────────────────────────────────────────
-function LoadingScreen({ message }: { message: string }) {
-  return (
-    <div className="bg-gradient-to-br from-indigo-50 via-white to-violet-50 flex items-center justify-center" style={{ height: '100%', position: 'fixed', inset: 0 }}>
-      <div className="text-center">
-        <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-2xl shadow-lg mb-4 animate-pulse">
-          <span className="text-3xl">🏠</span>
-        </div>
-        <p className="text-gray-500 text-sm mt-2">{message}</p>
-      </div>
-    </div>
-  );
-}
+
 
 // ── Local / Demo mode ─────────────────────────────────────────────────────────
 function LocalApp({ onExitDemo }: { onExitDemo: () => void }) {
@@ -219,17 +207,12 @@ function SupabaseApp({ onExitToAuth }: { onExitToAuth: () => void }) {
     members, setMembers,
     shoppingLists, setShoppingLists,
     familyName, setFamilyName,
-    loading: dataLoading,
   } = useSupabaseData(user?.id);
 
   const handleSignOut = async () => {
     await signOut();
     onExitToAuth();
   };
-
-  if (dataLoading) {
-    return <LoadingScreen message="Synchronizowanie danych..." />;
-  }
 
   const supabaseData = {
     transactions, setTransactions,
@@ -257,46 +240,47 @@ function SupabaseApp({ onExitToAuth }: { onExitToAuth: () => void }) {
 // ── Root ──────────────────────────────────────────────────────────────────────
 export default function App() {
   const { user, loading: authLoading } = useAuth();
-  const [appMode, setAppMode] = useState<AppMode>('loading');
+  const [appMode, setAppMode] = useState<AppMode>(() => {
+    // Inicjalizuj tryb SYNCHRONICZNIE — bez opóźnienia
+    if (!isSupabaseConfigured) return 'auth';
+    // Sprawdź localStorage synchronicznie
+    try {
+      const keys = Object.keys(localStorage);
+      const authKey = keys.find(k => k.startsWith('sb-') && k.endsWith('-auth-token'));
+      if (authKey) {
+        const raw = localStorage.getItem(authKey);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed?.expires_at && parsed.expires_at * 1000 > Date.now()) {
+            return 'app';
+          }
+        }
+      }
+    } catch {}
+    return 'auth';
+  });
 
+  // Reaguj na zmiany stanu auth (login/logout/wygaśnięcie sesji)
   useEffect(() => {
     if (authLoading) return;
-
     if (isSupabaseConfigured) {
-      if (user) {
-        // Zalogowany użytkownik — pokaż aplikację
-        setAppMode('app');
-      } else {
-        // Niezalogowany — pokaż ekran auth
-        setAppMode('auth');
-      }
+      if (user && appMode !== 'app' && appMode !== 'demo') setAppMode('app');
+      else if (!user && appMode === 'app') setAppMode('auth');
     } else {
-      // Brak Supabase — pokaż ekran auth z opcją demo
       setAppMode('auth');
     }
-  }, [authLoading, user]);
-
-  // Nasłuchuj zmian auth state (login/logout)
-  useEffect(() => {
-    if (!authLoading && isSupabaseConfigured) {
-      if (user && appMode === 'auth') {
-        setAppMode('app');
-      } else if (!user && appMode === 'app') {
-        setAppMode('auth');
-      }
-    }
-  }, [user, authLoading, appMode]);
-
-  if (appMode === 'loading' || authLoading) {
-    return <LoadingScreen message="Ładowanie..." />;
-  }
+  }, [user, authLoading]);
 
   if (appMode === 'demo') {
     return <LocalApp onExitDemo={() => setAppMode('auth')} />;
   }
 
-  if (appMode === 'app' && isSupabaseConfigured && user) {
+  if (appMode === 'app' && isSupabaseConfigured && (user || authLoading)) {
     return <SupabaseApp onExitToAuth={() => setAppMode('auth')} />;
+  }
+
+  if (appMode === 'app' && !isSupabaseConfigured) {
+    return <LocalApp onExitDemo={() => setAppMode('auth')} />;
   }
 
   // Ekran logowania/rejestracji

@@ -15,24 +15,51 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-async function ensureFamilyRecord(userId: string) {
-  const { data } = await supabase
-    .from('families')
-    .select('id')
-    .eq('user_id', userId)
-    .maybeSingle();
-
-  if (!data) {
-    await supabase
-      .from('families')
-      .insert({ user_id: userId, family_name: 'Wpisz nazwę rodziny' });
+// Odczyt sesji SYNCHRONICZNIE z localStorage — zero opóźnienia
+function getSessionFromStorage(): { user: User | null; session: Session | null } {
+  if (!isSupabaseConfigured) return { user: null, session: null };
+  try {
+    const keys = Object.keys(localStorage);
+    const authKey = keys.find(k => k.startsWith('sb-') && k.endsWith('-auth-token'));
+    if (!authKey) return { user: null, session: null };
+    const raw = localStorage.getItem(authKey);
+    if (!raw) return { user: null, session: null };
+    const parsed = JSON.parse(raw);
+    const expiresAt = parsed?.expires_at;
+    // Sprawdź czy token nie wygasł
+    if (!expiresAt || expiresAt * 1000 < Date.now()) return { user: null, session: null };
+    return {
+      user: parsed?.user ?? null,
+      session: parsed as Session ?? null,
+    };
+  } catch {
+    return { user: null, session: null };
   }
 }
 
+async function ensureFamilyRecord(userId: string) {
+  try {
+    const { data } = await supabase
+      .from('families')
+      .select('id')
+      .eq('user_id', userId)
+      .maybeSingle();
+
+    if (!data) {
+      await supabase
+        .from('families')
+        .insert({ user_id: userId, family_name: 'Wpisz nazwę rodziny' });
+    }
+  } catch {}
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [session, setSession] = useState<Session | null>(null);
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  // Inicjalizuj stan SYNCHRONICZNIE z localStorage — brak opóźnienia przy renderze
+  const initial = getSessionFromStorage();
+  const [session, setSession] = useState<Session | null>(initial.session);
+  const [user, setUser] = useState<User | null>(initial.user);
+  // Jeśli mamy sesję z localStorage — loading = false od razu
+  const [loading, setLoading] = useState(!initial.user && isSupabaseConfigured);
 
   useEffect(() => {
     if (!isSupabaseConfigured) {
@@ -40,27 +67,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return;
     }
 
+    // Odśwież sesję w tle — bez blokowania UI
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
-        await ensureFamilyRecord(session.user.id);
+        ensureFamilyRecord(session.user.id); // w tle, bez await
       }
       setLoading(false);
+    }).catch(() => {
+      setLoading(false);
     });
+
+    // Timeout fallback — max 1.5s czekania
+    const timeout = setTimeout(() => setLoading(false), 1500);
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       setSession(session);
       setUser(session?.user ?? null);
-
       if ((event === 'SIGNED_IN' || event === 'USER_UPDATED') && session?.user) {
-        await ensureFamilyRecord(session.user.id);
+        ensureFamilyRecord(session.user.id); // w tle
       }
-
       setLoading(false);
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      subscription.unsubscribe();
+      clearTimeout(timeout);
+    };
   }, []);
 
   const signUp = async (email: string, password: string): Promise<{ error: string | null; needsConfirmation: boolean }> => {
@@ -110,36 +144,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!isSupabaseConfigured) return { error: 'Supabase nie jest skonfigurowany.' };
     if (!user) return { error: 'Brak zalogowanego użytkownika.' };
 
-    // Krok 1: Weryfikacja hasła
     const { error: signInError } = await supabase.auth.signInWithPassword({
       email: user.email!,
       password,
     });
     if (signInError) return { error: 'Nieprawidłowe hasło. Spróbuj ponownie.' };
 
-    // Krok 2: Usuń dane użytkownika z tabel przez RPC
     const { error: dataError } = await supabase.rpc('delete_user_data');
-    if (dataError) {
-      console.error('Błąd usuwania danych:', dataError);
-    }
+    if (dataError) console.error('Błąd usuwania danych:', dataError);
 
-    // Krok 3: Usuń konto z auth.users przez supabaseAdmin (service_role)
     if (supabaseAdmin) {
       const { error: adminError } = await supabaseAdmin.auth.admin.deleteUser(user.id);
       if (adminError) {
         console.error('Błąd usuwania konta przez admin:', adminError);
         await supabase.auth.signOut();
-        return { error: 'Dane usunięte, ale konto nie mogło zostać usunięte. Skontaktuj się z administratorem.' };
+        return { error: 'Dane usunięte, ale konto nie mogło zostać usunięte.' };
       }
     } else {
-      // Fallback jeśli brak service_role key — wyloguj i poinformuj
       await supabase.auth.signOut();
-      return { error: 'Brak klucza VITE_SUPABASE_SERVICE_ROLE_KEY w pliku .env. Dodaj go aby umożliwić usuwanie konta.' };
+      return { error: 'Brak klucza VITE_SUPABASE_SERVICE_ROLE_KEY w pliku .env.' };
     }
 
-    // Krok 4: Wyloguj
     await supabase.auth.signOut();
-
     return { error: null };
   };
 
