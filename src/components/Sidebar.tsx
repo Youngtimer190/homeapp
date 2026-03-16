@@ -49,8 +49,10 @@ export default function Sidebar({ active, onChange, mobileOpen, onClose, familyN
           lg:relative lg:translate-x-0 lg:shadow-none lg:z-auto lg:flex-shrink-0
         `}
       >
-        {/* Logo */}
-        <div className="flex items-center gap-3 px-4 py-4 border-b border-gray-100 flex-shrink-0">
+        {/* Logo — safe area top for iOS notch */}
+        <div className="flex items-center gap-3 px-4 border-b border-gray-100 flex-shrink-0"
+          style={{ paddingTop: `calc(env(safe-area-inset-top) + 1rem)`, paddingBottom: '1rem' }}
+        >
           <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-lg shadow flex-shrink-0">
             🏠
           </div>
@@ -68,7 +70,7 @@ export default function Sidebar({ active, onChange, mobileOpen, onClose, familyN
         </div>
 
         {/* Nav */}
-        <nav className="flex-1 px-2 py-3 space-y-0.5 overflow-y-auto">
+        <nav className="flex-1 px-2 py-3 space-y-0.5 overflow-y-auto" style={{ WebkitOverflowScrolling: 'touch' as any }}>
           {navItems.map((item) => {
             const isActive = active === item.id;
             return (
@@ -114,6 +116,8 @@ export default function Sidebar({ active, onChange, mobileOpen, onClose, familyN
             </button>
           </div>
         </nav>
+        {/* Safe area bottom for iPhone home bar */}
+        <div style={{ height: 'env(safe-area-inset-bottom)', flexShrink: 0 }} />
       </aside>
     </>
   );

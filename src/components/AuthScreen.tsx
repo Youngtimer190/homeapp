@@ -77,7 +77,7 @@ export default function AuthScreen({ onSuccess, onDemoMode }: Props) {
   // Ekran potwierdzenia e-maila
   if (needsConfirmation) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-violet-50 flex items-center justify-center p-4">
+      <div className="bg-gradient-to-br from-indigo-50 via-white to-violet-50 flex items-center justify-center p-4 overflow-y-auto" style={{ minHeight: '100%' }}>
         <div className="w-full max-w-md text-center">
           <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-2xl shadow-lg mb-6">
             <span className="text-4xl">📧</span>
@@ -115,7 +115,7 @@ export default function AuthScreen({ onSuccess, onDemoMode }: Props) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-violet-50 flex items-center justify-center p-3 sm:p-4">
+    <div className="bg-gradient-to-br from-indigo-50 via-white to-violet-50 flex items-center justify-center p-3 sm:p-4 overflow-y-auto" style={{ minHeight: '100%', paddingTop: `calc(env(safe-area-inset-top) + 1rem)`, paddingBottom: `calc(env(safe-area-inset-bottom) + 1rem)` }}>
       <div className="w-full max-w-md">
 
         {/* Logo */}

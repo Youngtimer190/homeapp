@@ -49,7 +49,7 @@ function AppLayout({ data, isLocalMode, userEmail, onSignOut, onDeleteAccount, o
   const handleNavigate = (section: Section) => setActive(section);
 
   return (
-    <div className="min-h-screen bg-gray-50 flex" style={{ fontFamily: "'Inter', sans-serif" }}>
+    <div className="bg-gray-50 flex" style={{ fontFamily: "'Inter', sans-serif", height: '100%', position: 'fixed', inset: 0 }}>
       <Sidebar
         active={active}
         onChange={(s) => setActive(s)}
@@ -58,7 +58,9 @@ function AppLayout({ data, isLocalMode, userEmail, onSignOut, onDeleteAccount, o
         familyName={data.familyName}
       />
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        <header className="bg-white border-b border-gray-100 px-3 sm:px-6 py-3 flex items-center gap-2 sm:gap-4 sticky top-0 z-20">
+        <header className="bg-white border-b border-gray-100 px-3 sm:px-6 flex items-center gap-2 sm:gap-4 sticky top-0 z-20 flex-shrink-0"
+          style={{ paddingTop: `calc(env(safe-area-inset-top) + 0.75rem)`, paddingBottom: '0.75rem' }}
+        >
           <button
             onClick={() => setMobileOpen(true)}
             className="lg:hidden w-9 h-9 rounded-xl bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition flex-shrink-0"
@@ -124,8 +126,8 @@ function AppLayout({ data, isLocalMode, userEmail, onSignOut, onDeleteAccount, o
             )}
           </div>
         </header>
-        <main className="flex-1 p-3 sm:p-4 lg:p-6 overflow-y-auto overflow-x-hidden">
-          <div className="max-w-7xl mx-auto w-full">
+        <main className="flex-1 overflow-y-auto overflow-x-hidden" style={{ WebkitOverflowScrolling: 'touch' as any }}>
+          <div className="max-w-7xl mx-auto w-full p-3 sm:p-4 lg:p-6" style={{ paddingBottom: `calc(env(safe-area-inset-bottom) + 1.5rem)` }}>
             {active === 'dashboard' && (
               <Dashboard
                 transactions={data.transactions}
@@ -181,7 +183,7 @@ function AppLayout({ data, isLocalMode, userEmail, onSignOut, onDeleteAccount, o
 // ── Loading Screen ─────────────────────────────────────────────────────────────
 function LoadingScreen({ message }: { message: string }) {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-violet-50 flex items-center justify-center">
+    <div className="bg-gradient-to-br from-indigo-50 via-white to-violet-50 flex items-center justify-center" style={{ height: '100%', position: 'fixed', inset: 0 }}>
       <div className="text-center">
         <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-2xl shadow-lg mb-4 animate-pulse">
           <span className="text-3xl">🏠</span>
