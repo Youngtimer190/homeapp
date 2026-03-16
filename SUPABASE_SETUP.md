@@ -1,129 +1,147 @@
-# Konfiguracja Supabase — Dom Manager
+# Konfiguracja Supabase dla Dom Manager
 
-## 1. Utwórz projekt w Supabase
-Wejdź na https://supabase.com i utwórz nowy projekt.
+## Krok 1 — Utwórz projekt Supabase
+1. Wejdź na [supabase.com](https://supabase.com) i załóż darmowe konto
+2. Utwórz nowy projekt (zapamiętaj hasło do bazy danych)
+3. Poczekaj ~2 minuty aż projekt się uruchomi
 
-## 2. Skonfiguruj zmienne środowiskowe
-Utwórz plik `.env` w głównym katalogu projektu:
+## Krok 2 — Pobierz klucze API
+W panelu Supabase wejdź w: **Settings → API**
+- Skopiuj **Project URL** (np. `https://abcdef.supabase.co`)
+- Skopiuj **anon public** key
+
+## Krok 3 — Skonfiguruj zmienne środowiskowe
+Utwórz plik `.env` w głównym folderze projektu:
 ```
 VITE_SUPABASE_URL=https://twoj-projekt.supabase.co
-VITE_SUPABASE_ANON_KEY=twoj-anon-key
+VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ```
 
-Klucze znajdziesz w: **Project Settings → API**
-
----
-
-## 3. Uruchom SQL — Tabele, RLS i funkcje
-
-Wejdź w **SQL Editor** w panelu Supabase i wklej poniższy kod:
+## Krok 4 — Utwórz tabele w bazie danych
+W panelu Supabase wejdź w: **SQL Editor → New query**
+Wklej poniższy kod i kliknij **Run**:
 
 ```sql
 -- ============================================================
--- TABELE
+-- DOM MANAGER — Kompletny setup bazy danych
+-- Wklej całość i kliknij RUN
 -- ============================================================
 
+-- 1. Tabela rodzin (jedna na konto)
 CREATE TABLE IF NOT EXISTS families (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL UNIQUE,
   family_name TEXT DEFAULT 'Wpisz nazwę rodziny',
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- 2. Transakcje budżetu
 CREATE TABLE IF NOT EXISTS transactions (
   id TEXT PRIMARY KEY,
   user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
-  type TEXT NOT NULL,
-  amount NUMERIC NOT NULL,
-  description TEXT,
+  type TEXT NOT NULL CHECK (type IN ('income', 'expense')),
   category TEXT,
+  description TEXT,
+  amount NUMERIC NOT NULL DEFAULT 0,
   date TEXT,
   added_by TEXT,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- 3. Zadania
 CREATE TABLE IF NOT EXISTS tasks (
   id TEXT PRIMARY KEY,
   user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
   title TEXT NOT NULL,
   description TEXT,
-  priority TEXT,
-  status TEXT,
   assigned_to TEXT,
+  priority TEXT DEFAULT 'medium' CHECK (priority IN ('low', 'medium', 'high')),
+  status TEXT DEFAULT 'todo' CHECK (status IN ('todo', 'in-progress', 'done')),
   due_date TEXT,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- 4. Posiłki
 CREATE TABLE IF NOT EXISTS meals (
   id TEXT PRIMARY KEY,
   user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
   name TEXT NOT NULL,
   meal_label TEXT,
   date TEXT,
-  notes TEXT,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  ingredients TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- 5. Pojazdy
 CREATE TABLE IF NOT EXISTS vehicles (
   id TEXT PRIMARY KEY,
   user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
-  name TEXT NOT NULL,
+  name TEXT,
   brand TEXT,
   model TEXT,
-  year TEXT,
-  fuel_type TEXT,
+  year INTEGER,
+  license_plate TEXT,
   vin TEXT,
-  policy_number TEXT,
-  last_inspection TEXT,
-  next_inspection TEXT,
+  fuel_type TEXT,
+  last_service TEXT,
+  next_service TEXT,
   unlimited_inspection BOOLEAN DEFAULT FALSE,
-  insurance_expiry TEXT,
-  notes TEXT,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  mileage INTEGER DEFAULT 0,
+  insurance TEXT,
+  policy_number TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- 6. Zwierzęta
 CREATE TABLE IF NOT EXISTS pets (
   id TEXT PRIMARY KEY,
   user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
   name TEXT NOT NULL,
   species TEXT,
   breed TEXT,
-  age TEXT,
-  weight TEXT,
-  vaccine_name TEXT,
-  vaccine_date TEXT,
-  deworming_name TEXT,
-  deworming_date TEXT,
-  tick_name TEXT,
-  tick_date TEXT,
-  next_vet_visit TEXT,
+  age NUMERIC,
+  weight NUMERIC,
+  color TEXT,
+  vet TEXT,
+  last_visit TEXT,
+  next_visit TEXT,
   no_next_visit BOOLEAN DEFAULT FALSE,
+  vaccinations TEXT,
+  vaccinations_date TEXT,
+  deworming TEXT,
+  deworming_date TEXT,
+  tick_protection TEXT,
+  tick_protection_date TEXT,
   notes TEXT,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- 7. Członkowie rodziny
 CREATE TABLE IF NOT EXISTS members (
   id TEXT PRIMARY KEY,
   user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
   name TEXT NOT NULL,
   role TEXT,
-  age TEXT,
-  birthday TEXT,
+  age INTEGER,
+  email TEXT,
+  phone TEXT,
   avatar TEXT,
-  duties TEXT,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  birthday TEXT,
+  responsibilities TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- 8. Listy zakupów (items jako JSON)
 CREATE TABLE IF NOT EXISTS shopping_lists (
   id TEXT PRIMARY KEY,
   user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
   name TEXT NOT NULL,
   items JSONB DEFAULT '[]',
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- ============================================================
--- ROW LEVEL SECURITY (RLS)
+-- ROW LEVEL SECURITY — każdy widzi tylko swoje dane
 -- ============================================================
 
 ALTER TABLE families ENABLE ROW LEVEL SECURITY;
@@ -184,100 +202,70 @@ CREATE POLICY "shopping_lists_update" ON shopping_lists FOR UPDATE USING (auth.u
 CREATE POLICY "shopping_lists_delete" ON shopping_lists FOR DELETE USING (auth.uid() = user_id);
 
 -- ============================================================
--- FUNKCJA USUWANIA DANYCH UŻYTKOWNIKA
--- ============================================================
--- Usuwa wszystkie dane użytkownika z tabel aplikacji.
--- Samo konto (auth.users) jest usuwane osobno przez aplikację.
-
-CREATE OR REPLACE FUNCTION delete_user_data()
-RETURNS void
-LANGUAGE plpgsql
-SECURITY DEFINER
-SET search_path = public
-AS $$
-DECLARE
-  current_uid UUID;
-BEGIN
-  current_uid := auth.uid();
-
-  IF current_uid IS NULL THEN
-    RAISE EXCEPTION 'Brak autoryzacji';
-  END IF;
-
-  DELETE FROM shopping_lists WHERE user_id = current_uid;
-  DELETE FROM members WHERE user_id = current_uid;
-  DELETE FROM pets WHERE user_id = current_uid;
-  DELETE FROM vehicles WHERE user_id = current_uid;
-  DELETE FROM meals WHERE user_id = current_uid;
-  DELETE FROM tasks WHERE user_id = current_uid;
-  DELETE FROM transactions WHERE user_id = current_uid;
-  DELETE FROM families WHERE user_id = current_uid;
-END;
-$$;
-
-GRANT EXECUTE ON FUNCTION delete_user_data() TO authenticated;
-
--- ============================================================
 -- TRIGGER — automatyczne tworzenie rodziny przy rejestracji
 -- ============================================================
 
-CREATE OR REPLACE FUNCTION handle_new_user()
-RETURNS TRIGGER
-LANGUAGE plpgsql
-SECURITY DEFINER
-SET search_path = public
-AS $$
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER AS $$
 BEGIN
   INSERT INTO public.families (user_id, family_name)
   VALUES (NEW.id, 'Wpisz nazwę rodziny')
   ON CONFLICT (user_id) DO NOTHING;
   RETURN NEW;
 END;
-$$;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
 
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
-  FOR EACH ROW EXECUTE FUNCTION handle_new_user();
+  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+
+-- ============================================================
+-- FUNKCJA — usuwanie danych użytkownika (wywoływana przez aplikację)
+-- ============================================================
+
+CREATE OR REPLACE FUNCTION public.delete_user_data()
+RETURNS void AS $$
+DECLARE
+  calling_user_id UUID;
+BEGIN
+  calling_user_id := auth.uid();
+  IF calling_user_id IS NULL THEN
+    RAISE EXCEPTION 'Brak zalogowanego użytkownika';
+  END IF;
+
+  DELETE FROM public.shopping_lists WHERE user_id = calling_user_id;
+  DELETE FROM public.members WHERE user_id = calling_user_id;
+  DELETE FROM public.pets WHERE user_id = calling_user_id;
+  DELETE FROM public.vehicles WHERE user_id = calling_user_id;
+  DELETE FROM public.meals WHERE user_id = calling_user_id;
+  DELETE FROM public.tasks WHERE user_id = calling_user_id;
+  DELETE FROM public.transactions WHERE user_id = calling_user_id;
+  DELETE FROM public.families WHERE user_id = calling_user_id;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+
+-- ============================================================
+-- GOTOWE! Możesz teraz uruchomić aplikację.
+-- ============================================================
 ```
 
----
-
-## 4. Włącz usuwanie konta przez użytkownika
-
-Supabase nie pozwala zwykłemu użytkownikowi usunąć własnego konta przez standardowe API — wymaga to klucza `service_role`. Dlatego należy włączyć tę opcję w ustawieniach:
-
-**Authentication → Policies → Allow users to delete their own accounts → włącz**
-
-Lub wklej ten SQL:
-
-```sql
--- Pozwól użytkownikom usuwać własne konta
-CREATE OR REPLACE FUNCTION auth.delete_user()
-RETURNS void
-LANGUAGE sql
-SECURITY DEFINER
-AS $$
-  DELETE FROM auth.users WHERE id = auth.uid();
-$$;
+## Krok 5 — Uruchom aplikację
+```bash
+npm run dev
 ```
 
----
+## Uwagi
 
-## 5. Opcjonalne — wyłącz potwierdzenie e-mail (dla testów)
+### Potwierdzenie e-mail
+Domyślnie Supabase wymaga potwierdzenia e-maila. Aby wyłączyć (na potrzeby testów):
+**Authentication → Settings → Email Confirmations → wyłącz**
 
-W panelu Supabase: **Authentication → Email → Confirm email → wyłącz**
+### Usuwanie konta
+Funkcja `delete_user_data()` usuwa wszystkie dane z tabel aplikacji.
+Samo konto (`auth.users`) jest usuwane przez REST API Supabase z poziomu aplikacji.
 
-Dzięki temu użytkownicy są od razu zalogowani po rejestracji.
-
----
-
-## 6. Sprawdź konfigurację
-
-Po wykonaniu powyższych kroków:
-1. ✅ Użytkownicy mogą się rejestrować i logować
-2. ✅ Każda rodzina ma izolowane dane (RLS)
-3. ✅ Nowa rejestracja = nowa pusta przestrzeń dla rodziny
-4. ✅ Trigger automatycznie tworzy rodzinę przy rejestracji
-5. ✅ Użytkownik może usunąć swoje konto i wszystkie dane
-6. ✅ Synchronizacja między urządzeniami działa automatycznie
+### Bezpieczeństwo
+- Każdy użytkownik widzi **tylko swoje dane** dzięki Row Level Security
+- Klucz `anon` jest bezpieczny do użycia po stronie klienta — RLS chroni dane
+- Nigdy nie używaj klucza `service_role` po stronie klienta

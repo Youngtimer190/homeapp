@@ -17,8 +17,9 @@ function useTable<T extends { id: string }>(
   useEffect(() => {
     if (!userId) { setData([]); setLoading(false); return; }
     setLoading(true);
-    supabase.from(table).select('*').eq('user_id', userId).order('created_at', { ascending: true })
-      .then(({ data: rows }) => {
+    supabase.from(table).select('*').eq('user_id', userId)
+      .then(({ data: rows, error }) => {
+        if (error) console.error(`[${table}] fetch error:`, error.message);
         setData((rows || []).map(r => fromRow(r as Record<string, unknown>)));
         setLoading(false);
       });
@@ -202,9 +203,9 @@ export function useSupabaseData(userId: string | undefined) {
 
   useEffect(() => {
     if (!userId) { setFamilyLoading(false); return; }
-    supabase.from('families').select('name').eq('user_id', userId).single()
+    supabase.from('families').select('family_name').eq('user_id', userId).single()
       .then(({ data }) => {
-        if (data) setFamilyNameState(data.name);
+        if (data?.family_name) setFamilyNameState(data.family_name);
         setFamilyLoading(false);
       });
   }, [userId]);
@@ -212,7 +213,7 @@ export function useSupabaseData(userId: string | undefined) {
   const setFamilyName = useCallback(async (name: string) => {
     setFamilyNameState(name);
     if (!userId) return;
-    await supabase.from('families').update({ name }).eq('user_id', userId);
+    await supabase.from('families').update({ family_name: name }).eq('user_id', userId);
   }, [userId]);
 
   const loading = transactions.loading || tasks.loading || meals.loading ||

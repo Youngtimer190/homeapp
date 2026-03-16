@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Section } from './types';
 import Sidebar from './components/Sidebar';
 import Dashboard from './components/Dashboard';
@@ -17,6 +17,7 @@ import { useLocalData } from './lib/useLocalData';
 import { isSupabaseConfigured } from './lib/supabase';
 
 type ActiveSection = Section | 'dashboard';
+type AppMode = 'loading' | 'auth' | 'demo' | 'app';
 
 const sectionTitles: Record<ActiveSection, { label: string; icon: string }> = {
   dashboard: { label: 'Przegląd',        icon: '🏠' },
@@ -185,6 +186,20 @@ function AppLayout({ data, isLocalMode, userEmail, onSignOut, onDeleteAccount, o
   );
 }
 
+// ── Loading Screen ─────────────────────────────────────────────────────────────
+function LoadingScreen({ message }: { message: string }) {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-violet-50 flex items-center justify-center">
+      <div className="text-center">
+        <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-2xl shadow-lg mb-4 animate-pulse">
+          <span className="text-3xl">🏠</span>
+        </div>
+        <p className="text-gray-500 text-sm mt-2">{message}</p>
+      </div>
+    </div>
+  );
+}
+
 // ── Local / Demo mode ─────────────────────────────────────────────────────────
 function LocalApp({ onExitDemo }: { onExitDemo: () => void }) {
   const data = useLocalData();
@@ -199,7 +214,7 @@ function LocalApp({ onExitDemo }: { onExitDemo: () => void }) {
 
 // ── Supabase mode ─────────────────────────────────────────────────────────────
 function SupabaseApp({ onExitToAuth }: { onExitToAuth: () => void }) {
-  const { user, loading: authLoading, signOut, deleteAccount } = useAuth();
+  const { user, signOut, deleteAccount } = useAuth();
 
   const {
     transactions, setTransactions,
@@ -218,30 +233,8 @@ function SupabaseApp({ onExitToAuth }: { onExitToAuth: () => void }) {
     onExitToAuth();
   };
 
-  if (authLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-violet-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-2xl shadow-lg mb-4 animate-pulse">
-            <span className="text-3xl">🏠</span>
-          </div>
-          <p className="text-gray-500 text-sm mt-2">Ładowanie...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (dataLoading && user) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-violet-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-2xl shadow-lg mb-4">
-            <span className="text-3xl">⏳</span>
-          </div>
-          <p className="text-gray-500 text-sm mt-2">Synchronizowanie danych...</p>
-        </div>
-      </div>
-    );
+  if (dataLoading) {
+    return <LoadingScreen message="Synchronizowanie danych..." />;
   }
 
   const supabaseData = {
@@ -269,30 +262,53 @@ function SupabaseApp({ onExitToAuth }: { onExitToAuth: () => void }) {
 
 // ── Root ──────────────────────────────────────────────────────────────────────
 export default function App() {
-  // tryb: 'auth' = ekran logowania, 'demo' = lokalny, 'supabase' = zalogowany
-  const [appMode, setAppMode] = useState<'auth' | 'demo' | 'supabase'>(() => {
-    // Jeśli Supabase nie jest skonfigurowany — od razu pokaż ekran auth (z opcją demo)
-    return 'auth';
-  });
-
   const { user, loading: authLoading } = useAuth();
+  const [appMode, setAppMode] = useState<AppMode>('loading');
 
-  // Gdy Supabase skonfigurowany i użytkownik już zalogowany — przełącz na supabase
-  if (isSupabaseConfigured && !authLoading && user && appMode === 'auth') {
-    return <SupabaseApp onExitToAuth={() => setAppMode('auth')} />;
+  useEffect(() => {
+    if (authLoading) return;
+
+    if (isSupabaseConfigured) {
+      if (user) {
+        // Zalogowany użytkownik — pokaż aplikację
+        setAppMode('app');
+      } else {
+        // Niezalogowany — pokaż ekran auth
+        setAppMode('auth');
+      }
+    } else {
+      // Brak Supabase — pokaż ekran auth z opcją demo
+      setAppMode('auth');
+    }
+  }, [authLoading, user]);
+
+  // Nasłuchuj zmian auth state (login/logout)
+  useEffect(() => {
+    if (!authLoading && isSupabaseConfigured) {
+      if (user && appMode === 'auth') {
+        setAppMode('app');
+      } else if (!user && appMode === 'app') {
+        setAppMode('auth');
+      }
+    }
+  }, [user, authLoading, appMode]);
+
+  if (appMode === 'loading' || authLoading) {
+    return <LoadingScreen message="Ładowanie..." />;
   }
 
   if (appMode === 'demo') {
     return <LocalApp onExitDemo={() => setAppMode('auth')} />;
   }
 
-  if (appMode === 'supabase' && isSupabaseConfigured) {
+  if (appMode === 'app' && isSupabaseConfigured && user) {
     return <SupabaseApp onExitToAuth={() => setAppMode('auth')} />;
   }
 
-  // Zawsze pokaż ekran auth (logowanie/rejestracja + opcja demo)
+  // Ekran logowania/rejestracji
   return (
     <AuthScreen
+      onSuccess={() => setAppMode('app')}
       onDemoMode={() => setAppMode('demo')}
     />
   );
