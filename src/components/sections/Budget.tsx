@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Transaction } from '../../types';
 import ConfirmDialog from '../ConfirmDialog';
+import Modal from '../Modal';
 
 interface Props {
   transactions: Transaction[];
@@ -383,19 +384,12 @@ export default function Budget({ transactions, setTransactions, memberNames }: P
       </div>
 
       {/* Modal — Add / Edit */}
-      {showForm && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md">
-            <div className="p-6 border-b border-gray-100 flex items-center justify-between">
-              <h3 className="text-lg font-bold text-gray-900">
-                {editId ? 'Edytuj transakcję' : 'Nowa transakcja'}
-              </h3>
-              <button
-                onClick={() => { setShowForm(false); setEditId(null); }}
-                className="text-gray-400 hover:text-gray-600 text-2xl leading-none"
-              >×</button>
-            </div>
-            <div className="p-6 space-y-4">
+      <Modal
+        isOpen={showForm}
+        onClose={() => { setShowForm(false); setEditId(null); }}
+        title={editId ? 'Edytuj transakcję' : 'Nowa transakcja'}
+      >
+            <div className="p-5 space-y-4">
               <div className="flex rounded-xl overflow-hidden border border-gray-200">
                 <button
                   onClick={() => setForm(f => ({ ...f, type: 'expense' }))}
@@ -460,7 +454,7 @@ export default function Budget({ transactions, setTransactions, memberNames }: P
                 </select>
               </div>
             </div>
-            <div className="p-6 pt-0 flex gap-3">
+            <div className="p-5 pt-0 flex gap-3">
               <button
                 onClick={() => { setShowForm(false); setEditId(null); }}
                 className="flex-1 border border-gray-200 text-gray-700 py-2.5 rounded-xl text-sm font-semibold hover:bg-gray-50 transition"
@@ -471,9 +465,7 @@ export default function Budget({ transactions, setTransactions, memberNames }: P
                 className="flex-1 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed text-white py-2.5 rounded-xl text-sm font-semibold transition shadow"
               >{editId ? 'Zapisz zmiany' : 'Dodaj'}</button>
             </div>
-          </div>
-        </div>
-      )}
+      </Modal>
 
       <ConfirmDialog
         isOpen={confirmId !== null}

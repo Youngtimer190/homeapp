@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Vehicle } from '../../types';
 import ConfirmDialog from '../ConfirmDialog';
+import Modal from '../Modal';
 
 interface Props {
   vehicles: Vehicle[];
@@ -252,16 +253,8 @@ export default function Vehicles({ vehicles, setVehicles }: Props) {
       )}
 
       {/* Modal – dodaj / edytuj */}
-      {showForm && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white z-10">
-              <h3 className="text-lg font-bold text-gray-900">
-                {editingId ? '✏️ Edytuj pojazd' : '🚗 Nowy pojazd'}
-              </h3>
-              <button onClick={closeModal} className="text-gray-400 hover:text-gray-600 text-2xl leading-none">×</button>
-            </div>
-            <div className="p-6 space-y-4">
+      <Modal isOpen={showForm} onClose={closeModal} title={editingId ? '✏️ Edytuj pojazd' : '🚗 Nowy pojazd'} maxWidth="max-w-lg">
+            <div className="p-5 space-y-4">
 
               {/* Nazwa / przezwisko */}
               <input type="text" placeholder="Nazwa / przezwisko (opcjonalnie)" value={form.name}
@@ -363,15 +356,13 @@ export default function Vehicles({ vehicles, setVehicles }: Props) {
               </div>
 
             </div>
-            <div className="p-6 pt-0 flex gap-3">
+            <div className="p-5 pt-0 flex gap-3">
               <button onClick={closeModal} className="flex-1 border border-gray-200 text-gray-700 py-2.5 rounded-xl text-sm font-semibold hover:bg-gray-50 transition">Anuluj</button>
               <button onClick={handleSave} className="flex-1 bg-violet-600 hover:bg-violet-700 text-white py-2.5 rounded-xl text-sm font-semibold transition shadow">
                 {editingId ? 'Zapisz zmiany' : 'Dodaj pojazd'}
               </button>
             </div>
-          </div>
-        </div>
-      )}
+      </Modal>
 
       <ConfirmDialog
         isOpen={confirmId !== null}

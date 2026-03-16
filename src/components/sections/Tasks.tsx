@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Task } from '../../types';
 import ConfirmDialog from '../ConfirmDialog';
+import Modal from '../Modal';
 
 interface Props {
   tasks: Task[];
@@ -167,14 +168,8 @@ export default function Tasks({ tasks, setTasks, members }: Props) {
       </div>
 
       {/* Modal */}
-      {showForm && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md">
-            <div className="p-6 border-b border-gray-100 flex items-center justify-between">
-              <h3 className="text-lg font-bold text-gray-900">Nowe zadanie</h3>
-              <button onClick={() => setShowForm(false)} className="text-gray-400 hover:text-gray-600 text-2xl leading-none">×</button>
-            </div>
-            <div className="p-6 space-y-4">
+      <Modal isOpen={showForm} onClose={() => setShowForm(false)} title="Nowe zadanie">
+            <div className="p-5 space-y-4">
               <input
                 type="text"
                 placeholder="Tytuł zadania *"
@@ -222,13 +217,11 @@ export default function Tasks({ tasks, setTasks, members }: Props) {
                 </select>
               </div>
             </div>
-            <div className="p-6 pt-0 flex gap-3">
+            <div className="p-5 pt-0 flex gap-3">
               <button onClick={() => setShowForm(false)} className="flex-1 border border-gray-200 text-gray-700 py-2.5 rounded-xl text-sm font-semibold hover:bg-gray-50 transition">Anuluj</button>
               <button onClick={handleAdd} className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-xl text-sm font-semibold transition shadow">Dodaj</button>
             </div>
-          </div>
-        </div>
-      )}
+      </Modal>
 
       <ConfirmDialog
         isOpen={confirmId !== null}
