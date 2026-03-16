@@ -115,46 +115,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       email: user.email!,
       password,
     });
-
     if (signInError) return { error: 'Nieprawidłowe hasło. Spróbuj ponownie.' };
 
-    // Krok 2: Usuń wszystkie dane użytkownika przez RPC
-    // Funkcja delete_user_data() usuwa tylko dane z tabel aplikacji
-    const { error: rpcError } = await supabase.rpc('delete_user_data');
+    // Krok 2: Wywołaj funkcję SQL która usuwa dane + konto z auth.users
+    const { error: rpcError } = await supabase.rpc('delete_user_account');
 
     if (rpcError) {
-      // Fallback — ręczne usunięcie danych jeśli RPC nie zadziała
+      // Fallback — ręczne usunięcie danych z tabel (bez usunięcia konta auth)
       const tables = ['shopping_lists', 'members', 'pets', 'vehicles', 'meals', 'tasks', 'transactions', 'families'];
       for (const table of tables) {
         await supabase.from(table).delete().eq('user_id', user.id);
       }
     }
 
-    // Krok 3: Usuń konto auth przez wbudowane API Supabase
-    // supabase.auth.admin nie jest dostępne po stronie klienta —
-    // używamy alternatywnego endpointu który Supabase udostępnia
-    try {
-      const supabaseUrl = (supabase as any).supabaseUrl || '';
-      const supabaseKey = (supabase as any).supabaseKey || '';
-      const currentSession = await supabase.auth.getSession();
-      const accessToken = currentSession.data.session?.access_token;
-
-      if (accessToken) {
-        // Wywołanie REST API Supabase do usunięcia własnego konta
-        await fetch(`${supabaseUrl}/auth/v1/user`, {
-          method: 'DELETE',
-          headers: {
-            'Authorization': `Bearer ${accessToken}`,
-            'apikey': supabaseKey,
-            'Content-Type': 'application/json',
-          },
-        });
-      }
-    } catch {
-      // Ignoruj błąd — dane i tak zostały usunięte
-    }
-
-    // Krok 4: Wyloguj niezależnie od wyniku usunięcia konta
+    // Krok 3: Wyloguj niezależnie od wyniku
     await supabase.auth.signOut();
     return { error: null };
   };
