@@ -247,13 +247,13 @@ export default function Members({ members, setMembers, familyName, setFamilyName
                   {/* Top banner */}
                   <div className="bg-gradient-to-br from-rose-500 to-pink-600 p-6 text-white relative overflow-hidden">
                     <div className="absolute -right-10 -top-10 w-48 h-48 rounded-full bg-white opacity-10" />
-                    <div className="relative flex items-start gap-5 justify-between">
+                    <div className="relative flex flex-col gap-3">
                       <div className="flex items-center gap-4">
-                        <div className="w-20 h-20 rounded-2xl bg-white/20 flex items-center justify-center text-5xl shadow">
+                        <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-white/20 flex items-center justify-center text-4xl sm:text-5xl shadow flex-shrink-0">
                           {current.avatar}
                         </div>
                         <div>
-                          <h3 className="text-2xl font-bold">{current.name}</h3>
+                          <h3 className="text-xl sm:text-2xl font-bold">{current.name}</h3>
                           <div className="flex items-center gap-2 mt-1">
                             <span className={`text-xs px-2 py-1 rounded-lg font-semibold ${getRoleColor(current.role)}`}>
                               {current.role || 'Brak typu'}
@@ -267,14 +267,14 @@ export default function Members({ members, setMembers, familyName, setFamilyName
                           )}
                         </div>
                       </div>
-                      <div className="flex flex-col gap-2">
+                      <div className="flex flex-col gap-2 w-full">
                         <button
                           onClick={() => openEdit(current)}
-                          className="bg-white/20 hover:bg-white/30 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition flex-shrink-0"
+                          className="bg-white/20 hover:bg-white/30 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition"
                         >✏️ Edytuj</button>
                         <button
                           onClick={() => setConfirmId(current.id)}
-                          className="bg-white/20 hover:bg-red-500/70 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition flex-shrink-0"
+                          className="bg-white/20 hover:bg-red-500/70 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition"
                         >🗑 Usuń</button>
                       </div>
                     </div>
