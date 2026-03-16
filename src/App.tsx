@@ -1,0 +1,299 @@
+import { useState } from 'react';
+import { Section } from './types';
+import Sidebar from './components/Sidebar';
+import Dashboard from './components/Dashboard';
+import Budget from './components/sections/Budget';
+import Tasks from './components/sections/Tasks';
+import Shopping from './components/sections/Shopping';
+import Meals from './components/sections/Meals';
+import Vehicles from './components/sections/Vehicles';
+import Pets from './components/sections/Pets';
+import Members from './components/sections/Members';
+import AuthScreen from './components/AuthScreen';
+import Settings from './components/sections/Settings';
+import { useAuth } from './lib/AuthContext';
+import { useSupabaseData } from './lib/useSupabaseData';
+import { useLocalData } from './lib/useLocalData';
+import { isSupabaseConfigured } from './lib/supabase';
+
+type ActiveSection = Section | 'dashboard';
+
+const sectionTitles: Record<ActiveSection, { label: string; icon: string }> = {
+  dashboard: { label: 'Przegląd',        icon: '🏠' },
+  budget:    { label: 'Budżet',          icon: '💰' },
+  tasks:     { label: 'Zadania',         icon: '✅' },
+  shopping:  { label: 'Lista zakupów',   icon: '🛒' },
+  meals:     { label: 'Posiłki',         icon: '🍽️' },
+  vehicles:  { label: 'Pojazdy',         icon: '🚗' },
+  pets:      { label: 'Zwierzęta',       icon: '🐾' },
+  members:   { label: 'Członkowie',      icon: '👨‍👩‍👧‍👦' },
+  settings:  { label: 'Ustawienia',      icon: '⚙️' },
+};
+
+// ── Shared App Layout ─────────────────────────────────────────────────────────
+interface AppLayoutProps {
+  data: ReturnType<typeof useLocalData>;
+  isLocalMode: boolean;
+  userEmail?: string;
+  onSignOut?: () => void;
+  onDeleteAccount?: (password: string) => Promise<{ error: string | null }>;
+  onExitDemo?: () => void;
+}
+
+function AppLayout({ data, isLocalMode, userEmail, onSignOut, onDeleteAccount, onExitDemo }: AppLayoutProps) {
+  const [active, setActive] = useState<ActiveSection>('dashboard');
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  const memberNames = data.members.map(m => m.name.split(' ')[0]);
+  const handleNavigate = (section: Section) => setActive(section);
+
+  return (
+    <div className="min-h-screen bg-gray-50 flex" style={{ fontFamily: "'Inter', sans-serif" }}>
+      <Sidebar
+        active={active}
+        onChange={(s) => setActive(s)}
+        mobileOpen={mobileOpen}
+        onClose={() => setMobileOpen(false)}
+        familyName={data.familyName}
+      />
+      <div className="flex-1 flex flex-col min-w-0">
+        <header className="bg-white border-b border-gray-100 px-6 py-4 flex items-center gap-4 sticky top-0 z-20">
+          <button
+            onClick={() => setMobileOpen(true)}
+            className="lg:hidden w-9 h-9 rounded-xl bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition flex-shrink-0"
+          >
+            <span className="text-gray-600 text-lg">☰</span>
+          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setActive('dashboard')}
+              className={`text-sm font-medium transition ${active === 'dashboard' ? 'text-gray-900' : 'text-gray-400 hover:text-gray-700'}`}
+            >
+              Dom Manager
+            </button>
+            {active !== 'dashboard' && (
+              <>
+                <span className="text-gray-300">/</span>
+                <span className="text-sm font-semibold text-gray-900">
+                  {sectionTitles[active].icon} {sectionTitles[active].label}
+                </span>
+              </>
+            )}
+          </div>
+          <div className="ml-auto flex items-center gap-3">
+            <button
+              onClick={() => setActive('dashboard')}
+              className={`hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition ${
+                active === 'dashboard' ? 'bg-indigo-100 text-indigo-700' : 'text-gray-500 hover:bg-gray-100'
+              }`}
+            >
+              <span>🏠</span> Dashboard
+            </button>
+            <div className="hidden md:flex items-center gap-2 text-xs text-gray-400 bg-gray-50 px-3 py-1.5 rounded-lg">
+              <span>{data.tasks.filter(t => t.status !== 'done').length} zadań</span>
+              <span className="text-gray-300">·</span>
+              <span>{data.members.length} osób</span>
+            </div>
+
+            {isLocalMode ? (
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 px-3 py-1.5 bg-amber-50 text-amber-700 rounded-lg text-xs font-medium">
+                  <span>💾</span>
+                  <span className="hidden sm:inline">Tryb demo</span>
+                </div>
+                {onExitDemo && (
+                  <button
+                    onClick={onExitDemo}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 rounded-lg text-xs font-semibold transition"
+                    title="Wróć do ekranu logowania"
+                  >
+                    <span>🔑</span>
+                    <span className="hidden sm:inline">Zaloguj się</span>
+                  </button>
+                )}
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <div className="hidden sm:flex flex-col items-end">
+                  <span className="text-xs font-medium text-gray-700 truncate max-w-[140px]">{userEmail}</span>
+                  <span className="text-xs text-gray-400">zalogowany</span>
+                </div>
+                {onSignOut && (
+                  <button
+                    onClick={onSignOut}
+                    title="Wyloguj się"
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg text-xs font-semibold transition"
+                  >
+                    🚪 <span className="hidden sm:inline">Wyloguj</span>
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+        </header>
+        <main className="flex-1 p-6 overflow-y-auto">
+          <div className="max-w-7xl mx-auto">
+            {active === 'dashboard' && (
+              <Dashboard
+                transactions={data.transactions}
+                tasks={data.tasks}
+                meals={data.meals}
+                vehicles={data.vehicles}
+                pets={data.pets}
+                members={data.members}
+                onNavigate={handleNavigate}
+              />
+            )}
+            {active === 'budget' && (
+              <Budget transactions={data.transactions} setTransactions={data.setTransactions} memberNames={memberNames} />
+            )}
+            {active === 'tasks' && (
+              <Tasks tasks={data.tasks} setTasks={data.setTasks} members={memberNames} />
+            )}
+            {active === 'shopping' && (
+              <Shopping lists={data.shoppingLists} setLists={data.setShoppingLists} members={memberNames} />
+            )}
+            {active === 'meals' && (
+              <Meals meals={data.meals} setMeals={data.setMeals} />
+            )}
+            {active === 'vehicles' && (
+              <Vehicles vehicles={data.vehicles} setVehicles={data.setVehicles} />
+            )}
+            {active === 'pets' && (
+              <Pets pets={data.pets} setPets={data.setPets} />
+            )}
+            {active === 'members' && (
+              <Members
+                members={data.members}
+                setMembers={data.setMembers}
+                familyName={data.familyName}
+                setFamilyName={data.setFamilyName}
+              />
+            )}
+            {active === 'settings' && (
+              <Settings
+                userEmail={userEmail}
+                onSignOut={onSignOut}
+                onDeleteAccount={onDeleteAccount}
+                isLocalMode={isLocalMode}
+              />
+            )}
+          </div>
+        </main>
+      </div>
+    </div>
+  );
+}
+
+// ── Local / Demo mode ─────────────────────────────────────────────────────────
+function LocalApp({ onExitDemo }: { onExitDemo: () => void }) {
+  const data = useLocalData();
+  return (
+    <AppLayout
+      data={data}
+      isLocalMode={true}
+      onExitDemo={onExitDemo}
+    />
+  );
+}
+
+// ── Supabase mode ─────────────────────────────────────────────────────────────
+function SupabaseApp({ onExitToAuth }: { onExitToAuth: () => void }) {
+  const { user, loading: authLoading, signOut, deleteAccount } = useAuth();
+
+  const {
+    transactions, setTransactions,
+    tasks, setTasks,
+    meals, setMeals,
+    vehicles, setVehicles,
+    pets, setPets,
+    members, setMembers,
+    shoppingLists, setShoppingLists,
+    familyName, setFamilyName,
+    loading: dataLoading,
+  } = useSupabaseData(user?.id);
+
+  const handleSignOut = async () => {
+    await signOut();
+    onExitToAuth();
+  };
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-violet-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-2xl shadow-lg mb-4 animate-pulse">
+            <span className="text-3xl">🏠</span>
+          </div>
+          <p className="text-gray-500 text-sm mt-2">Ładowanie...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (dataLoading && user) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-violet-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-2xl shadow-lg mb-4">
+            <span className="text-3xl">⏳</span>
+          </div>
+          <p className="text-gray-500 text-sm mt-2">Synchronizowanie danych...</p>
+        </div>
+      </div>
+    );
+  }
+
+  const supabaseData = {
+    transactions, setTransactions,
+    tasks, setTasks,
+    meals, setMeals,
+    vehicles, setVehicles,
+    pets, setPets,
+    members, setMembers,
+    shoppingLists, setShoppingLists,
+    familyName, setFamilyName,
+    loading: false,
+  } as unknown as ReturnType<typeof useLocalData>;
+
+  return (
+    <AppLayout
+      data={supabaseData}
+      isLocalMode={false}
+      userEmail={user?.email}
+      onSignOut={handleSignOut}
+      onDeleteAccount={deleteAccount}
+    />
+  );
+}
+
+// ── Root ──────────────────────────────────────────────────────────────────────
+export default function App() {
+  // tryb: 'auth' = ekran logowania, 'demo' = lokalny, 'supabase' = zalogowany
+  const [appMode, setAppMode] = useState<'auth' | 'demo' | 'supabase'>(() => {
+    // Jeśli Supabase nie jest skonfigurowany — od razu pokaż ekran auth (z opcją demo)
+    return 'auth';
+  });
+
+  const { user, loading: authLoading } = useAuth();
+
+  // Gdy Supabase skonfigurowany i użytkownik już zalogowany — przełącz na supabase
+  if (isSupabaseConfigured && !authLoading && user && appMode === 'auth') {
+    return <SupabaseApp onExitToAuth={() => setAppMode('auth')} />;
+  }
+
+  if (appMode === 'demo') {
+    return <LocalApp onExitDemo={() => setAppMode('auth')} />;
+  }
+
+  if (appMode === 'supabase' && isSupabaseConfigured) {
+    return <SupabaseApp onExitToAuth={() => setAppMode('auth')} />;
+  }
+
+  // Zawsze pokaż ekran auth (logowanie/rejestracja + opcja demo)
+  return (
+    <AuthScreen
+      onDemoMode={() => setAppMode('demo')}
+    />
+  );
+}
