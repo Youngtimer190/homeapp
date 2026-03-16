@@ -7,11 +7,11 @@ interface Props {
   setVehicles: (val: Vehicle[] | ((prev: Vehicle[]) => Vehicle[])) => void;
 }
 
-const fuelTypes = ['Benzyna', 'Diesel', 'LPG', 'Benzyna+LPG', 'Elektryczny', 'Hybryda'];
+const fuelTypes = ['Nie dotyczy', 'Benzyna', 'Diesel', 'LPG', 'Benzyna+LPG', 'Elektryczny', 'Hybryda'];
 
 const emptyForm = (): Omit<Vehicle, 'id'> => ({
   name: '', brand: '', model: '', year: new Date().getFullYear(),
-  licensePlate: '', vin: '', fuelType: 'Benzyna', lastService: '', nextService: '',
+  licensePlate: '', vin: '', fuelType: '', lastService: '', nextService: '',
   unlimitedInspection: false, mileage: 0, insurance: '', policyNumber: '',
 });
 
@@ -302,6 +302,7 @@ export default function Vehicles({ vehicles, setVehicles }: Props) {
                 <select value={form.fuelType}
                   onChange={e => setForm(f => ({ ...f, fuelType: e.target.value }))}
                   className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400 bg-white">
+                  <option value="" disabled>Wybierz rodzaj paliwa</option>
                   {fuelTypes.map(ft => <option key={ft} value={ft}>{ft}</option>)}
                 </select>
                 <input type="number" placeholder="Przebieg (km)" value={form.mileage || ''}
