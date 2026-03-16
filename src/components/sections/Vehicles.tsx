@@ -160,13 +160,13 @@ export default function Vehicles({ vehicles, setVehicles }: Props) {
                     <div className="absolute -right-8 -top-8 w-40 h-40 rounded-full bg-white" />
                     <div className="absolute -right-4 top-8 w-24 h-24 rounded-full bg-white" />
                   </div>
-                  <div className="relative flex items-start justify-between">
+                  <div className="relative flex flex-col gap-3">
                     <div>
                       <h3 className="text-2xl font-bold">{selected.name || `${selected.brand} ${selected.model}`}</h3>
                       <p className="text-white/80 mt-1">{selected.brand} {selected.model} · {selected.year} · {selected.fuelType}</p>
                       <p className="text-white/70 text-sm mt-1">🔢 {selected.licensePlate}</p>
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex flex-col gap-2 w-full">
                       <button
                         onClick={() => openEdit(selected)}
                         className="bg-white/20 hover:bg-white/30 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition"

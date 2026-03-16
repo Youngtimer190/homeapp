@@ -309,7 +309,7 @@ export default function Pets({ pets, setPets }: Props) {
                 {/* Top banner */}
                 <div className="p-6 relative overflow-hidden" style={{ background: `linear-gradient(135deg, ${selected.color}dd, ${selected.color}99)` }}>
                   <div className="absolute -right-10 -top-10 w-48 h-48 rounded-full bg-white opacity-10" />
-                  <div className="relative flex items-start justify-between">
+                  <div className="relative flex flex-col gap-3">
                     <div className="flex items-center gap-4">
                       <div className="w-20 h-20 rounded-2xl bg-white/20 flex items-center justify-center text-5xl shadow">
                         {speciesEmoji[selected.species] || '🐾'}
@@ -323,7 +323,7 @@ export default function Pets({ pets, setPets }: Props) {
                         </div>
                       </div>
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex flex-col gap-2 w-full">
                       <button
                         onClick={() => openEdit(selected)}
                         className="bg-white/20 hover:bg-white/30 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition"
