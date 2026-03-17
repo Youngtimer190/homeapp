@@ -116,7 +116,12 @@ create table shopping_lists (
 );
 alter table shopping_lists enable row level security;
 create policy "own" on shopping_lists
-  using (auth.uid() = user_id) with check (auth.uid() = user_id);`}
+  using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+-- Dodaj brakujące kolumny dla istniejących tabel
+ALTER TABLE pets ADD COLUMN IF NOT EXISTS birth_date text;
+ALTER TABLE pets ADD COLUMN IF NOT EXISTS age numeric;
+ALTER TABLE families ADD COLUMN IF NOT EXISTS name text default 'Wpisz nazwę rodziny';`}
             </pre>
           </div>
 

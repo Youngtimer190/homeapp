@@ -17,9 +17,11 @@ function useTable<T extends { id: string }>(
   useEffect(() => {
     if (!userId) { setData([]); setLoading(false); return; }
     setLoading(true);
+    console.log(`[${table}] fetching for user ${userId}`);
     supabase.from(table).select('*').eq('user_id', userId)
       .then(({ data: rows, error }) => {
         if (error) console.error(`[${table}] fetch error:`, error.message);
+        else console.log(`[${table}] fetched ${rows?.length || 0} rows`);
         setData((rows || []).map(r => fromRow(r as Record<string, unknown>)));
         setLoading(false);
       });
@@ -41,17 +43,21 @@ function useTable<T extends { id: string }>(
     const updated = newItems.filter(d => oldIds.has(d.id));
 
     try {
+      console.log(`[${table}] sync: ${deleted.length} deleted, ${added.length} added, ${updated.length} updated`);
       for (const item of deleted) {
+        console.log(`[${table}] delete:`, item.id);
         const { error } = await supabase.from(table).delete().eq('id', item.id).eq('user_id', userId);
         if (error) console.error(`[${table}] delete error:`, error.message);
       }
       for (const item of added) {
+        console.log(`[${table}] upsert:`, item.id, toRow(item));
         const { error } = await supabase.from(table).upsert({ ...toRow(item), user_id: userId });
         if (error) console.error(`[${table}] upsert error:`, error.message);
       }
       for (const item of updated) {
         const old = data.find(d => d.id === item.id);
         if (JSON.stringify(old) !== JSON.stringify(item)) {
+          console.log(`[${table}] update:`, item.id, toRow(item));
           const { error } = await supabase.from(table).update({ ...toRow(item), user_id: userId }).eq('id', item.id).eq('user_id', userId);
           if (error) console.error(`[${table}] update error:`, error.message);
         }
@@ -151,15 +157,17 @@ function calculateAge(birthDate: string): number {
 function petFromRow(r: Record<string, unknown>): Pet {
   // Calculate birthDate from age if birth_date not available
   let birthDate = r.birth_date as string;
-  if (!birthDate && typeof r.age === 'number') {
+  const ageValue = typeof r.age === 'number' ? r.age as number : typeof r.age === 'string' ? parseFloat(r.age) : 0;
+  if (!birthDate && ageValue > 0) {
     const today = new Date();
-    const birthYear = today.getFullYear() - (r.age as number);
+    const birthYear = today.getFullYear() - ageValue;
     birthDate = `${birthYear}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
   }
   if (!birthDate) {
     birthDate = new Date().toISOString().split('T')[0]; // today as fallback
   }
-  const age = typeof r.age === 'number' ? r.age as number : calculateAge(birthDate);
+  const age = calculateAge(birthDate);
+  const weight = typeof r.weight === 'number' ? r.weight as number : typeof r.weight === 'string' ? parseFloat(r.weight) : 0;
   return {
     id: r.id as string,
     name: r.name as string,
@@ -167,7 +175,7 @@ function petFromRow(r: Record<string, unknown>): Pet {
     breed: r.breed as string,
     birthDate,
     age,
-    weight: r.weight as number,
+    weight,
     color: r.color as string,
     vet: r.vet as string,
     lastVisit: r.last_visit as string,
