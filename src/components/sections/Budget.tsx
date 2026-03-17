@@ -401,66 +401,69 @@ export default function Budget({ transactions, setTransactions, memberNames }: P
                   className={`flex-1 py-2.5 text-sm font-semibold transition ${form.type === 'income' ? 'bg-emerald-500 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
                 >💰 Przychód</button>
               </div>
-              <input
-                type="text"
-                placeholder="Opis transakcji"
-                value={form.description}
-                onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
-                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400"
-              />
+               <div>
+                 <label className="block text-xs text-gray-500 mb-1 ml-1">Opis *</label>
+                 <input
+                   type="text"
+                   placeholder="np. Zakupy spożywcze"
+                   value={form.description}
+                   onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
+                   className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400"
+                 />
+               </div>
               <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs text-gray-500 mb-1 font-medium">Kwota (PLN)</label>
-                  <input
-                    type="number"
-                    placeholder="0.00"
-                    min="0"
-                    step="0.01"
-                    value={form.amount || ''}
-                    onChange={e => setForm(f => ({ ...f, amount: parseFloat(e.target.value) || 0 }))}
-                    className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs text-gray-500 mb-1 font-medium">Data</label>
-                  <input
-                    type="date"
-                    value={form.date}
-                    onChange={e => setForm(f => ({ ...f, date: e.target.value }))}
-                    className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400"
-                  />
-                </div>
-              </div>
               <div>
-                <label className="block text-xs text-gray-500 mb-1 font-medium">Kategoria</label>
-                <select
-                  value={form.category}
-                  onChange={e => setForm(f => ({ ...f, category: e.target.value }))}
-                  className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 bg-white"
-                >
-                  {categories.map(c => <option key={c} value={c}>{categoryIcons[c]} {c}</option>)}
-                </select>
+                 <label className="block text-xs text-gray-500 mb-1 ml-1">Kwota (PLN) *</label>
+                 <input
+                   type="number"
+                   placeholder="0.00"
+                   min="0"
+                   step="0.01"
+                   value={form.amount || ''}
+                   onChange={e => setForm(f => ({ ...f, amount: parseFloat(e.target.value) || 0 }))}
+                   className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400"
+                 />
+               </div>
+               <div>
+                 <label className="block text-xs text-gray-500 mb-1 ml-1">Data *</label>
+                 <input
+                   type="date"
+                   value={form.date}
+                   onChange={e => setForm(f => ({ ...f, date: e.target.value }))}
+                   className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400"
+                 />
+               </div>
               </div>
+               <div>
+                 <label className="block text-xs text-gray-500 mb-1 ml-1">Kategoria *</label>
+                 <select
+                   value={form.category}
+                   onChange={e => setForm(f => ({ ...f, category: e.target.value }))}
+                   className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 bg-white"
+                 >
+                   {categories.map(c => <option key={c} value={c}>{categoryIcons[c]} {c}</option>)}
+                 </select>
+               </div>
 
-              <div>
-                <label className="block text-xs text-gray-500 mb-1 font-medium">Przypisz do osoby</label>
-                {memberNames.length > 0 ? (
-                  <select
-                    value={form.addedBy || ''}
-                    onChange={e => setForm(f => ({ ...f, addedBy: e.target.value }))}
-                    className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 bg-white"
-                  >
-                    <option value="">-- Wybierz osobę --</option>
-                    {memberNames.map(name => (
-                      <option key={name} value={name}>{name}</option>
-                    ))}
-                  </select>
-                ) : (
-                  <div className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm bg-gray-50 text-gray-500 italic">
-                    Najpierw dodaj członka rodziny
-                  </div>
-                )}
-              </div>
+               <div>
+                 <label className="block text-xs text-gray-500 mb-1 ml-1">Przypisz do osoby</label>
+                 {memberNames.length > 0 ? (
+                   <select
+                     value={form.addedBy || ''}
+                     onChange={e => setForm(f => ({ ...f, addedBy: e.target.value }))}
+                     className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 bg-white"
+                   >
+                     <option value="">-- Wybierz osobę --</option>
+                     {memberNames.map(name => (
+                       <option key={name} value={name}>{name}</option>
+                     ))}
+                   </select>
+                 ) : (
+                   <div className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm bg-gray-50 text-gray-500 italic">
+                     Najpierw dodaj członka rodziny
+                   </div>
+                 )}
+               </div>
 
             </div>
             <div className="p-5 pt-0 flex gap-3">

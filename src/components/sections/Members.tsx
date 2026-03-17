@@ -335,7 +335,7 @@ export default function Members({ members, setMembers, familyName, setFamilyName
       >
         <div className="p-5 space-y-4">
           <div>
-            <label className="block text-xs text-gray-500 mb-2 ml-1">Avatar</label>
+             <label className="block text-xs text-gray-500 mb-1 ml-1">Avatar</label>
             <div className="flex gap-2 flex-wrap">
               {avatarOptions.map(a => (
                 <button key={a} onClick={() => setForm(f => ({ ...f, avatar: a }))}
@@ -345,24 +345,39 @@ export default function Members({ members, setMembers, familyName, setFamilyName
               ))}
             </div>
           </div>
-          <input type="text" placeholder="Imię i nazwisko *" value={form.name}
-            onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
-            className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-rose-400" />
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <input type="text" placeholder="Typ członka (np. Tata)" value={form.role}
-              onChange={e => setForm(f => ({ ...f, role: e.target.value }))}
-              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-rose-400" />
-            <input type="number" placeholder="Wiek" value={form.age || ''}
-              onChange={e => setForm(f => ({ ...f, age: parseInt(e.target.value) || 0 }))}
+          <div>
+            <label className="block text-xs text-gray-500 mb-1 ml-1">Imię i nazwisko *</label>
+            <input type="text" placeholder="np. Jan Kowalski" value={form.name}
+              onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
               className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-rose-400" />
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <input type="email" placeholder="Email" value={form.email}
-              onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
-              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-rose-400" />
-            <input type="tel" placeholder="Telefon" value={form.phone}
-              onChange={e => setForm(f => ({ ...f, phone: e.target.value }))}
-              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-rose-400" />
+            <div>
+              <label className="block text-xs text-gray-500 mb-1 ml-1">Typ członka</label>
+              <input type="text" placeholder="np. Tata, Mama, Dziecko" value={form.role}
+                onChange={e => setForm(f => ({ ...f, role: e.target.value }))}
+                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-rose-400" />
+            </div>
+            <div>
+              <label className="block text-xs text-gray-500 mb-1 ml-1">Wiek</label>
+              <input type="number" placeholder="0" value={form.age || ''}
+                onChange={e => setForm(f => ({ ...f, age: parseInt(e.target.value) || 0 }))}
+                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-rose-400" />
+            </div>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs text-gray-500 mb-1 ml-1">Email</label>
+              <input type="email" placeholder="np. jan@example.com" value={form.email}
+                onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
+                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-rose-400" />
+            </div>
+            <div>
+              <label className="block text-xs text-gray-500 mb-1 ml-1">Telefon</label>
+              <input type="tel" placeholder="np. 123-456-789" value={form.phone}
+                onChange={e => setForm(f => ({ ...f, phone: e.target.value }))}
+                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-rose-400" />
+            </div>
           </div>
           <div>
             <label className="block text-xs text-gray-500 mb-1 ml-1">Data urodzin</label>
@@ -370,9 +385,12 @@ export default function Members({ members, setMembers, familyName, setFamilyName
               onChange={e => setForm(f => ({ ...f, birthday: e.target.value }))}
               className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-rose-400" />
           </div>
-          <input type="text" placeholder="Obowiązki (oddzielone przecinkiem)" value={form.responsibilities}
-            onChange={e => setForm(f => ({ ...f, responsibilities: e.target.value }))}
-            className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-rose-400" />
+          <div>
+            <label className="block text-xs text-gray-500 mb-1 ml-1">Obowiązki</label>
+            <input type="text" placeholder="np. Sprzątanie, Zakupy, Gotowanie" value={form.responsibilities}
+              onChange={e => setForm(f => ({ ...f, responsibilities: e.target.value }))}
+              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-rose-400" />
+          </div>
         </div>
         <div className="px-5 pb-5 flex gap-3">
           <button onClick={() => { setShowForm(false); setEditingMember(null); setForm(emptyForm()); }}

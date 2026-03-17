@@ -324,44 +324,44 @@ export default function Meals({ meals, setMeals }: Props) {
       <Modal isOpen={showForm} onClose={closeModal} title={editId ? 'Edytuj posiłek' : 'Nowy posiłek'}>
             <div className="p-5 space-y-4">
               {/* Date */}
-              <div>
-                <label className="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wide">Data *</label>
-                <input
-                  type="date"
-                  value={form.date}
-                  onChange={e => setForm(f => ({ ...f, date: e.target.value }))}
-                  className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
-                />
-              </div>
+               <div>
+                 <label className="block text-xs text-gray-500 mb-1 ml-1">Data *</label>
+                 <input
+                   type="date"
+                   value={form.date}
+                   onChange={e => setForm(f => ({ ...f, date: e.target.value }))}
+                   className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
+                 />
+               </div>
 
               {/* Meal name */}
-              <div>
-                <label className="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wide">Nazwa posiłku *</label>
-                <input
-                  type="text"
-                  placeholder="np. Kurczak z ryżem"
-                  value={form.name}
-                  onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
-                  className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
-                />
-              </div>
+               <div>
+                 <label className="block text-xs text-gray-500 mb-1 ml-1">Nazwa posiłku *</label>
+                 <input
+                   type="text"
+                   placeholder="np. Kurczak z ryżem"
+                   value={form.name}
+                   onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
+                   className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
+                 />
+               </div>
 
               {/* Meal label */}
-              <div>
-                <label className="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wide">Kategoria posiłku</label>
-                <input
-                  type="text"
-                  placeholder="np. Śniadanie, II śniadanie, Obiad..."
-                  value={form.mealLabel}
-                  onChange={e => setForm(f => ({ ...f, mealLabel: e.target.value }))}
-                  className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
-                />
-                <p className="text-xs text-gray-400 mt-1">Wpisz dowolną nazwę — np. Śniadanie, Lunch, Podwieczorek</p>
-              </div>
+               <div>
+                 <label className="block text-xs text-gray-500 mb-1 ml-1">Kategoria posiłku (opcjonalnie)</label>
+                 <input
+                   type="text"
+                   placeholder="np. Śniadanie, II śniadanie, Obiad..."
+                   value={form.mealLabel}
+                   onChange={e => setForm(f => ({ ...f, mealLabel: e.target.value }))}
+                   className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
+                 />
+                 <p className="text-xs text-gray-400 mt-1 ml-1">Wpisz dowolną nazwę — np. Śniadanie, Lunch, Podwieczorek</p>
+               </div>
 
-              {/* Ingredients */}
-              <div>
-                <label className="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wide">Składniki</label>
+               {/* Ingredients */}
+               <div>
+                 <label className="block text-xs text-gray-500 mb-1 ml-1">Składniki</label>
                 <textarea
                   placeholder="np. Pierś z kurczaka, ryż, brokuły, oliwa z oliwek"
                   value={form.ingredients}

@@ -408,18 +408,18 @@ export default function Shopping({ lists, setLists }: Props) {
               <button onClick={() => setShowListModal(false)} className="text-gray-400 hover:text-gray-600 text-xl">✕</button>
             </div>
             <div className="p-6 space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Nazwa listy *</label>
-                <input
-                  type="text"
-                  value={listForm.name}
-                  onChange={e => setListForm({ ...listForm, name: e.target.value })}
-                  onKeyDown={e => e.key === 'Enter' && handleAddList()}
-                  placeholder="np. Tygodniowe zakupy, Drogeria..."
-                  className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
-                  autoFocus
-                />
-              </div>
+               <div>
+                 <label className="block text-xs text-gray-500 mb-1 ml-1">Nazwa listy *</label>
+                 <input
+                   type="text"
+                   value={listForm.name}
+                   onChange={e => setListForm({ ...listForm, name: e.target.value })}
+                   onKeyDown={e => e.key === 'Enter' && handleAddList()}
+                   placeholder="np. Tygodniowe zakupy, Drogeria..."
+                   className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+                   autoFocus
+                 />
+               </div>
             </div>
             <div className="flex gap-3 p-6 pt-0">
               <button onClick={() => setShowListModal(false)} className="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-50 transition">
@@ -448,28 +448,28 @@ export default function Shopping({ lists, setLists }: Props) {
               <button onClick={() => setShowItemModal(false)} className="text-gray-400 hover:text-gray-600 text-xl">✕</button>
             </div>
             <div className="p-6 space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Nazwa produktu *</label>
-                <input
-                  type="text"
-                  value={itemForm.name}
-                  onChange={e => setItemForm({ ...itemForm, name: e.target.value })}
-                  onKeyDown={e => e.key === 'Enter' && handleSaveItem()}
-                  placeholder="np. Mleko, Chleb, Szampon..."
-                  className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
-                  autoFocus
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Ilość / jednostka</label>
-                <input
-                  type="text"
-                  value={itemForm.quantity}
-                  onChange={e => setItemForm({ ...itemForm, quantity: e.target.value })}
-                  placeholder="np. 2 l, 1 kg, 3 szt."
-                  className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
-                />
-              </div>
+               <div>
+                 <label className="block text-xs text-gray-500 mb-1 ml-1">Nazwa produktu *</label>
+                 <input
+                   type="text"
+                   value={itemForm.name}
+                   onChange={e => setItemForm({ ...itemForm, name: e.target.value })}
+                   onKeyDown={e => e.key === 'Enter' && handleSaveItem()}
+                   placeholder="np. Mleko, Chleb, Szampon..."
+                   className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+                   autoFocus
+                 />
+               </div>
+               <div>
+                 <label className="block text-xs text-gray-500 mb-1 ml-1">Ilość / jednostka (opcjonalnie)</label>
+                 <input
+                   type="text"
+                   value={itemForm.quantity}
+                   onChange={e => setItemForm({ ...itemForm, quantity: e.target.value })}
+                   placeholder="np. 2 l, 1 kg, 3 szt."
+                   className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+                 />
+               </div>
             </div>
             <div className="flex gap-3 p-6 pt-0">
               <button onClick={() => setShowItemModal(false)} className="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-50 transition">

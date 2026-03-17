@@ -402,69 +402,69 @@ export default function Tasks({ tasks, setTasks, members }: Props) {
       {/* Modal for add/edit task */}
       <Modal isOpen={showForm} onClose={() => setShowForm(false)} title={editId ? 'Edytuj zadanie' : 'Nowe zadanie'}>
         <div className="p-5 space-y-4">
-          <div>
-            <label className="block text-xs text-gray-500 mb-1 font-medium">Tytuł zadania</label>
-            <input
-              type="text"
-              placeholder="Tytuł zadania *"
-              value={form.title}
-              onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
-              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
-            />
-          </div>
-          <div>
-            <label className="block text-xs text-gray-500 mb-1 font-medium">Opis</label>
-            <textarea
-              placeholder="Opis (opcjonalnie)"
-              value={form.description}
-              onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
-              rows={2}
-              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none"
-            />
+           <div>
+             <label className="block text-xs text-gray-500 mb-1 ml-1">Tytuł zadania *</label>
+             <input
+               type="text"
+               placeholder="np. Zrobić zakupy"
+               value={form.title}
+               onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
+               className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+             />
+           </div>
+           <div>
+             <label className="block text-xs text-gray-500 mb-1 ml-1">Opis (opcjonalnie)</label>
+             <textarea
+               placeholder="Dodatkowy opis zadania"
+               value={form.description}
+               onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
+               rows={2}
+               className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none"
+             />
+           </div>
+          <div className="grid grid-cols-2 gap-3">
+             <div>
+               <label className="block text-xs text-gray-500 mb-1 ml-1">Przypisz osobę</label>
+               <select
+                 value={form.assignedTo}
+                 onChange={e => setForm(f => ({ ...f, assignedTo: e.target.value }))}
+                 className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white"
+               >
+                 <option value="">Wybierz osobę</option>
+                 {members.map(m => <option key={m} value={m}>{m}</option>)}
+               </select>
+             </div>
+             <div>
+               <label className="block text-xs text-gray-500 mb-1 ml-1">Termin</label>
+               <input
+                 type="date"
+                 value={form.dueDate}
+                 onChange={e => setForm(f => ({ ...f, dueDate: e.target.value }))}
+                 className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+               />
+             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs text-gray-500 mb-1 font-medium">Przypisz osobę</label>
-              <select
-                value={form.assignedTo}
-                onChange={e => setForm(f => ({ ...f, assignedTo: e.target.value }))}
-                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white"
-              >
-                <option value="">Wybierz osobę</option>
-                {members.map(m => <option key={m} value={m}>{m}</option>)}
-              </select>
-            </div>
-            <div>
-              <label className="block text-xs text-gray-500 mb-1 font-medium">Termin</label>
-              <input
-                type="date"
-                value={form.dueDate}
-                onChange={e => setForm(f => ({ ...f, dueDate: e.target.value }))}
-                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
-              />
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs text-gray-500 mb-1 font-medium">Priorytet</label>
-              <select
-                value={form.priority}
-                onChange={e => setForm(f => ({ ...f, priority: e.target.value as Task['priority'] }))}
-                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white"
-              >
-                {priorities.map(p => <option key={p} value={p}>{priorityLabel[p]}</option>)}
-              </select>
-            </div>
-            <div>
-              <label className="block text-xs text-gray-500 mb-1 font-medium">Status</label>
-              <select
-                value={form.status}
-                onChange={e => setForm(f => ({ ...f, status: e.target.value as Task['status'] }))}
-                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white"
-              >
-                {statuses.map(s => <option key={s} value={s}>{statusLabel[s]}</option>)}
-              </select>
-            </div>
+             <div>
+               <label className="block text-xs text-gray-500 mb-1 ml-1">Priorytet</label>
+               <select
+                 value={form.priority}
+                 onChange={e => setForm(f => ({ ...f, priority: e.target.value as Task['priority'] }))}
+                 className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white"
+               >
+                 {priorities.map(p => <option key={p} value={p}>{priorityLabel[p]}</option>)}
+               </select>
+             </div>
+             <div>
+               <label className="block text-xs text-gray-500 mb-1 ml-1">Status</label>
+               <select
+                 value={form.status}
+                 onChange={e => setForm(f => ({ ...f, status: e.target.value as Task['status'] }))}
+                 className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white"
+               >
+                 {statuses.map(s => <option key={s} value={s}>{statusLabel[s]}</option>)}
+               </select>
+             </div>
           </div>
         </div>
         <div className="p-5 pt-0 flex gap-3">

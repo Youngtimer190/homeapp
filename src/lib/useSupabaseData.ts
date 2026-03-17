@@ -129,13 +129,37 @@ function vehicleToRow(v: Vehicle): Record<string, unknown> {
 }
 
 // ── Pets ──────────────────────────────────────────────────────────────────────
+function calculateAge(birthDate: string): number {
+  if (!birthDate) return 0;
+  const today = new Date();
+  const birth = new Date(birthDate);
+  let age = today.getFullYear() - birth.getFullYear();
+  const monthDiff = today.getMonth() - birth.getMonth();
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+    age--;
+  }
+  return age;
+}
+
 function petFromRow(r: Record<string, unknown>): Pet {
+  // Calculate birthDate from age if birth_date not available
+  let birthDate = r.birth_date as string;
+  if (!birthDate && typeof r.age === 'number') {
+    const today = new Date();
+    const birthYear = today.getFullYear() - (r.age as number);
+    birthDate = `${birthYear}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+  }
+  if (!birthDate) {
+    birthDate = new Date().toISOString().split('T')[0]; // today as fallback
+  }
+  const age = typeof r.age === 'number' ? r.age as number : calculateAge(birthDate);
   return {
     id: r.id as string,
     name: r.name as string,
     species: r.species as string,
     breed: r.breed as string,
-    age: r.age as number,
+    birthDate,
+    age,
     weight: r.weight as number,
     color: r.color as string,
     vet: r.vet as string,
@@ -152,7 +176,28 @@ function petFromRow(r: Record<string, unknown>): Pet {
   };
 }
 function petToRow(p: Pet): Record<string, unknown> {
-  return { id: p.id, name: p.name, species: p.species, breed: p.breed, age: p.age, weight: p.weight, color: p.color, vet: p.vet, last_visit: p.lastVisit, next_visit: p.nextVisit, no_next_visit: p.noNextVisit, vaccinations: p.vaccinations, vaccinations_date: p.vaccinationsDate, deworming: p.deworming, deworming_date: p.dewormingDate, tick_protection: p.tickProtection, tick_protection_date: p.tickProtectionDate, notes: p.notes };
+  const age = calculateAge(p.birthDate);
+  return {
+    id: p.id,
+    name: p.name,
+    species: p.species,
+    breed: p.breed,
+    birth_date: p.birthDate,
+    age: age,
+    weight: p.weight,
+    color: p.color,
+    vet: p.vet,
+    last_visit: p.lastVisit,
+    next_visit: p.nextVisit,
+    no_next_visit: p.noNextVisit,
+    vaccinations: p.vaccinations,
+    vaccinations_date: p.vaccinationsDate,
+    deworming: p.deworming,
+    deworming_date: p.dewormingDate,
+    tick_protection: p.tickProtection,
+    tick_protection_date: p.tickProtectionDate,
+    notes: p.notes,
+  };
 }
 
 // ── Members ───────────────────────────────────────────────────────────────────

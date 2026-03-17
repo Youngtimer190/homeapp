@@ -70,7 +70,8 @@ export interface Pet {
   name: string;
   species: string;
   breed: string;
-  age: number;
+  birthDate: string; // YYYY-MM-DD
+  age?: number; // dla kompatybilności
   weight: number;
   color: string;
   vet: string;

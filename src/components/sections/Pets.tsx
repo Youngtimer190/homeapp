@@ -17,7 +17,7 @@ const colors = ['#F59E0B', '#8B5CF6', '#3B82F6', '#10B981', '#EF4444', '#EC4899'
 const emptyForm = (): Omit<Pet, 'id'> => {
   const today = new Date().toISOString().split('T')[0];
   return {
-    name: '', species: 'Pies', breed: '', age: 0, weight: 0,
+    name: '', species: 'Pies', breed: '', birthDate: today, weight: 0,
     color: '#F59E0B', vet: '', lastVisit: today, nextVisit: today, noNextVisit: false,
     vaccinations: '', vaccinationsDate: today,
     deworming: '', dewormingDate: today,
@@ -88,7 +88,7 @@ const emptyForm = (): Omit<Pet, 'id'> => {
     setEditingId(pet.id);
     setForm({
       name: pet.name, species: pet.species, breed: pet.breed,
-      age: pet.age, weight: pet.weight, color: pet.color,
+      birthDate: pet.birthDate, weight: pet.weight, color: pet.color,
       vet: pet.vet, lastVisit: pet.lastVisit, nextVisit: pet.nextVisit,
       noNextVisit: pet.noNextVisit,
       vaccinations: pet.vaccinations, vaccinationsDate: pet.vaccinationsDate,
@@ -135,6 +135,18 @@ const emptyForm = (): Omit<Pet, 'id'> => {
   const daysUntil = (d: string) => {
     if (!d) return null;
     return Math.ceil((new Date(d).getTime() - Date.now()) / 86400000);
+  };
+
+  const calculateAge = (birthDate: string): number => {
+    if (!birthDate) return 0;
+    const today = new Date();
+    const birth = new Date(birthDate);
+    let age = today.getFullYear() - birth.getFullYear();
+    const monthDiff = today.getMonth() - birth.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+      age--;
+    }
+    return age;
   };
 
   const urgency = (d: string) => {
@@ -303,7 +315,7 @@ const emptyForm = (): Omit<Pet, 'id'> => {
                   <div className="flex-1 min-w-0">
                     <p className="font-bold text-gray-900">{pet.name}</p>
                     <p className="text-xs text-gray-500">{pet.species} · {pet.breed}</p>
-                    <p className="text-xs text-gray-400 mt-0.5">{pet.age} {ageSuffix(pet.age)} · {pet.weight} kg</p>
+                    <p className="text-xs text-gray-400 mt-0.5">{calculateAge(pet.birthDate)} {ageSuffix(calculateAge(pet.birthDate))} · {pet.weight} kg</p>
                     {/* Mini status profilaktyki */}
                     <div className="flex gap-1 mt-1.5">
                       {[
@@ -341,7 +353,7 @@ const emptyForm = (): Omit<Pet, 'id'> => {
                         <h3 className="text-2xl font-bold">{selected.name}</h3>
                         <p className="text-white/80 mt-0.5">{selected.species} · {selected.breed}</p>
                         <div className="flex gap-4 mt-2 text-sm text-white/70">
-                          <span>🎂 {selected.age} {ageSuffix(selected.age)}</span>
+                           <span>🎂 {calculateAge(selected.birthDate)} {ageSuffix(calculateAge(selected.birthDate))}</span>
                           <span>⚖️ {selected.weight} kg</span>
                         </div>
                       </div>
@@ -448,9 +460,9 @@ const emptyForm = (): Omit<Pet, 'id'> => {
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs text-gray-500 mb-1 ml-1">Wiek (lata)</label>
-                  <input type="number" placeholder="0" value={form.age || ''}
-                    onChange={e => setForm(f => ({ ...f, age: parseInt(e.target.value) || 0 }))}
+                  <label className="block text-xs text-gray-500 mb-1 ml-1">Data urodzenia</label>
+                  <input type="date" value={form.birthDate}
+                    onChange={e => setForm(f => ({ ...f, birthDate: e.target.value }))}
                     className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400" />
                 </div>
                 <div>

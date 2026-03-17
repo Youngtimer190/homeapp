@@ -17,6 +17,18 @@ export default function Dashboard({ transactions, tasks, meals, vehicles, pets, 
   const balance = income - expense;
   const fmt = (n: number) => new Intl.NumberFormat('pl-PL', { style: 'currency', currency: 'PLN' }).format(n);
 
+  const calculateAge = (birthDate: string): number => {
+    if (!birthDate) return 0;
+    const today = new Date();
+    const birth = new Date(birthDate);
+    let age = today.getFullYear() - birth.getFullYear();
+    const monthDiff = today.getMonth() - birth.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+      age--;
+    }
+    return age;
+  };
+
   const todayMeals = (() => {
     const t = new Date();
     const ymd = `${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}-${String(t.getDate()).padStart(2,'0')}`;
@@ -283,7 +295,7 @@ export default function Dashboard({ transactions, tasks, meals, vehicles, pets, 
               <div key={p.id} className="flex items-center gap-2 text-xs text-gray-600">
                 <span className="w-1.5 h-1.5 rounded-full bg-amber-400 flex-shrink-0" />
                 <span className="truncate">{p.name} ({p.species})</span>
-                <span className="text-gray-400 ml-auto flex-shrink-0">{p.age} lat</span>
+                <span className="text-gray-400 ml-auto flex-shrink-0">{calculateAge(p.birthDate)} lat</span>
               </div>
             ))}
           </div>
