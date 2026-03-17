@@ -1,4 +1,4 @@
-import { Transaction, Task, Meal, Vehicle, Pet, Member, Section, ShoppingList } from '../types';
+import { Transaction, Task, Meal, Vehicle, Pet, Member, Section, ShoppingList, ShoppingItem } from '../types';
 
 interface Props {
   transactions: Transaction[];
@@ -50,9 +50,13 @@ export default function Dashboard({ transactions, tasks, meals, vehicles, pets, 
   };
 
   // Products to buy (checked === false)
-  const productsToBuyCount = shoppingLists.reduce((total, list) => {
-    return total + list.items.filter(item => !item.checked).length;
-  }, 0);
+  const productsToBuy: { item: ShoppingItem; listName: string }[] = [];
+  shoppingLists.forEach(list => {
+    list.items.filter(item => !item.checked).forEach(item => {
+      productsToBuy.push({ item, listName: list.name });
+    });
+  });
+  const productsToBuyCount = productsToBuy.length;
   console.log('Products to buy:', productsToBuyCount);
 
   const upcomingVehicle = vehicles
@@ -285,29 +289,27 @@ export default function Dashboard({ transactions, tasks, meals, vehicles, pets, 
           </div>
         </button>
 
-        {/* Members card */}
-        <button onClick={() => onNavigate('members')} className="bg-white rounded-2xl border border-gray-100 p-5 text-left shadow-sm hover:shadow-md transition group">
+        {/* Shopping card */}
+        <button onClick={() => onNavigate('shopping')} className="bg-white rounded-2xl border border-gray-100 p-5 text-left shadow-sm hover:shadow-md transition group">
           <div className="flex items-center justify-between mb-4">
-            <div className="w-10 h-10 bg-rose-100 rounded-xl flex items-center justify-center text-xl">👨‍👩‍👧‍👦</div>
-            <span className="text-xs text-gray-400 group-hover:text-rose-500 transition">Przejdź →</span>
+            <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center text-xl">🛒</div>
+            <span className="text-xs text-gray-400 group-hover:text-green-500 transition">Przejdź →</span>
           </div>
-          <h4 className="font-semibold text-gray-900">Rodzina</h4>
-          <p className="text-2xl font-bold text-rose-600 mt-1">{members.length}<span className="text-gray-400 text-base font-normal"> osób</span></p>
-          {upcomingBirthday && (
-            <p className="text-xs text-gray-500 mt-1">
-              🎂 {upcomingBirthday.name}: {upcomingBirthday.days === 0 ? 'dziś!' : `za ${upcomingBirthday.days} dni`}
-            </p>
-          )}
-          <div className="mt-3 flex gap-1">
-            {members.slice(0, 6).map(m => (
-              <div key={m.id} className="w-8 h-8 rounded-xl bg-rose-50 flex items-center justify-center text-base" title={m.name}>
-                {m.avatar}
+          <h4 className="font-semibold text-gray-900">Lista zakupów</h4>
+          <p className="text-2xl font-bold text-green-600 mt-1">{productsToBuyCount}<span className="text-gray-400 text-base font-normal"> produktów</span></p>
+          <p className="text-xs text-gray-500 mt-1">
+            {shoppingLists.length} list · {productsToBuyCount} do kupienia
+          </p>
+          <div className="mt-3 space-y-1">
+            {productsToBuy.slice(0, 3).map((p, idx) => (
+              <div key={idx} className="flex items-center gap-2 text-xs text-gray-600">
+                <span className="w-1.5 h-1.5 rounded-full bg-green-400 flex-shrink-0" />
+                <span className="truncate">{p.item.name}</span>
+                <span className="text-gray-400 ml-auto flex-shrink-0 text-xs truncate max-w-[80px]" title={p.listName}>{p.listName}</span>
               </div>
             ))}
-            {members.length > 6 && (
-              <div className="w-8 h-8 rounded-xl bg-gray-100 flex items-center justify-center text-xs text-gray-500 font-bold">
-                +{members.length - 6}
-              </div>
+            {productsToBuy.length === 0 && (
+              <div className="text-xs text-gray-400 italic">Brak produktów do kupienia</div>
             )}
           </div>
         </button>
