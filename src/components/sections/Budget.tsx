@@ -299,7 +299,7 @@ export default function Budget({ transactions, setTransactions, memberNames }: P
                     {t.type === 'income' ? '+' : '-'}{fmt(t.amount)}
                   </p>
                 </div>
-                <div className="opacity-0 group-hover:opacity-100 flex items-center gap-1 transition">
+                <div className="opacity-100 flex items-center gap-1 transition">
                   <button
                     onClick={() => openEdit(t)}
                     className="w-7 h-7 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-500 flex items-center justify-center text-xs transition"

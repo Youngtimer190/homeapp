@@ -58,8 +58,8 @@ function AppLayout({ data, isLocalMode, userEmail, onSignOut, onDeleteAccount, o
         familyName={data.familyName}
       />
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        <header className="bg-white border-b border-gray-100 px-3 sm:px-6 flex items-center gap-2 sm:gap-4 sticky top-0 z-20 flex-shrink-0"
-          style={{ paddingTop: `calc(env(safe-area-inset-top) + 0.75rem)`, paddingBottom: '0.75rem' }}
+         <header className="bg-white/95 backdrop-blur-sm border-b border-gray-200 px-3 sm:px-6 flex items-center gap-2 sm:gap-4 sticky top-0 z-50 flex-shrink-0 shadow-md"
+           style={{ paddingTop: `calc(env(safe-area-inset-top) + 1rem)`, paddingBottom: '1rem' }}
         >
           <button
             onClick={() => setMobileOpen(true)}
@@ -146,7 +146,7 @@ function AppLayout({ data, isLocalMode, userEmail, onSignOut, onDeleteAccount, o
               <Tasks tasks={data.tasks} setTasks={data.setTasks} members={memberNames} />
             )}
             {active === 'shopping' && (
-              <Shopping lists={data.shoppingLists} setLists={data.setShoppingLists} members={memberNames} />
+              <Shopping lists={data.shoppingLists} setLists={data.setShoppingLists} />
             )}
             {active === 'meals' && (
               <Meals meals={data.meals} setMeals={data.setMeals} />

@@ -409,14 +409,14 @@ function MealCard({
   onDelete: (id: string) => void;
 }) {
   return (
-    <div className="flex items-start justify-between px-5 py-4 group hover:bg-gray-50 transition">
+    <div className="flex items-start justify-between px-5 py-4 hover:bg-gray-50 transition">
       <div className="flex-1 min-w-0">
         <p className="font-semibold text-gray-900 text-sm">{meal.name}</p>
         {meal.ingredients && (
           <p className="text-xs text-gray-400 mt-0.5 truncate">{meal.ingredients}</p>
         )}
       </div>
-      <div className="flex items-center gap-2 ml-3 flex-shrink-0 opacity-0 group-hover:opacity-100 transition">
+      <div className="flex items-center gap-2 ml-3 flex-shrink-0 opacity-100 transition">
         <button
           onClick={() => onEdit(meal)}
           className="text-xs px-2.5 py-1 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 font-medium transition"

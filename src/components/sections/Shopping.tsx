@@ -5,13 +5,12 @@ import ConfirmDialog from '../ConfirmDialog';
 interface Props {
   lists: ShoppingList[];
   setLists: (val: ShoppingList[] | ((prev: ShoppingList[]) => ShoppingList[])) => void;
-  members: string[];
 }
 
 const emptyItem = { name: '', quantity: '', addedBy: '' };
 const emptyList = { name: '' };
 
-export default function Shopping({ lists, setLists, members }: Props) {
+export default function Shopping({ lists, setLists }: Props) {
   const [selectedListId, setSelectedListId] = useState<string | null>(lists[0]?.id ?? null);
   const [showListModal, setShowListModal] = useState(false);
   const [showItemModal, setShowItemModal] = useState(false);
@@ -48,7 +47,7 @@ export default function Shopping({ lists, setLists, members }: Props) {
   // ── Item actions ─────────────────────────────────────────────
   const handleOpenAddItem = () => {
     setEditingItem(null);
-    setItemForm({ ...emptyItem, addedBy: members[0] ?? '' });
+    setItemForm(emptyItem);
     setShowItemModal(true);
   };
 
@@ -309,28 +308,24 @@ export default function Shopping({ lists, setLists, members }: Props) {
                             {item.quantity}
                           </span>
                         )}
-                        {item.addedBy && (
-                          <span className="ml-2 text-xs text-gray-400">dodał(a): {item.addedBy}</span>
-                        )}
+
                       </div>
 
                       {/* Actions */}
-                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button
-                          onClick={() => handleOpenEditItem(item)}
-                          className="p-1.5 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition"
-                          title="Edytuj"
-                        >
-                          ✏️
-                        </button>
-                        <button
-                          onClick={() => setConfirmItemId(item.id)}
-                          className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition"
-                          title="Usuń"
-                        >
-                          🗑
-                        </button>
-                      </div>
+                       <div className="flex items-center gap-2 ml-3 flex-shrink-0 opacity-100 transition">
+                         <button
+                           onClick={() => handleOpenEditItem(item)}
+                           className="text-xs px-2.5 py-1 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 font-medium transition"
+                         >
+                           ✏️ Edytuj
+                         </button>
+                         <button
+                           onClick={() => setConfirmItemId(item.id)}
+                           className="text-xs px-2.5 py-1 rounded-lg bg-red-50 text-red-500 hover:bg-red-100 font-medium transition"
+                         >
+                           🗑 Usuń
+                         </button>
+                       </div>
                     </div>
                   ))}
                 </div>
@@ -475,27 +470,6 @@ export default function Shopping({ lists, setLists, members }: Props) {
                   placeholder="np. 2 l, 1 kg, 3 szt."
                   className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
                 />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Dodał(a)</label>
-                {members.length > 0 ? (
-                  <select
-                    value={itemForm.addedBy}
-                    onChange={e => setItemForm({ ...itemForm, addedBy: e.target.value })}
-                    className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
-                  >
-                    <option value="">— brak —</option>
-                    {members.map(m => <option key={m} value={m}>{m}</option>)}
-                  </select>
-                ) : (
-                  <input
-                    type="text"
-                    value={itemForm.addedBy}
-                    onChange={e => setItemForm({ ...itemForm, addedBy: e.target.value })}
-                    placeholder="Imię osoby"
-                    className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
-                  />
-                )}
               </div>
             </div>
             <div className="flex gap-3 p-6 pt-0">
