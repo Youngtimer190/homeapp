@@ -1,4 +1,6 @@
 import { useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
+import { useScrollLock } from '../hooks/useScrollLock';
 
 interface ModalProps {
   isOpen: boolean;
@@ -8,35 +10,13 @@ interface ModalProps {
   maxWidth?: string;
 }
 
-export default function Modal({ isOpen, onClose, title, children, maxWidth = 'max-w-md' }: ModalProps) {
+export default function Modal({ isOpen, onClose, title, children, maxWidth = 'max-w-lg' }: ModalProps) {
   const contentRef = useRef<HTMLDivElement>(null);
 
-  // Block scrolling on #root when modal is open
-  useEffect(() => {
-    const root = document.getElementById('root');
-    const html = document.documentElement;
-    const scrollingElement = document.scrollingElement || document.documentElement;
-    if (!root) return;
+  // Lock body scroll when modal is open
+  useScrollLock(isOpen);
 
-    if (isOpen) {
-      root.style.overflow = 'hidden';
-      html.style.overflow = 'hidden';
-      // Scroll to top to ensure modal is visible
-      root.scrollTop = 0;
-      html.scrollTop = 0;
-      scrollingElement.scrollTop = 0;
-      window.scrollTo({ top: 0, behavior: 'auto' });
-    } else {
-      root.style.overflow = 'auto';
-      html.style.overflow = 'auto';
-    }
-
-    return () => {
-      root.style.overflow = 'auto';
-      html.style.overflow = 'auto';
-    };
-  }, [isOpen]);
-
+  // Escape key
   useEffect(() => {
     if (!isOpen) return;
     const handleKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
@@ -46,75 +26,56 @@ export default function Modal({ isOpen, onClose, title, children, maxWidth = 'ma
 
   if (!isOpen) return null;
 
-  return (
-    <div className="fixed inset-0 z-50">
+  const modalRoot = document.getElementById('modal-root') || document.body;
+
+  return createPortal(
+    <div
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center"
+      style={{
+        paddingTop: 'env(safe-area-inset-top, 0px)',
+        paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+        paddingLeft: 'env(safe-area-inset-left, 0px)',
+        paddingRight: 'env(safe-area-inset-right, 0px)',
+      }}
+    >
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/50 backdrop-blur-sm"
         onClick={onClose}
       />
 
-      {/* Mobile layout: full screen modal */}
-      <div 
-        className="sm:hidden fixed inset-0 flex flex-col"
+      {/* Modal panel */}
+      <div
+        ref={contentRef}
+        className={`
+          relative bg-white w-full flex flex-col z-10
+          rounded-t-3xl sm:rounded-2xl shadow-2xl
+          ${maxWidth}
+        `}
         style={{
-          paddingTop: 'env(safe-area-inset-top, 0px)',
-          paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+          maxHeight: 'calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 1rem)',
         }}
       >
-        <div
-          ref={contentRef}
-          className="relative bg-white w-full flex flex-col"
-          style={{ height: 'calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px))' }}
-        >
-          {/* Header */}
-          <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 shrink-0 bg-white">
-            <h3 className="text-lg font-bold text-gray-900">{title}</h3>
-            <button
-              onClick={onClose}
-              className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-400 hover:text-gray-600 text-xl transition"
-            >
-              ×
-            </button>
-          </div>
-          {/* Scrollable body */}
-          <div
-            className="overflow-y-auto overscroll-contain flex-1"
-            style={{
-              WebkitOverflowScrolling: 'touch' as any,
-              paddingBottom: 'calc(env(safe-area-inset-bottom) + 16px)',
-            }}
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 shrink-0">
+          <h3 className="text-lg font-bold text-gray-900">{title}</h3>
+          <button
+            onClick={onClose}
+            className="w-9 h-9 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-700 text-xl transition"
           >
-            {children}
-          </div>
+            ×
+          </button>
         </div>
-      </div>
 
-      {/* Desktop layout: centered modal */}
-      <div className="hidden sm:flex absolute inset-0 items-center justify-center p-4">
+        {/* Scrollable body */}
         <div
-          className={`relative bg-white w-full ${maxWidth} rounded-2xl shadow-2xl flex flex-col`}
-          style={{ maxHeight: '90dvh' }}
+          className="overflow-y-auto overscroll-contain flex-1 p-5"
+          style={{ WebkitOverflowScrolling: 'touch' as any }}
         >
-          {/* Header */}
-          <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 shrink-0">
-            <h3 className="text-lg font-bold text-gray-900">{title}</h3>
-            <button
-              onClick={onClose}
-              className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-400 hover:text-gray-600 text-xl transition"
-            >
-              ×
-            </button>
-          </div>
-          {/* Scrollable body */}
-          <div
-            className="overflow-y-auto overscroll-contain flex-1"
-            style={{ WebkitOverflowScrolling: 'touch' as any }}
-          >
-            {children}
-          </div>
+          {children}
         </div>
       </div>
-    </div>
+    </div>,
+    modalRoot
   );
 }

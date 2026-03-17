@@ -15,24 +15,23 @@ import { useAuth } from './lib/AuthContext';
 import { useSupabaseData } from './lib/useSupabaseData';
 import { useLocalData } from './lib/useLocalData';
 import { isSupabaseConfigured } from './lib/supabase';
-import { useIOSHeightFix } from './hooks/useIOSHeightFix';
+import { useScrollLock } from './hooks/useScrollLock';
 
 type ActiveSection = Section | 'dashboard';
 type AppMode = 'auth' | 'demo' | 'app';
 
 const sectionTitles: Record<ActiveSection, { label: string; icon: string }> = {
-  dashboard: { label: 'Przegląd',        icon: '🏠' },
-  budget:    { label: 'Budżet',          icon: '💰' },
-  tasks:     { label: 'Zadania',         icon: '✅' },
-  shopping:  { label: 'Lista zakupów',   icon: '🛒' },
-  meals:     { label: 'Posiłki',         icon: '🍽️' },
-  vehicles:  { label: 'Pojazdy',         icon: '🚗' },
-  pets:      { label: 'Zwierzęta',       icon: '🐾' },
-  members:   { label: 'Członkowie',      icon: '👨‍👩‍👧‍👦' },
-  settings:  { label: 'Ustawienia',      icon: '⚙️' },
+  dashboard: { label: 'Przegląd',      icon: '🏠' },
+  budget:    { label: 'Budżet',        icon: '💰' },
+  tasks:     { label: 'Zadania',       icon: '✅' },
+  shopping:  { label: 'Lista zakupów', icon: '🛒' },
+  meals:     { label: 'Posiłki',       icon: '🍽️' },
+  vehicles:  { label: 'Pojazdy',       icon: '🚗' },
+  pets:      { label: 'Zwierzęta',     icon: '🐾' },
+  members:   { label: 'Członkowie',    icon: '👨‍👩‍👧‍👦' },
+  settings:  { label: 'Ustawienia',    icon: '⚙️' },
 };
 
-// ── Shared App Layout ─────────────────────────────────────────────────────────
 interface AppLayoutProps {
   data: ReturnType<typeof useLocalData>;
   isLocalMode: boolean;
@@ -46,54 +45,50 @@ function AppLayout({ data, isLocalMode, userEmail, onSignOut, onDeleteAccount, o
   const [active, setActive] = useState<ActiveSection>('dashboard');
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  // Blokuj scrollowanie tła gdy sidebar otwarty na mobile
-  useEffect(() => {
-    const root = document.getElementById('root');
-    const html = document.documentElement;
-    const scrollingElement = document.scrollingElement || document.documentElement;
-    if (!root) return;
-    
-    if (mobileOpen) {
-      root.style.overflow = 'hidden';
-      html.style.overflow = 'hidden';
-      // Scroll to top when sidebar opens
-      root.scrollTop = 0;
-      html.scrollTop = 0;
-      scrollingElement.scrollTop = 0;
-      window.scrollTo({ top: 0, behavior: 'auto' });
-    } else {
-      root.style.overflow = 'auto';
-      html.style.overflow = 'auto';
-    }
-    
-    return () => {
-      root.style.overflow = 'auto';
-      html.style.overflow = 'auto';
-    };
-  }, [mobileOpen]);
+  // Lock scroll when sidebar is open on mobile
+  useScrollLock(mobileOpen);
 
   const memberNames = data.members.map(m => m.name.split(' ')[0]);
   const handleNavigate = (section: Section) => setActive(section);
 
+  const handleSidebarChange = (s: ActiveSection) => {
+    setActive(s);
+    setMobileOpen(false);
+  };
+
   return (
-    <div className="bg-white flex flex-col min-h-full ios-scroll-fix" style={{ fontFamily: "'Inter', sans-serif" }}>
+    <div className="flex min-h-dvh bg-gray-50" style={{ fontFamily: "'Inter', sans-serif" }}>
+
+      {/* Sidebar */}
       <Sidebar
         active={active}
-        onChange={(s) => setActive(s)}
+        onChange={handleSidebarChange}
         mobileOpen={mobileOpen}
         onClose={() => setMobileOpen(false)}
         familyName={data.familyName}
       />
-       <div className="flex-1 flex flex-col min-w-0 lg:ml-64">
-        <header className="bg-white border-b border-gray-200 px-3 sm:px-6 flex items-center gap-2 sm:gap-4 sticky top-0 z-50 flex-shrink-0 shadow-lg"
-          style={{ paddingTop: `calc(env(safe-area-inset-top) + 0.75rem)`, paddingBottom: '0.75rem' }}
+
+      {/* Main content */}
+      <div className="flex-1 flex flex-col min-w-0 lg:ml-64">
+
+        {/* Header */}
+        <header
+          className="bg-white border-b border-gray-200 px-3 sm:px-6 flex items-center gap-2 sm:gap-4 sticky top-0 z-20 shadow-sm"
+          style={{
+            paddingTop: `calc(env(safe-area-inset-top, 0px) + 0.625rem)`,
+            paddingBottom: '0.625rem',
+          }}
         >
-           <button
-             onClick={() => setMobileOpen(!mobileOpen)}
-             className="lg:hidden w-9 h-9 rounded-xl bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition flex-shrink-0"
-           >
-             <span className="text-gray-600 text-lg">{mobileOpen ? '✕' : '☰'}</span>
-           </button>
+          {/* Hamburger */}
+          <button
+            onClick={() => setMobileOpen(!mobileOpen)}
+            className="lg:hidden w-9 h-9 rounded-xl bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition flex-shrink-0"
+            aria-label="Menu"
+          >
+            <span className="text-gray-600 text-lg leading-none">{mobileOpen ? '✕' : '☰'}</span>
+          </button>
+
+          {/* Breadcrumb */}
           <div className="flex items-center gap-1.5 min-w-0 flex-1">
             <button
               onClick={() => setActive('dashboard')}
@@ -110,6 +105,8 @@ function AppLayout({ data, isLocalMode, userEmail, onSignOut, onDeleteAccount, o
               </>
             )}
           </div>
+
+          {/* Right side */}
           <div className="flex items-center gap-2 flex-shrink-0">
             <div className="hidden md:flex items-center gap-2 text-xs text-gray-400 bg-gray-50 px-3 py-1.5 rounded-lg">
               <span>{data.tasks.filter(t => t.status !== 'done').length} zadań</span>
@@ -119,18 +116,17 @@ function AppLayout({ data, isLocalMode, userEmail, onSignOut, onDeleteAccount, o
 
             {isLocalMode ? (
               <div className="flex items-center gap-2">
-                <div className="flex items-center gap-2 px-3 py-1.5 bg-amber-50 text-amber-700 rounded-lg text-xs font-medium">
+                <div className="flex items-center gap-1.5 px-2.5 py-1.5 bg-amber-50 text-amber-700 rounded-lg text-xs font-medium">
                   <span>💾</span>
-                  <span className="hidden sm:inline">Tryb demo</span>
+                  <span className="hidden sm:inline">Demo</span>
                 </div>
                 {onExitDemo && (
                   <button
                     onClick={onExitDemo}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 rounded-lg text-xs font-semibold transition"
-                    title="Wróć do ekranu logowania"
+                    className="flex items-center gap-1.5 px-2.5 py-1.5 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 rounded-lg text-xs font-semibold transition"
                   >
                     <span>🔑</span>
-                    <span className="hidden sm:inline">Zaloguj się</span>
+                    <span className="hidden sm:inline">Zaloguj</span>
                   </button>
                 )}
               </div>
@@ -143,8 +139,7 @@ function AppLayout({ data, isLocalMode, userEmail, onSignOut, onDeleteAccount, o
                 {onSignOut && (
                   <button
                     onClick={onSignOut}
-                    title="Wyloguj się"
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg text-xs font-semibold transition"
+                    className="flex items-center gap-1.5 px-2.5 py-1.5 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg text-xs font-semibold transition"
                   >
                     🚪 <span className="hidden sm:inline">Wyloguj</span>
                   </button>
@@ -153,8 +148,13 @@ function AppLayout({ data, isLocalMode, userEmail, onSignOut, onDeleteAccount, o
             )}
           </div>
         </header>
-         <main className="flex-1 bg-gray-50" style={{ paddingBottom: `calc(env(safe-area-inset-bottom) + 1.5rem)` }}>
-          <div className="max-w-7xl mx-auto w-full p-3 sm:p-4 lg:p-6">
+
+        {/* Page content */}
+        <main
+          className="flex-1"
+          style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 1.5rem)' }}
+        >
+          <div className="max-w-5xl mx-auto w-full px-3 py-4 sm:px-6 sm:py-6">
             {active === 'dashboard' && (
               <Dashboard
                 transactions={data.transactions}
@@ -208,21 +208,13 @@ function AppLayout({ data, isLocalMode, userEmail, onSignOut, onDeleteAccount, o
   );
 }
 
-
-
-// ── Local / Demo mode ─────────────────────────────────────────────────────────
+// ── Local / Demo mode ──────────────────────────────────────────────────────────
 function LocalApp({ onExitDemo }: { onExitDemo: () => void }) {
   const data = useLocalData();
-  return (
-    <AppLayout
-      data={data}
-      isLocalMode={true}
-      onExitDemo={onExitDemo}
-    />
-  );
+  return <AppLayout data={data} isLocalMode={true} onExitDemo={onExitDemo} />;
 }
 
-// ── Supabase mode ─────────────────────────────────────────────────────────────
+// ── Supabase mode ──────────────────────────────────────────────────────────────
 function SupabaseApp({ onExitToAuth }: { onExitToAuth: () => void }) {
   const { user, signOut, deleteAccount } = useAuth();
 
@@ -265,16 +257,11 @@ function SupabaseApp({ onExitToAuth }: { onExitToAuth: () => void }) {
   );
 }
 
-// ── Root ──────────────────────────────────────────────────────────────────────
+// ── Root ───────────────────────────────────────────────────────────────────────
 export default function App() {
-  // Fix iOS Safari address bar hiding issues
-  useIOSHeightFix();
-  
   const { user, loading: authLoading } = useAuth();
   const [appMode, setAppMode] = useState<AppMode>(() => {
-    // Inicjalizuj tryb SYNCHRONICZNIE — bez opóźnienia
     if (!isSupabaseConfigured) return 'auth';
-    // Sprawdź localStorage synchronicznie
     try {
       const keys = Object.keys(localStorage);
       const authKey = keys.find(k => k.startsWith('sb-') && k.endsWith('-auth-token'));
@@ -282,16 +269,13 @@ export default function App() {
         const raw = localStorage.getItem(authKey);
         if (raw) {
           const parsed = JSON.parse(raw);
-          if (parsed?.expires_at && parsed.expires_at * 1000 > Date.now()) {
-            return 'app';
-          }
+          if (parsed?.expires_at && parsed.expires_at * 1000 > Date.now()) return 'app';
         }
       }
     } catch {}
     return 'auth';
   });
 
-  // Reaguj na zmiany stanu auth (login/logout/wygaśnięcie sesji)
   useEffect(() => {
     if (authLoading) return;
     if (isSupabaseConfigured) {
@@ -302,23 +286,9 @@ export default function App() {
     }
   }, [user, authLoading]);
 
-  if (appMode === 'demo') {
-    return <LocalApp onExitDemo={() => setAppMode('auth')} />;
-  }
+  if (appMode === 'demo') return <LocalApp onExitDemo={() => setAppMode('auth')} />;
+  if (appMode === 'app' && isSupabaseConfigured && (user || authLoading)) return <SupabaseApp onExitToAuth={() => setAppMode('auth')} />;
+  if (appMode === 'app' && !isSupabaseConfigured) return <LocalApp onExitDemo={() => setAppMode('auth')} />;
 
-  if (appMode === 'app' && isSupabaseConfigured && (user || authLoading)) {
-    return <SupabaseApp onExitToAuth={() => setAppMode('auth')} />;
-  }
-
-  if (appMode === 'app' && !isSupabaseConfigured) {
-    return <LocalApp onExitDemo={() => setAppMode('auth')} />;
-  }
-
-  // Ekran logowania/rejestracji
-  return (
-    <AuthScreen
-      onSuccess={() => setAppMode('app')}
-      onDemoMode={() => setAppMode('demo')}
-    />
-  );
+  return <AuthScreen onSuccess={() => setAppMode('app')} onDemoMode={() => setAppMode('demo')} />;
 }

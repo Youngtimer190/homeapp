@@ -1,6 +1,6 @@
-
-
 import { useEffect } from 'react';
+import { createPortal } from 'react-dom';
+import { useScrollLock } from '../hooks/useScrollLock';
 
 interface ConfirmDialogProps {
   isOpen: boolean;
@@ -19,32 +19,10 @@ export default function ConfirmDialog({
   onConfirm,
   onCancel,
 }: ConfirmDialogProps) {
-  // Block scrolling on #root when dialog is open
-  useEffect(() => {
-    const root = document.getElementById('root');
-    const html = document.documentElement;
-    const scrollingElement = document.scrollingElement || document.documentElement;
-    if (!root) return;
+  // Lock body scroll
+  useScrollLock(isOpen);
 
-    if (isOpen) {
-      root.style.overflow = 'hidden';
-      html.style.overflow = 'hidden';
-      // Scroll to top to ensure dialog is visible
-      root.scrollTop = 0;
-      html.scrollTop = 0;
-      scrollingElement.scrollTop = 0;
-      window.scrollTo({ top: 0, behavior: 'auto' });
-    } else {
-      root.style.overflow = 'auto';
-      html.style.overflow = 'auto';
-    }
-
-    return () => {
-      root.style.overflow = 'auto';
-      html.style.overflow = 'auto';
-    };
-  }, [isOpen]);
-
+  // Escape key
   useEffect(() => {
     if (!isOpen) return;
     const handleKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onCancel(); };
@@ -54,53 +32,54 @@ export default function ConfirmDialog({
 
   if (!isOpen) return null;
 
-  return (
-    <div 
-      className="fixed z-50 inset-0 flex items-center justify-center"
+  const modalRoot = document.getElementById('modal-root') || document.body;
+
+  return createPortal(
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
       style={{
-        paddingTop: 'env(safe-area-inset-top, 0px)',
-        paddingBottom: 'env(safe-area-inset-bottom, 0px)',
-        paddingLeft: 'env(safe-area-inset-left, 0px)',
-        paddingRight: 'env(safe-area-inset-right, 0px)',
+        paddingTop: 'calc(env(safe-area-inset-top, 0px) + 1rem)',
+        paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 1rem)',
+        paddingLeft: 'calc(env(safe-area-inset-left, 0px) + 1rem)',
+        paddingRight: 'calc(env(safe-area-inset-right, 0px) + 1rem)',
       }}
     >
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
         onClick={onCancel}
       />
 
-       {/* Dialog — centered on all devices */}
-       <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md sm:max-w-sm p-6 flex flex-col items-center gap-4 overflow-y-auto overscroll-contain" style={{ 
-        maxHeight: 'calc(100dvh - 2rem - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px))',
-       }}>
-         {/* Icon */}
-         <div className="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center text-3xl">
-           🗑️
-         </div>
+      {/* Dialog */}
+      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm flex flex-col items-center gap-5 p-6 z-10">
+        {/* Icon */}
+        <div className="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center text-3xl flex-shrink-0">
+          🗑️
+        </div>
 
-         {/* Title */}
-         <h2 className="text-xl font-bold text-gray-800 text-center">{title}</h2>
+        {/* Text */}
+        <div className="text-center">
+          <h2 className="text-lg font-bold text-gray-900 mb-1">{title}</h2>
+          <p className="text-sm text-gray-500 leading-relaxed">{message}</p>
+        </div>
 
-         {/* Message */}
-         <p className="text-gray-500 text-center text-sm leading-relaxed">{message}</p>
-
-            {/* Buttons */}
-            <div className="flex gap-3 w-full mt-1">
-              <button
-                onClick={onCancel}
-                className="flex-1 py-3 rounded-xl border border-gray-200 text-gray-600 font-medium hover:bg-gray-50 transition min-h-[44px]"
-              >
-                Anuluj
-              </button>
-              <button
-                onClick={onConfirm}
-                className="flex-1 py-3 rounded-xl bg-red-500 text-white font-medium hover:bg-red-600 transition shadow min-h-[44px]"
-              >
-                {confirmLabel}
-              </button>
-            </div>
-       </div>
-    </div>
+        {/* Buttons */}
+        <div className="flex gap-3 w-full">
+          <button
+            onClick={onCancel}
+            className="flex-1 px-4 py-3 rounded-xl border border-gray-200 text-gray-700 font-semibold text-sm hover:bg-gray-50 transition"
+          >
+            Anuluj
+          </button>
+          <button
+            onClick={onConfirm}
+            className="flex-1 px-4 py-3 rounded-xl bg-red-500 text-white font-semibold text-sm hover:bg-red-600 transition"
+          >
+            {confirmLabel}
+          </button>
+        </div>
+      </div>
+    </div>,
+    modalRoot
   );
 }
