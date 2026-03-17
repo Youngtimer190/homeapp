@@ -27,7 +27,7 @@ html, body, #root {
 /* Prevent overscroll bounce on body */
 body {
   overscroll-behavior: none;
-  overflow: hidden;
+  overflow: auto;
   margin: 0;
   padding: 0;
   width: 100%;
@@ -40,7 +40,7 @@ body {
   flex-direction: column;
   min-height: 100vh;
   min-height: -webkit-fill-available;
-  overflow: hidden;
+  overflow: visible;
 }
 
 /* Safe area insets for iPhone notch/home bar */

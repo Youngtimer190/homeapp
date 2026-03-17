@@ -119,7 +119,7 @@ export default function Budget({ transactions, setTransactions, memberNames }: P
 
   const openEdit = (t: Transaction) => {
     setEditId(t.id);
-    setForm({ type: t.type, category: t.category, description: t.description, amount: t.amount, date: t.date, addedBy: t.addedBy });
+    setForm({ type: t.type, category: t.category, description: t.description, amount: t.amount, date: t.date });
     setShowForm(true);
   };
 

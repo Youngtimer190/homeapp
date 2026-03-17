@@ -6,7 +6,6 @@ export interface ShoppingItem {
   name: string;
   quantity: string;
   checked: boolean;
-  addedBy: string;
 }
 
 export interface ShoppingList {
@@ -24,7 +23,7 @@ export interface Transaction {
   description: string;
   amount: number;
   date: string;
-  addedBy: string;
+  addedBy?: string;
 }
 
 // Tasks

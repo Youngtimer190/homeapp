@@ -7,7 +7,7 @@ interface Props {
   setLists: (val: ShoppingList[] | ((prev: ShoppingList[]) => ShoppingList[])) => void;
 }
 
-const emptyItem = { name: '', quantity: '', addedBy: '' };
+const emptyItem = { name: '', quantity: '' };
 const emptyList = { name: '' };
 
 export default function Shopping({ lists, setLists }: Props) {
@@ -53,7 +53,7 @@ export default function Shopping({ lists, setLists }: Props) {
 
   const handleOpenEditItem = (item: ShoppingItem) => {
     setEditingItem(item);
-    setItemForm({ name: item.name, quantity: item.quantity, addedBy: item.addedBy });
+    setItemForm({ name: item.name, quantity: item.quantity });
     setShowItemModal(true);
   };
 
@@ -61,7 +61,7 @@ export default function Shopping({ lists, setLists }: Props) {
     if (!itemForm.name.trim() || !selectedList) return;
     if (editingItem) {
       setLists(prev => prev.map(l => l.id === selectedList.id
-        ? { ...l, items: l.items.map(i => i.id === editingItem.id ? { ...i, name: itemForm.name.trim(), quantity: itemForm.quantity.trim(), addedBy: itemForm.addedBy } : i) }
+        ? { ...l, items: l.items.map(i => i.id === editingItem.id ? { ...i, name: itemForm.name.trim(), quantity: itemForm.quantity.trim() } : i) }
         : l));
     } else {
       const newItem: ShoppingItem = {
@@ -69,7 +69,6 @@ export default function Shopping({ lists, setLists }: Props) {
         name: itemForm.name.trim(),
         quantity: itemForm.quantity.trim(),
         checked: false,
-        addedBy: itemForm.addedBy,
       };
       setLists(prev => prev.map(l => l.id === selectedList.id
         ? { ...l, items: [...l.items, newItem] }

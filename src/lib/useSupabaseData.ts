@@ -68,7 +68,7 @@ function txFromRow(r: Record<string, unknown>): Transaction {
     description: r.description as string,
     amount: r.amount as number,
     date: r.date as string,
-    addedBy: r.added_by as string,
+    addedBy: r.added_by as string | undefined,
   };
 }
 function txToRow(t: Transaction): Record<string, unknown> {
