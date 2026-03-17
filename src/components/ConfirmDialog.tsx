@@ -20,15 +20,19 @@ export default function ConfirmDialog({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed z-50 flex items-end sm:items-center justify-center p-0 sm:p-4" style={{ inset: 0 }}>
+    <div className="fixed z-50 flex items-center justify-center p-4" style={{ inset: 0 }}>
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/40 backdrop-blur-sm"
         onClick={onCancel}
       />
 
-      {/* Dialog — bottom sheet on mobile, centered on desktop */}
-      <div className="relative bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl w-full sm:max-w-sm p-6 flex flex-col items-center gap-4" style={{ paddingBottom: `calc(env(safe-area-inset-bottom) + 1.5rem)` }}>
+      {/* Dialog — centered on all devices */}
+      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 flex flex-col items-center gap-4" style={{ 
+        maxHeight: 'calc(100dvh - 2rem)',
+        marginTop: 'env(safe-area-inset-top, 0px)',
+        marginBottom: 'env(safe-area-inset-bottom, 0px)'
+      }}>
         {/* Icon */}
         <div className="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center text-3xl">
           🗑️

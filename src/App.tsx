@@ -50,7 +50,7 @@ function AppLayout({ data, isLocalMode, userEmail, onSignOut, onDeleteAccount, o
   const handleNavigate = (section: Section) => setActive(section);
 
   return (
-     <div className="bg-white flex min-h-full ios-scroll-fix" style={{ fontFamily: "'Inter', sans-serif" }}>
+     <div className="bg-white flex h-full ios-scroll-fix" style={{ fontFamily: "'Inter', sans-serif" }}>
       <Sidebar
         active={active}
         onChange={(s) => setActive(s)}

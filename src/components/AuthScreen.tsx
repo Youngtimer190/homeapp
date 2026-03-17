@@ -115,8 +115,8 @@ export default function AuthScreen({ onSuccess, onDemoMode }: Props) {
   }
 
   return (
-    <div className="bg-gradient-to-br from-indigo-50 via-white to-violet-50 flex items-start justify-center p-3 sm:p-4 overflow-y-auto min-h-screen safe-top safe-bottom" style={{ paddingTop: `calc(env(safe-area-inset-top) + 2rem)`, paddingBottom: `calc(env(safe-area-inset-bottom) + 2rem)` }}>
-      <div className="w-full max-w-md mt-4">
+    <div className="bg-gradient-to-br from-indigo-50 via-white to-violet-50 flex items-center justify-center p-3 sm:p-4 overflow-y-auto min-h-screen safe-top safe-bottom" style={{ paddingTop: `calc(env(safe-area-inset-top) + 1rem)`, paddingBottom: `calc(env(safe-area-inset-bottom) + 1rem)` }}>
+      <div className="w-full max-w-md">
 
         {/* Logo */}
         <div className="text-center mb-6 sm:mb-8">
