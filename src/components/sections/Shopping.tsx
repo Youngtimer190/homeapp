@@ -312,12 +312,12 @@ export default function Shopping({ lists, setLists }: Props) {
 
                        {/* Actions */}
                         <div className="flex items-center gap-2 ml-3 flex-shrink-0">
-                          <button
-                            onClick={() => handleOpenEditItem(item)}
-                            className="text-xs px-3 py-1.5 rounded-lg bg-teal-500 text-white hover:bg-teal-600 font-medium transition shadow-sm"
-                          >
-                            ✏️ Edytuj
-                          </button>
+                           <button
+                             onClick={() => handleOpenEditItem(item)}
+                             className="text-xs px-3 py-1.5 rounded-lg bg-orange-500 text-white hover:bg-orange-600 font-medium transition shadow-sm"
+                           >
+                             ✏️ Edytuj
+                           </button>
                           <button
                             onClick={() => setConfirmItemId(item.id)}
                             className="text-xs px-3 py-1.5 rounded-lg bg-red-500 text-white hover:bg-red-600 font-medium transition shadow-sm"

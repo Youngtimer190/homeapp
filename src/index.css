@@ -23,8 +23,10 @@ html, body, #root {
   }
   body {
     width: 100%;
-    overflow-y: scroll;
+    overflow-y: auto;
     -webkit-overflow-scrolling: touch;
+    /* Allow native scroll for address bar hiding */
+    position: relative;
   }
   /* Force address bar to hide on scroll */
   .scroll-container {
