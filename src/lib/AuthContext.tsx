@@ -48,7 +48,7 @@ async function ensureFamilyRecord(userId: string) {
     if (!data) {
       await supabase
         .from('families')
-        .insert({ user_id: userId, family_name: 'Wpisz nazwę rodziny' });
+        .insert({ user_id: userId, name: 'Wpisz nazwę rodziny' });
     }
   } catch {}
 }

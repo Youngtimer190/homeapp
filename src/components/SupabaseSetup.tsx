@@ -86,7 +86,7 @@ create policy "own" on vehicles
 
 create table pets (
   id text primary key, user_id uuid references auth.users not null,
-  name text, species text, breed text, age numeric,
+  name text, species text, breed text, birth_date text, age numeric,
   weight numeric, color text, vet text,
   last_visit text, next_visit text,
   no_next_visit boolean default false,

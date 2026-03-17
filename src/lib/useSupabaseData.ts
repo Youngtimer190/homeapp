@@ -40,17 +40,24 @@ function useTable<T extends { id: string }>(
     // Updated
     const updated = newItems.filter(d => oldIds.has(d.id));
 
-    for (const item of deleted) {
-      await supabase.from(table).delete().eq('id', item.id).eq('user_id', userId);
-    }
-    for (const item of added) {
-      await supabase.from(table).upsert({ ...toRow(item), user_id: userId });
-    }
-    for (const item of updated) {
-      const old = data.find(d => d.id === item.id);
-      if (JSON.stringify(old) !== JSON.stringify(item)) {
-        await supabase.from(table).update({ ...toRow(item), user_id: userId }).eq('id', item.id);
+    try {
+      for (const item of deleted) {
+        const { error } = await supabase.from(table).delete().eq('id', item.id).eq('user_id', userId);
+        if (error) console.error(`[${table}] delete error:`, error.message);
       }
+      for (const item of added) {
+        const { error } = await supabase.from(table).upsert({ ...toRow(item), user_id: userId });
+        if (error) console.error(`[${table}] upsert error:`, error.message);
+      }
+      for (const item of updated) {
+        const old = data.find(d => d.id === item.id);
+        if (JSON.stringify(old) !== JSON.stringify(item)) {
+          const { error } = await supabase.from(table).update({ ...toRow(item), user_id: userId }).eq('id', item.id).eq('user_id', userId);
+          if (error) console.error(`[${table}] update error:`, error.message);
+        }
+      }
+    } catch (err) {
+      console.error(`[${table}] sync error:`, err);
     }
 
     setData(newItems);
@@ -248,9 +255,9 @@ export function useSupabaseData(userId: string | undefined) {
 
   useEffect(() => {
     if (!userId) { setFamilyLoading(false); return; }
-    supabase.from('families').select('family_name').eq('user_id', userId).single()
+    supabase.from('families').select('name').eq('user_id', userId).single()
       .then(({ data }) => {
-        if (data?.family_name) setFamilyNameState(data.family_name);
+        if (data?.name) setFamilyNameState(data.name);
         setFamilyLoading(false);
       });
   }, [userId]);
@@ -258,7 +265,7 @@ export function useSupabaseData(userId: string | undefined) {
   const setFamilyName = useCallback(async (name: string) => {
     setFamilyNameState(name);
     if (!userId) return;
-    await supabase.from('families').update({ family_name: name }).eq('user_id', userId);
+    await supabase.from('families').update({ name: name }).eq('user_id', userId);
   }, [userId]);
 
   const loading = transactions.loading || tasks.loading || meals.loading ||
