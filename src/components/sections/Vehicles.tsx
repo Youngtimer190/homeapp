@@ -10,10 +10,14 @@ interface Props {
 
 const fuelTypes = ['Nie dotyczy', 'Benzyna', 'Diesel', 'LPG', 'Benzyna+LPG', 'Elektryczny', 'Hybryda'];
 
+// Generate years from current year down to 1900
+const currentYear = new Date().getFullYear();
+const years = Array.from({ length: currentYear - 1899 }, (_, i) => currentYear - i);
+
 const emptyForm = (): Omit<Vehicle, 'id'> => {
   const today = new Date().toISOString().split('T')[0];
   return {
-    name: '', brand: '', model: '', year: new Date().getFullYear(),
+    name: '', brand: '', model: '', year: 0,
     licensePlate: '', vin: '', fuelType: '', lastService: today, nextService: today,
     unlimitedInspection: false, mileage: 0, insurance: today, policyNumber: '',
   };
@@ -259,30 +263,48 @@ export default function Vehicles({ vehicles, setVehicles }: Props) {
       <Modal isOpen={showForm} onClose={closeModal} title={editingId ? '✏️ Edytuj pojazd' : '🚗 Nowy pojazd'} maxWidth="max-w-lg">
             <div className="p-5 space-y-4">
 
-              {/* Nazwa / przezwisko */}
-              <input type="text" placeholder="Nazwa / przezwisko (opcjonalnie)" value={form.name}
-                onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
-                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400" />
+               {/* Nazwa / przezwisko */}
+               <div>
+                 <label className="block text-xs text-gray-500 mb-1 ml-1">Nazwa / przezwisko (opcjonalnie)</label>
+                 <input type="text" placeholder="np. 'Nasze rodzinne auto'" value={form.name}
+                   onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
+                   className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400" />
+               </div>
 
-              {/* Marka i model */}
-              <div className="grid grid-cols-2 gap-3">
-                <input type="text" placeholder="Marka *" value={form.brand}
-                  onChange={e => setForm(f => ({ ...f, brand: e.target.value }))}
-                  className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400" />
-                <input type="text" placeholder="Model *" value={form.model}
-                  onChange={e => setForm(f => ({ ...f, model: e.target.value }))}
-                  className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400" />
-              </div>
+               {/* Marka i model */}
+               <div className="grid grid-cols-2 gap-3">
+                 <div>
+                   <label className="block text-xs text-gray-500 mb-1 ml-1">Marka *</label>
+                   <input type="text" placeholder="np. Toyota" value={form.brand}
+                     onChange={e => setForm(f => ({ ...f, brand: e.target.value }))}
+                     className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400" />
+                 </div>
+                 <div>
+                   <label className="block text-xs text-gray-500 mb-1 ml-1">Model *</label>
+                   <input type="text" placeholder="np. Corolla" value={form.model}
+                     onChange={e => setForm(f => ({ ...f, model: e.target.value }))}
+                     className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400" />
+                 </div>
+               </div>
 
-              {/* Rok i rejestracja */}
-              <div className="grid grid-cols-2 gap-3">
-                <input type="number" placeholder="Rok produkcji" value={form.year}
-                  onChange={e => setForm(f => ({ ...f, year: parseInt(e.target.value) || 2020 }))}
-                  className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400" />
-                <input type="text" placeholder="Nr rejestracyjny" value={form.licensePlate}
-                  onChange={e => setForm(f => ({ ...f, licensePlate: e.target.value }))}
-                  className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400" />
-              </div>
+               {/* Rok i rejestracja */}
+               <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs text-gray-500 mb-1 ml-1">Rok produkcji</label>
+                    <select value={form.year === 0 ? '' : form.year.toString()}
+                      onChange={e => setForm(f => ({ ...f, year: parseInt(e.target.value) || 0 }))}
+                      className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400 bg-white">
+                      <option value="" disabled>Wybierz rok produkcji</option>
+                      {years.map(year => <option key={year} value={year}>{year}</option>)}
+                    </select>
+                  </div>
+                 <div>
+                   <label className="block text-xs text-gray-500 mb-1 ml-1">Nr rejestracyjny</label>
+                   <input type="text" placeholder="np. WAW12345" value={form.licensePlate}
+                     onChange={e => setForm(f => ({ ...f, licensePlate: e.target.value }))}
+                     className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400" />
+                 </div>
+               </div>
 
               {/* VIN */}
               <div>
@@ -293,18 +315,24 @@ export default function Vehicles({ vehicles, setVehicles }: Props) {
                   className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-mono tracking-wide focus:outline-none focus:ring-2 focus:ring-violet-400" />
               </div>
 
-              {/* Paliwo i przebieg */}
-              <div className="grid grid-cols-2 gap-3">
-                <select value={form.fuelType}
-                  onChange={e => setForm(f => ({ ...f, fuelType: e.target.value }))}
-                  className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400 bg-white">
-                  <option value="" disabled>Wybierz rodzaj paliwa</option>
-                  {fuelTypes.map(ft => <option key={ft} value={ft}>{ft}</option>)}
-                </select>
-                <input type="number" placeholder="Przebieg (km)" value={form.mileage || ''}
-                  onChange={e => setForm(f => ({ ...f, mileage: parseInt(e.target.value) || 0 }))}
-                  className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400" />
-              </div>
+               {/* Paliwo i przebieg */}
+               <div className="grid grid-cols-2 gap-3">
+                 <div>
+                   <label className="block text-xs text-gray-500 mb-1 ml-1">Rodzaj paliwa</label>
+                   <select value={form.fuelType}
+                     onChange={e => setForm(f => ({ ...f, fuelType: e.target.value }))}
+                     className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400 bg-white">
+                     <option value="" disabled>Wybierz rodzaj paliwa</option>
+                     {fuelTypes.map(ft => <option key={ft} value={ft}>{ft}</option>)}
+                   </select>
+                 </div>
+                 <div>
+                   <label className="block text-xs text-gray-500 mb-1 ml-1">Przebieg (km)</label>
+                   <input type="number" placeholder="0" value={form.mileage || ''}
+                     onChange={e => setForm(f => ({ ...f, mileage: parseInt(e.target.value) || 0 }))}
+                     className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400" />
+                 </div>
+               </div>
 
               {/* Ostatnie badanie */}
               <div>

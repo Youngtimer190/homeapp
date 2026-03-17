@@ -24,9 +24,54 @@ const emptyForm = (): Omit<Pet, 'id'> => {
     tickProtection: '', tickProtectionDate: today,
     notes: '',
   };
-};
+  };
 
-export default function Pets({ pets, setPets }: Props) {
+  // Komponent formularza profilaktyki - zdefiniowany na zewnątrz, aby zachować focus inputów
+  const HealthFormRow = ({
+    label, icon,
+    nameKey, dateKey,
+    namePlaceholder,
+    value,
+    dateValue,
+    onChange,
+    onDateChange,
+  }: {
+    label: string; icon: string;
+    nameKey: keyof Omit<Pet, 'id'>;
+    dateKey: keyof Omit<Pet, 'id'>;
+    namePlaceholder: string;
+    value: string;
+    dateValue: string;
+    onChange: (nameKey: keyof Omit<Pet, 'id'>, value: string) => void;
+    onDateChange: (dateKey: keyof Omit<Pet, 'id'>, value: string) => void;
+  }) => (
+    <div className="border border-gray-100 rounded-xl p-4 space-y-2 bg-gray-50">
+      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">{icon} {label}</p>
+      <div className="grid grid-cols-2 gap-2">
+         <input
+           type="text"
+           placeholder={namePlaceholder}
+           value={value}
+           onChange={e => onChange(nameKey, e.target.value)}
+           className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 bg-white"
+           autoComplete="off"
+           autoCorrect="off"
+           spellCheck="false"
+         />
+        <div>
+          <label className="block text-xs text-gray-400 mb-1">Ważne do</label>
+          <input
+            type="date"
+            value={dateValue}
+            onChange={e => onDateChange(dateKey, e.target.value)}
+            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 bg-white"
+          />
+        </div>
+      </div>
+    </div>
+  );
+
+  export default function Pets({ pets, setPets }: Props) {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm());
@@ -205,39 +250,14 @@ export default function Pets({ pets, setPets }: Props) {
     );
   };
 
-  // Pole daty profilaktyki w formularzu
-  const HealthFormRow = ({
-    label, icon,
-    nameKey, dateKey,
-    namePlaceholder,
-  }: {
-    label: string; icon: string;
-    nameKey: keyof Omit<Pet, 'id'>;
-    dateKey: keyof Omit<Pet, 'id'>;
-    namePlaceholder: string;
-  }) => (
-    <div className="border border-gray-100 rounded-xl p-4 space-y-2 bg-gray-50">
-      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">{icon} {label}</p>
-      <div className="grid grid-cols-2 gap-2">
-        <input
-          type="text"
-          placeholder={namePlaceholder}
-          value={form[nameKey] as string}
-          onChange={e => setForm(f => ({ ...f, [nameKey]: e.target.value }))}
-          className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 bg-white"
-        />
-        <div>
-          <label className="block text-xs text-gray-400 mb-1">Ważne do</label>
-          <input
-            type="date"
-            value={form[dateKey] as string}
-            onChange={e => setForm(f => ({ ...f, [dateKey]: e.target.value }))}
-            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 bg-white"
-          />
-        </div>
-      </div>
-    </div>
-  );
+  // Pole daty profilaktyki w formularzu - zdefiniowane poza komponentem aby zachować focus
+  const handleHealthChange = (nameKey: keyof Omit<Pet, 'id'>, value: string) => {
+    setForm(f => ({ ...f, [nameKey]: value }));
+  };
+
+  const handleHealthDateChange = (dateKey: keyof Omit<Pet, 'id'>, value: string) => {
+    setForm(f => ({ ...f, [dateKey]: value }));
+  };
 
   return (
     <div className="space-y-6">
@@ -403,30 +423,48 @@ export default function Pets({ pets, setPets }: Props) {
         <div className="p-5 space-y-4">
 
               {/* Podstawowe dane */}
-              <input type="text" placeholder="Imię *" value={form.name}
-                onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
-                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400" />
-              <div className="grid grid-cols-2 gap-3">
-                <select value={form.species}
-                  onChange={e => setForm(f => ({ ...f, species: e.target.value }))}
-                  className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 bg-white">
-                  {speciesOptions.map(s => <option key={s} value={s}>{speciesEmoji[s]} {s}</option>)}
-                </select>
-                <input type="text" placeholder="Rasa" value={form.breed}
-                  onChange={e => setForm(f => ({ ...f, breed: e.target.value }))}
+              <div>
+                <label className="block text-xs text-gray-500 mb-1 ml-1">Imię *</label>
+                <input type="text" placeholder="np. Azor" value={form.name}
+                  onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
                   className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400" />
               </div>
               <div className="grid grid-cols-2 gap-3">
-                <input type="number" placeholder="Wiek (lata)" value={form.age || ''}
-                  onChange={e => setForm(f => ({ ...f, age: parseInt(e.target.value) || 0 }))}
-                  className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400" />
-                <input type="number" placeholder="Waga (kg)" step="0.1" value={form.weight || ''}
-                  onChange={e => setForm(f => ({ ...f, weight: parseFloat(e.target.value) || 0 }))}
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1 ml-1">Gatunek *</label>
+                  <select value={form.species}
+                    onChange={e => setForm(f => ({ ...f, species: e.target.value }))}
+                    className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 bg-white">
+                    {speciesOptions.map(s => <option key={s} value={s}>{speciesEmoji[s]} {s}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1 ml-1">Rasa</label>
+                  <input type="text" placeholder="np. Owczarek niemiecki" value={form.breed}
+                    onChange={e => setForm(f => ({ ...f, breed: e.target.value }))}
+                    className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400" />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1 ml-1">Wiek (lata)</label>
+                  <input type="number" placeholder="0" value={form.age || ''}
+                    onChange={e => setForm(f => ({ ...f, age: parseInt(e.target.value) || 0 }))}
+                    className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400" />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1 ml-1">Waga (kg)</label>
+                  <input type="number" placeholder="0" step="0.1" value={form.weight || ''}
+                    onChange={e => setForm(f => ({ ...f, weight: parseFloat(e.target.value) || 0 }))}
+                    className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400" />
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs text-gray-500 mb-1 ml-1">Weterynarz</label>
+                <input type="text" placeholder="np. Klinika Weterynaryjna XYZ" value={form.vet}
+                  onChange={e => setForm(f => ({ ...f, vet: e.target.value }))}
                   className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400" />
               </div>
-              <input type="text" placeholder="Weterynarz" value={form.vet}
-                onChange={e => setForm(f => ({ ...f, vet: e.target.value }))}
-                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400" />
 
               {/* Wizyty */}
               <div className="border border-gray-100 rounded-xl p-4 space-y-3 bg-gray-50">
@@ -469,23 +507,38 @@ export default function Pets({ pets, setPets }: Props) {
                 label="Szczepienia" icon="💉"
                 nameKey="vaccinations" dateKey="vaccinationsDate"
                 namePlaceholder="Rodzaj szczepień (np. Wścieklizna)"
+                value={form.vaccinations}
+                dateValue={form.vaccinationsDate}
+                onChange={handleHealthChange}
+                onDateChange={handleHealthDateChange}
               />
               <HealthFormRow
                 label="Odrobaczenie" icon="🪱"
                 nameKey="deworming" dateKey="dewormingDate"
                 namePlaceholder="Preparat (np. Milbemax)"
+                value={form.deworming}
+                dateValue={form.dewormingDate}
+                onChange={handleHealthChange}
+                onDateChange={handleHealthDateChange}
               />
               <HealthFormRow
                 label="Ochrona przeciw kleszczom" icon="🕷️"
                 nameKey="tickProtection" dateKey="tickProtectionDate"
                 namePlaceholder="Preparat (np. Bravecto)"
+                value={form.tickProtection}
+                dateValue={form.tickProtectionDate}
+                onChange={handleHealthChange}
+                onDateChange={handleHealthDateChange}
               />
 
               {/* Notatki */}
-              <textarea placeholder="Notatki" value={form.notes}
-                onChange={e => setForm(f => ({ ...f, notes: e.target.value }))}
-                rows={2}
-                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 resize-none" />
+              <div>
+                <label className="block text-xs text-gray-500 mb-1 ml-1">Notatki</label>
+                <textarea placeholder="Dodatkowe informacje o zwierzęciu" value={form.notes}
+                  onChange={e => setForm(f => ({ ...f, notes: e.target.value }))}
+                  rows={2}
+                  className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 resize-none" />
+              </div>
 
               {/* Kolor profilu */}
               <div>
