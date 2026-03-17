@@ -1,4 +1,4 @@
-import { Transaction, Task, Meal, Vehicle, Pet, Member, Section } from '../types';
+import { Transaction, Task, Meal, Vehicle, Pet, Member, Section, ShoppingList } from '../types';
 
 interface Props {
   transactions: Transaction[];
@@ -7,10 +7,11 @@ interface Props {
   vehicles: Vehicle[];
   pets: Pet[];
   members: Member[];
+  shoppingLists: ShoppingList[];
   onNavigate: (s: Section) => void;
 }
 
-export default function Dashboard({ transactions, tasks, meals, vehicles, pets, members, onNavigate }: Props) {
+export default function Dashboard({ transactions, tasks, meals, vehicles, pets, members, shoppingLists, onNavigate }: Props) {
   const income = transactions.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
   const expense = transactions.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
   const balance = income - expense;
@@ -22,14 +23,37 @@ export default function Dashboard({ transactions, tasks, meals, vehicles, pets, 
     return meals.filter(m => m.date === ymd);
   })();
 
-  const pendingTasks = tasks.filter(t => t.status !== 'done');
-  const doneTasks = tasks.filter(t => t.status === 'done');
+  // Tasks for current month
+  const monthTasks = (() => {
+    const t = new Date();
+    const monthPrefix = `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, '0')}`;
+    return tasks.filter(task => task.dueDate.startsWith(monthPrefix));
+  })();
+
+  const monthDoneTasks = monthTasks.filter(t => t.status === 'done');
+  const monthPendingTasks = monthTasks.filter(t => t.status !== 'done');
+  const monthHighPriorityTasks = monthTasks.filter(t => t.priority === 'high' && t.status !== 'done');
+
+  // Tasks for today
+  const todayTasks = (() => {
+    const t = new Date();
+    const ymd = `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, '0')}-${String(t.getDate()).padStart(2, '0')}`;
+    return tasks.filter(task => task.dueDate === ymd);
+  })();
+  const todayDoneTasks = todayTasks.filter(t => t.status === 'done');
+
   const highPriorityTasks = tasks.filter(t => t.priority === 'high' && t.status !== 'done');
 
   const daysUntil = (d: string) => {
     if (!d) return null;
     return Math.ceil((new Date(d).getTime() - Date.now()) / 86400000);
   };
+
+  // Products to buy (checked === false)
+  const productsToBuyCount = shoppingLists.reduce((total, list) => {
+    return total + list.items.filter(item => !item.checked).length;
+  }, 0);
+  console.log('Products to buy:', productsToBuyCount);
 
   const upcomingVehicle = vehicles
     .filter(v => !v.unlimitedInspection && v.nextService)
@@ -53,6 +77,20 @@ export default function Dashboard({ transactions, tasks, meals, vehicles, pets, 
 
   if (balance < 0) alerts.push({ type: 'error', message: `Budżet ujemny: ${fmt(balance)}`, section: 'budget' });
   if (highPriorityTasks.length > 0) alerts.push({ type: 'warning', message: `${highPriorityTasks.length} pilnych zadań do wykonania`, section: 'tasks' });
+
+  // Tasks due within 7 days
+  const nearDeadlineTasks = tasks.filter(task => {
+    if (task.status === 'done') return false;
+    const days = daysUntil(task.dueDate);
+    return days !== null && days <= 7;
+  });
+  if (nearDeadlineTasks.length > 0) {
+    alerts.push({ 
+      type: 'warning', 
+      message: `${nearDeadlineTasks.length} zadań z terminem w ciągu 7 dni`, 
+      section: 'tasks' 
+    });
+  }
 
   vehicles.forEach(v => {
     const d = v.unlimitedInspection ? null : daysUntil(v.nextService);
@@ -94,24 +132,24 @@ export default function Dashboard({ transactions, tasks, meals, vehicles, pets, 
           <p className="text-white/80 mt-1 text-xs sm:text-sm">
             {new Date().toLocaleDateString('pl-PL', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
           </p>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4 mt-4 sm:mt-6">
-            <div className="bg-white/15 rounded-xl sm:rounded-2xl p-3 sm:p-4 backdrop-blur-sm">
-              <p className="text-white/70 text-xs">Saldo</p>
-              <p className="text-base sm:text-xl font-bold mt-0.5 truncate">{fmt(balance)}</p>
-            </div>
-            <div className="bg-white/15 rounded-xl sm:rounded-2xl p-3 sm:p-4 backdrop-blur-sm">
-              <p className="text-white/70 text-xs">Zadania</p>
-              <p className="text-base sm:text-xl font-bold mt-0.5">{doneTasks.length}/{tasks.length}</p>
-            </div>
-            <div className="bg-white/15 rounded-xl sm:rounded-2xl p-3 sm:p-4 backdrop-blur-sm">
-              <p className="text-white/70 text-xs">Pojazdy</p>
-              <p className="text-base sm:text-xl font-bold mt-0.5">{vehicles.length}</p>
-            </div>
-            <div className="bg-white/15 rounded-xl sm:rounded-2xl p-3 sm:p-4 backdrop-blur-sm">
-              <p className="text-white/70 text-xs">Członkowie</p>
-              <p className="text-base sm:text-xl font-bold mt-0.5">{members.length}</p>
-            </div>
-          </div>
+           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4 mt-4 sm:mt-6">
+             <div className="bg-white/15 rounded-xl sm:rounded-2xl p-3 sm:p-4 backdrop-blur-sm">
+               <p className="text-white/70 text-xs">Saldo</p>
+               <p className="text-base sm:text-xl font-bold mt-0.5 truncate">{fmt(balance)}</p>
+             </div>
+             <div className="bg-white/15 rounded-xl sm:rounded-2xl p-3 sm:p-4 backdrop-blur-sm">
+                <p className="text-white/70 text-xs">Zadania dzisiaj</p>
+                 <p className="text-base sm:text-xl font-bold mt-0.5">{todayDoneTasks.length}/{todayTasks.length}</p>
+             </div>
+             <div className="bg-white/15 rounded-xl sm:rounded-2xl p-3 sm:p-4 backdrop-blur-sm">
+               <p className="text-white/70 text-xs">Posiłki dzisiaj</p>
+               <p className="text-base sm:text-xl font-bold mt-0.5">{todayMeals.length}</p>
+             </div>
+              <div className="bg-white/15 rounded-xl sm:rounded-2xl p-3 sm:p-4 backdrop-blur-sm">
+                <p className="text-white/70 text-xs">Do kupienia</p>
+                <p className="text-base sm:text-xl font-bold mt-0.5">{productsToBuyCount}</p>
+              </div>
+           </div>
         </div>
       </div>
 
@@ -158,11 +196,11 @@ export default function Dashboard({ transactions, tasks, meals, vehicles, pets, 
             <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center text-xl">✅</div>
             <span className="text-xs text-gray-400 group-hover:text-blue-500 transition">Przejdź →</span>
           </div>
-          <h4 className="font-semibold text-gray-900">Zadania</h4>
-          <p className="text-2xl font-bold text-blue-600 mt-1">{doneTasks.length}<span className="text-gray-400 text-base font-normal">/{tasks.length}</span></p>
-          <p className="text-xs text-gray-500 mt-1">{pendingTasks.length} do wykonania · {highPriorityTasks.length} pilnych</p>
-          <div className="mt-3 space-y-1">
-            {pendingTasks.slice(0, 2).map(t => (
+            <h4 className="font-semibold text-gray-900">Zadania w tym miesiącu</h4>
+            <p className="text-2xl font-bold text-blue-600 mt-1">{monthDoneTasks.length}<span className="text-gray-400 text-base font-normal">/{monthTasks.length}</span></p>
+            <p className="text-xs text-gray-500 mt-1">{monthPendingTasks.length} do wykonania w miesiącu · {monthHighPriorityTasks.length} pilnych</p>
+           <div className="mt-3 space-y-1">
+             {monthPendingTasks.slice(0, 2).map(t => (
               <div key={t.id} className="flex items-center gap-2 text-xs text-gray-600">
                 <span className="w-1.5 h-1.5 rounded-full bg-blue-400 flex-shrink-0" />
                 <span className="truncate">{t.title}</span>

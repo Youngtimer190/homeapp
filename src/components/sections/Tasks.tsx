@@ -186,28 +186,36 @@ export default function Tasks({ tasks, setTasks, members }: Props) {
         {/* Calendar panel */}
         <div className="lg:col-span-2 space-y-4">
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 sm:p-5">
-            {/* Calendar header */}
+            {/* Month navigation */}
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-base font-bold text-gray-900">
-                {MONTH_NAMES[viewMonth]} {viewYear}
-              </h3>
-              <div className="flex items-center gap-2">
+              <button
+                onClick={prevMonth}
+                className="w-8 h-8 rounded-lg hover:bg-gray-100 flex items-center justify-center text-gray-600 transition"
+              >‹</button>
+              <div className="text-center">
+                <p className="font-bold text-gray-900 text-sm">
+                  {MONTH_NAMES[viewMonth]} {viewYear}
+                </p>
+                {isCurrentMonth && (
+                  <span className="text-xs text-blue-500 font-medium">Bieżący miesiąc</span>
+                )}
+              </div>
+              <button
+                onClick={nextMonth}
+                className="w-8 h-8 rounded-lg hover:bg-gray-100 flex items-center justify-center text-gray-600 transition"
+              >›</button>
+            </div>
+
+            {!isCurrentMonth && (
+              <div className="mb-3 text-center">
                 <button
-                  onClick={prevMonth}
-                  className="w-8 h-8 rounded-xl bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition"
-                  title="Poprzedni miesiąc"
+                  onClick={goToday}
+                  className="text-xs text-blue-500 hover:text-blue-700 font-semibold underline underline-offset-2 transition"
                 >
-                  ‹
-                </button>
-                <button
-                  onClick={nextMonth}
-                  className="w-8 h-8 rounded-xl bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition"
-                  title="Następny miesiąc"
-                >
-                  ›
+                  Wróć do dziś
                 </button>
               </div>
-            </div>
+            )}
 
             {/* Day headers */}
             <div className="grid grid-cols-7 mb-1">
@@ -247,27 +255,17 @@ export default function Tasks({ tasks, setTasks, members }: Props) {
               })}
             </div>
 
-            {/* Legend and today button */}
-            <div className="mt-4 pt-3 border-t border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div className="flex items-center gap-4 text-xs text-gray-400">
-                <span className="flex items-center gap-1.5">
-                  <span className="w-3 h-3 rounded-full bg-blue-500 inline-block" /> wybrany
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <span className="w-3 h-3 rounded-full bg-blue-100 ring-1 ring-blue-300 inline-block" /> dziś
-                </span>
-                <span className="flex items-center gap-1.5 text-blue-400 font-semibold">
-                  3 <span className="text-gray-400 font-normal">= liczba zadań</span>
-                </span>
-              </div>
-              {!isCurrentMonth && (
-                <button
-                  onClick={goToday}
-                  className="text-xs text-blue-500 hover:text-blue-700 font-semibold underline underline-offset-2 transition"
-                >
-                  Wróć do dziś
-                </button>
-              )}
+            {/* Legend */}
+            <div className="mt-4 pt-3 border-t border-gray-100 flex items-center gap-4 text-xs text-gray-400">
+              <span className="flex items-center gap-1.5">
+                <span className="w-3 h-3 rounded-full bg-blue-500 inline-block" /> wybrany
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="w-3 h-3 rounded-full bg-blue-100 ring-1 ring-blue-300 inline-block" /> dziś
+              </span>
+              <span className="flex items-center gap-1.5 text-blue-400 font-semibold">
+                3 <span className="text-gray-400 font-normal">= liczba zadań</span>
+              </span>
             </div>
           </div>
 

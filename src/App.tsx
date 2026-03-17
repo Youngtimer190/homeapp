@@ -136,6 +136,7 @@ function AppLayout({ data, isLocalMode, userEmail, onSignOut, onDeleteAccount, o
                 vehicles={data.vehicles}
                 pets={data.pets}
                 members={data.members}
+                shoppingLists={data.shoppingLists}
                 onNavigate={handleNavigate}
               />
             )}
