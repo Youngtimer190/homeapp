@@ -46,6 +46,22 @@ function AppLayout({ data, isLocalMode, userEmail, onSignOut, onDeleteAccount, o
   const [active, setActive] = useState<ActiveSection>('dashboard');
   const [mobileOpen, setMobileOpen] = useState(false);
 
+  // Blokuj scrollowanie tła gdy sidebar otwarty na mobile
+  useEffect(() => {
+    const root = document.getElementById('root');
+    if (!root) return;
+    
+    if (mobileOpen) {
+      root.style.overflow = 'hidden';
+    } else {
+      root.style.overflow = 'auto';
+    }
+    
+    return () => {
+      root.style.overflow = 'auto';
+    };
+  }, [mobileOpen]);
+
   const memberNames = data.members.map(m => m.name.split(' ')[0]);
   const handleNavigate = (section: Section) => setActive(section);
 
@@ -62,12 +78,12 @@ function AppLayout({ data, isLocalMode, userEmail, onSignOut, onDeleteAccount, o
         <header className="bg-white border-b border-gray-200 px-3 sm:px-6 flex items-center gap-2 sm:gap-4 sticky top-0 z-50 flex-shrink-0 shadow-lg"
           style={{ paddingTop: `calc(env(safe-area-inset-top) + 0.75rem)`, paddingBottom: '0.75rem' }}
         >
-          <button
-            onClick={() => setMobileOpen(true)}
-            className="lg:hidden w-9 h-9 rounded-xl bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition flex-shrink-0"
-          >
-            <span className="text-gray-600 text-lg">☰</span>
-          </button>
+           <button
+             onClick={() => setMobileOpen(!mobileOpen)}
+             className="lg:hidden w-9 h-9 rounded-xl bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition flex-shrink-0"
+           >
+             <span className="text-gray-600 text-lg">{mobileOpen ? '✕' : '☰'}</span>
+           </button>
           <div className="flex items-center gap-1.5 min-w-0 flex-1">
             <button
               onClick={() => setActive('dashboard')}

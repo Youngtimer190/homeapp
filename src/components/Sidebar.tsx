@@ -40,14 +40,14 @@ export default function Sidebar({ active, onChange, mobileOpen, onClose, familyN
         />
       )}
 
-       <aside
-        className={`
-          fixed top-0 left-0 h-full w-64 z-40 flex flex-col
-          bg-white border-r border-gray-100 shadow-2xl
-          transition-transform duration-300 ease-in-out
-          ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}
-          lg:fixed lg:top-0 lg:left-0 lg:h-screen lg:translate-x-0 lg:shadow-sm lg:z-30 lg:flex-shrink-0
-        `}
+        <aside
+          className={`
+            fixed top-0 left-0 h-full w-64 sm:w-72 max-w-[85vw] z-40 flex flex-col
+            bg-white border-r border-gray-100 shadow-2xl
+            transition-transform duration-300 ease-in-out
+            ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}
+            lg:fixed lg:top-0 lg:left-0 lg:h-screen lg:translate-x-0 lg:shadow-sm lg:z-30 lg:flex-shrink-0
+          `}
       >
         {/* Logo — safe area top for iOS notch */}
         <div className="flex items-center gap-3 px-4 border-b border-gray-100 flex-shrink-0"

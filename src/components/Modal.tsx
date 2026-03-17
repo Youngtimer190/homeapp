@@ -16,6 +16,8 @@ export default function Modal({ isOpen, onClose, title, children, maxWidth = 'ma
     const root = document.getElementById('root');
     if (root) {
       root.style.overflow = 'hidden';
+      // Scroll to top when modal opens (better UX on mobile)
+      root.scrollTop = 0;
     }
     return () => {
       const root = document.getElementById('root');
