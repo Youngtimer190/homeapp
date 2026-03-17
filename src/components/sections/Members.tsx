@@ -42,7 +42,8 @@ export default function Members({ members, setMembers, familyName, setFamilyName
 
   const handleAdd = () => {
     if (!form.name) return;
-    const m = { ...form, id: Date.now().toString() };
+    const age = calculateAge(form.birthday);
+    const m = { ...form, age, id: Date.now().toString() };
     setMembers(prev => [...prev, m]);
     setSelected(m);
     setForm(emptyForm());
@@ -51,8 +52,10 @@ export default function Members({ members, setMembers, familyName, setFamilyName
 
   const handleEdit = () => {
     if (!editingMember || !form.name) return;
-    setMembers(prev => prev.map(m => m.id === editingMember.id ? { ...form, id: m.id } : m));
-    setSelected({ ...form, id: editingMember.id });
+    const age = calculateAge(form.birthday);
+    const updated = { ...form, age, id: editingMember.id };
+    setMembers(prev => prev.map(m => m.id === editingMember.id ? updated : m));
+    setSelected(updated);
     setEditingMember(null);
     setForm(emptyForm());
     setShowForm(false);
@@ -91,6 +94,18 @@ export default function Members({ members, setMembers, familyName, setFamilyName
     const next = new Date(today.getFullYear(), bd.getMonth(), bd.getDate());
     if (next < today) next.setFullYear(today.getFullYear() + 1);
     return Math.ceil((next.getTime() - today.getTime()) / 86400000);
+  };
+
+  const calculateAge = (birthday: string): number => {
+    if (!birthday) return 0;
+    const today = new Date();
+    const birthDate = new Date(birthday);
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    return age;
   };
 
   const roleColorList = [
@@ -230,7 +245,7 @@ export default function Members({ members, setMembers, familyName, setFamilyName
                         )}
                       </div>
                       <p className="text-xs text-gray-500">{member.role}</p>
-                      <p className="text-xs text-gray-400 mt-0.5">{member.age} lat</p>
+                      <p className="text-xs text-gray-400 mt-0.5">{calculateAge(member.birthday)} lat</p>
                     </div>
                   </div>
                 </button>
@@ -261,7 +276,7 @@ export default function Members({ members, setMembers, familyName, setFamilyName
                             <span className={`text-xs px-2 py-1 rounded-lg font-semibold ${getRoleColor(current.role)}`}>
                               {current.role || 'Brak typu'}
                             </span>
-                            <span className="text-white/70 text-sm">{current.age} lat</span>
+                            <span className="text-white/70 text-sm">{calculateAge(current.birthday)} lat</span>
                           </div>
                           {days !== null && (
                             <p className="text-white/70 text-xs mt-1">
@@ -351,19 +366,11 @@ export default function Members({ members, setMembers, familyName, setFamilyName
               onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
               className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-rose-400" />
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs text-gray-500 mb-1 ml-1">Typ członka</label>
-              <input type="text" placeholder="np. Tata, Mama, Dziecko" value={form.role}
-                onChange={e => setForm(f => ({ ...f, role: e.target.value }))}
-                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-rose-400" />
-            </div>
-            <div>
-              <label className="block text-xs text-gray-500 mb-1 ml-1">Wiek</label>
-              <input type="number" placeholder="0" value={form.age || ''}
-                onChange={e => setForm(f => ({ ...f, age: parseInt(e.target.value) || 0 }))}
-                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-rose-400" />
-            </div>
+          <div>
+            <label className="block text-xs text-gray-500 mb-1 ml-1">Typ członka</label>
+            <input type="text" placeholder="np. Tata, Mama, Dziecko" value={form.role}
+              onChange={e => setForm(f => ({ ...f, role: e.target.value }))}
+              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-rose-400" />
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>

@@ -50,7 +50,7 @@ function AppLayout({ data, isLocalMode, userEmail, onSignOut, onDeleteAccount, o
   const handleNavigate = (section: Section) => setActive(section);
 
   return (
-    <div className="bg-gray-50 flex h-full min-h-[100dvh] ios-scroll-fix" style={{ fontFamily: "'Inter', sans-serif" }}>
+     <div className="bg-white flex min-h-full ios-scroll-fix" style={{ fontFamily: "'Inter', sans-serif" }}>
       <Sidebar
         active={active}
         onChange={(s) => setActive(s)}
@@ -58,7 +58,7 @@ function AppLayout({ data, isLocalMode, userEmail, onSignOut, onDeleteAccount, o
         onClose={() => setMobileOpen(false)}
         familyName={data.familyName}
       />
-      <div className="flex-1 flex flex-col min-w-0 h-full">
+       <div className="flex-1 flex flex-col min-w-0 lg:ml-64">
         <header className="bg-white border-b border-gray-200 px-3 sm:px-6 flex items-center gap-2 sm:gap-4 sticky top-0 z-50 flex-shrink-0 shadow-lg"
           style={{ paddingTop: `calc(env(safe-area-inset-top) + 0.75rem)`, paddingBottom: '0.75rem' }}
         >
@@ -127,7 +127,7 @@ function AppLayout({ data, isLocalMode, userEmail, onSignOut, onDeleteAccount, o
             )}
           </div>
         </header>
-        <main className="flex-1" style={{ paddingBottom: `calc(env(safe-area-inset-bottom) + 1.5rem)` }}>
+         <main className="flex-1 bg-gray-50" style={{ paddingBottom: `calc(env(safe-area-inset-bottom) + 1.5rem)` }}>
           <div className="max-w-7xl mx-auto w-full p-3 sm:p-4 lg:p-6">
             {active === 'dashboard' && (
               <Dashboard

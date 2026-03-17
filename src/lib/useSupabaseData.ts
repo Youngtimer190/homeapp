@@ -221,7 +221,7 @@ function memberFromRow(r: Record<string, unknown>): Member {
     id: r.id as string,
     name: r.name as string,
     role: r.role as string,
-    age: r.age as number,
+    age: calculateAge(r.birthday as string),
     email: r.email as string,
     phone: r.phone as string,
     avatar: r.avatar as string,

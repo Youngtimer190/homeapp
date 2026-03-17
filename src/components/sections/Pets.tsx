@@ -371,19 +371,23 @@ const emptyForm = (): Omit<Pet, 'id'> => {
                   </div>
                 </div>
 
-                {/* Details */}
-                <div className="p-6 space-y-5">
-                  {/* Weterynarz + wizyty */}
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-gray-50 rounded-xl p-4">
-                      <p className="text-xs text-gray-500 mb-1">🏥 Weterynarz</p>
-                      <p className="font-semibold text-gray-900">{selected.vet || '—'}</p>
-                    </div>
-                    <div className="bg-gray-50 rounded-xl p-4">
-                      <p className="text-xs text-gray-500 mb-1">📅 Ostatnia wizyta</p>
-                      <p className="font-semibold text-gray-900">{fmtDate(selected.lastVisit)}</p>
-                    </div>
-                  </div>
+                  {/* Details */}
+                 <div className="p-6 space-y-5">
+                   {/* Weterynarz + wizyty + data urodzenia */}
+                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                     <div className="bg-gray-50 rounded-xl p-4">
+                       <p className="text-xs text-gray-500 mb-1">🏥 Weterynarz</p>
+                       <p className="font-semibold text-gray-900">{selected.vet || '—'}</p>
+                     </div>
+                     <div className="bg-gray-50 rounded-xl p-4">
+                       <p className="text-xs text-gray-500 mb-1">📅 Ostatnia wizyta</p>
+                       <p className="font-semibold text-gray-900">{fmtDate(selected.lastVisit)}</p>
+                     </div>
+                     <div className="bg-gray-50 rounded-xl p-4">
+                       <p className="text-xs text-gray-500 mb-1">🎂 Data urodzenia</p>
+                       <p className="font-semibold text-gray-900">{fmtDate(selected.birthDate)}</p>
+                     </div>
+                   </div>
 
                   {/* Następna wizyta */}
                   {selected.noNextVisit ? (

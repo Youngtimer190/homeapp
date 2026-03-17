@@ -40,13 +40,13 @@ export default function Sidebar({ active, onChange, mobileOpen, onClose, familyN
         />
       )}
 
-      <aside
+       <aside
         className={`
           fixed top-0 left-0 h-full w-64 z-40 flex flex-col
           bg-white border-r border-gray-100 shadow-2xl
           transition-transform duration-300 ease-in-out
           ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}
-          lg:sticky lg:top-0 lg:h-screen lg:translate-x-0 lg:shadow-none lg:z-30 lg:flex-shrink-0
+          lg:fixed lg:top-0 lg:left-0 lg:h-screen lg:translate-x-0 lg:shadow-sm lg:z-30 lg:flex-shrink-0
         `}
       >
         {/* Logo — safe area top for iOS notch */}
