@@ -419,6 +419,7 @@ const emptyForm = (): Omit<Pet, 'id'> => {
         isOpen={showForm}
         onClose={closeModal}
         title={editingId ? '✏️ Edytuj zwierzę' : '🐾 Nowe zwierzę'}
+        maxWidth="max-w-lg"
       >
         <div className="p-5 space-y-4">
 

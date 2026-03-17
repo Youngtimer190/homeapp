@@ -35,7 +35,13 @@ export default function Modal({ isOpen, onClose, title, children, maxWidth = 'ma
       />
 
       {/* Mobile layout: panel below app header, full width */}
-      <div className="sm:hidden absolute inset-x-0 bottom-0 top-16 flex flex-col">
+      <div 
+        className="sm:hidden absolute inset-x-0 bottom-0 flex flex-col"
+        style={{
+          top: 'calc(4rem + env(safe-area-inset-top, 0px))',
+          height: 'calc(100dvh - (4rem + env(safe-area-inset-top, 0px)))',
+        }}
+      >
         <div
           ref={contentRef}
           className="relative bg-white w-full flex flex-col h-full"

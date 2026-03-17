@@ -15,6 +15,7 @@ import { useAuth } from './lib/AuthContext';
 import { useSupabaseData } from './lib/useSupabaseData';
 import { useLocalData } from './lib/useLocalData';
 import { isSupabaseConfigured } from './lib/supabase';
+import { useIOSHeightFix } from './hooks/useIOSHeightFix';
 
 type ActiveSection = Section | 'dashboard';
 type AppMode = 'auth' | 'demo' | 'app';
@@ -49,7 +50,7 @@ function AppLayout({ data, isLocalMode, userEmail, onSignOut, onDeleteAccount, o
   const handleNavigate = (section: Section) => setActive(section);
 
   return (
-      <div className="bg-gray-50 flex h-[100dvh] ios-scroll-container overflow-y-auto" style={{ fontFamily: "'Inter', sans-serif" }}>
+    <div className="bg-gray-50 flex h-full min-h-[100dvh] ios-scroll-fix" style={{ fontFamily: "'Inter', sans-serif" }}>
       <Sidebar
         active={active}
         onChange={(s) => setActive(s)}
@@ -57,10 +58,10 @@ function AppLayout({ data, isLocalMode, userEmail, onSignOut, onDeleteAccount, o
         onClose={() => setMobileOpen(false)}
         familyName={data.familyName}
       />
-       <div className="flex-1 flex flex-col min-w-0 overflow-y-auto">
-         <header className="bg-white border-b border-gray-200 px-3 sm:px-6 flex items-center gap-2 sm:gap-4 sticky top-0 z-50 flex-shrink-0 shadow-lg"
-           style={{ paddingTop: `calc(env(safe-area-inset-top) + 0.75rem)`, paddingBottom: '0.75rem' }}
-         >
+      <div className="flex-1 flex flex-col min-w-0 h-full">
+        <header className="bg-white border-b border-gray-200 px-3 sm:px-6 flex items-center gap-2 sm:gap-4 sticky top-0 z-50 flex-shrink-0 shadow-lg"
+          style={{ paddingTop: `calc(env(safe-area-inset-top) + 0.75rem)`, paddingBottom: '0.75rem' }}
+        >
           <button
             onClick={() => setMobileOpen(true)}
             className="lg:hidden w-9 h-9 rounded-xl bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition flex-shrink-0"
@@ -126,8 +127,8 @@ function AppLayout({ data, isLocalMode, userEmail, onSignOut, onDeleteAccount, o
             )}
           </div>
         </header>
-        <main className="flex-1 overflow-hidden">
-          <div className="max-w-7xl mx-auto w-full p-3 sm:p-4 lg:p-6 h-full overflow-y-auto" style={{ paddingBottom: `calc(env(safe-area-inset-bottom) + 1.5rem)` }}>
+        <main className="flex-1" style={{ paddingBottom: `calc(env(safe-area-inset-bottom) + 1.5rem)` }}>
+          <div className="max-w-7xl mx-auto w-full p-3 sm:p-4 lg:p-6">
             {active === 'dashboard' && (
               <Dashboard
                 transactions={data.transactions}
@@ -240,6 +241,9 @@ function SupabaseApp({ onExitToAuth }: { onExitToAuth: () => void }) {
 
 // ── Root ──────────────────────────────────────────────────────────────────────
 export default function App() {
+  // Fix iOS Safari address bar hiding issues
+  useIOSHeightFix();
+  
   const { user, loading: authLoading } = useAuth();
   const [appMode, setAppMode] = useState<AppMode>(() => {
     // Inicjalizuj tryb SYNCHRONICZNIE — bez opóźnienia

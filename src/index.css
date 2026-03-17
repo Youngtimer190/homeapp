@@ -1,74 +1,81 @@
 @import "tailwindcss";
 
-/* ===== iOS Safari fixes ===== */
+/* ===== iOS Safari FULLSCREEN FIX ===== */
+/* This ensures address bar hides properly on iOS Safari */
 
-/* Prevent font size inflation on orientation change */
+/* CSS custom property for dynamic viewport height */
+:root {
+  --vh: 1vh;
+}
+
+/* 1. Lock the document at 100% height, no scrolling */
 html {
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
   height: 100%;
   width: 100%;
+  overflow: hidden;
+  position: fixed; /* This is key for iOS Safari */
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
 }
 
-/* Full height on iOS with dynamic viewport units for address bar hiding */
-html, body {
+/* 2. Body also locked at 100% height */
+body {
   margin: 0;
   padding: 0;
   width: 100%;
   height: 100%;
-  min-height: 100dvh;
-  min-height: -webkit-fill-available;
   overflow: hidden;
+  position: fixed; /* Prevents elastic scrolling */
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  -webkit-overflow-scrolling: touch;
 }
 
-/* Enable native scroll behavior for address bar hiding on iOS Safari */
+/* 3. Root element takes full height and provides the scroll */
+#root {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 100vh; /* Fallback */
+  height: calc(var(--vh, 1vh) * 100);
+  width: 100%;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+  overscroll-behavior: none; /* Disables pull-to-refresh */
+}
+
+/* iOS specific optimizations */
 @supports (-webkit-touch-callout: none) {
   html, body {
     height: -webkit-fill-available;
     min-height: -webkit-fill-available;
-    overflow: hidden;
-    overscroll-behavior-y: none;
   }
   
-  /* Main app container */
   #root {
-    height: 100%;
+    height: -webkit-fill-available;
     min-height: -webkit-fill-available;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    scroll-behavior: smooth;
   }
   
-  /* Force address bar to hide on scroll */
-  .ios-scroll-container {
-    -webkit-overflow-scrolling: touch;
-    overflow-y: auto;
-    height: 100%;
+  /* Force hardware acceleration for smoother scrolling */
+  .ios-scroll-fix {
+    -webkit-transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0);
   }
 }
 
 /* Remove tap highlight on iOS */
 * {
   -webkit-tap-highlight-color: transparent;
-}
-
-/* Smooth scrolling for all browsers */
-html {
-  scroll-behavior: smooth;
-}
-
-/* Main app root styling */
-#root {
-  display: flex;
-  flex-direction: column;
-  height: 100dvh;
-  height: -webkit-fill-available;
-  min-height: 100dvh;
-  min-height: -webkit-fill-available;
-  width: 100%;
-  position: relative;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
 }
 
 /* Safe area insets for iPhone notch/home bar */
@@ -103,64 +110,41 @@ select {
   appearance: none;
 }
 
-/* Scrollable containers */
-.scroll-container {
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior: contain;
-}
-
-/* Improve touch scrolling on iOS */
-.touch-scroll {
-  -webkit-overflow-scrolling: touch;
-  overflow-y: auto;
-}
-
-/* Prevent pull-to-refresh on iOS Safari */
-body {
-  overscroll-behavior-y: contain;
-  /* Enable native scroll for address bar hiding */
-  -webkit-overflow-scrolling: touch;
-  overflow-y: auto;
-}
-
-/* Improve address bar hiding on iOS */
-html {
-  height: 100%;
-  width: 100%;
-  overflow: hidden;
-}
-
-body {
-  height: 100%;
-  overflow: auto;
-  -webkit-overflow-scrolling: touch;
-}
-
-/* Fix for Safari address bar during scroll */
+/* Additional iOS fixes */
 @supports (-webkit-touch-callout: none) {
-  .ios-fix {
-    min-height: -webkit-fill-available;
+  /* Prevent rubber band effect */
+  .no-bounce {
+    overscroll-behavior: none;
   }
   
-  /* Force address bar to hide on scroll */
-  #root {
-    -webkit-transform: translate3d(0,0,0);
-    transform: translate3d(0,0,0);
-    overscroll-behavior-y: none;
+  /* Ensure inputs work well on iOS */
+  input[type="text"],
+  input[type="number"],
+  input[type="date"],
+  input[type="email"],
+  input[type="password"],
+  textarea {
+    font-size: 16px; /* Prevent zoom on focus */
   }
   
-  /* Enable smooth hiding of address bar */
-  .ios-scroll-container {
-    -webkit-overflow-scrolling: touch;
-    overflow-y: auto;
-    height: 100%;
+  /* Improve touch targets */
+  button, a {
+    min-height: 44px;
+    min-width: 44px;
   }
 }
 
-/* Ensure content is not hidden behind browser UI */
-@media (max-height: 600px) {
-  #root {
-    min-height: 100vh;
-  }
+/* Ensure the root stays as flex container for layout */
+#root {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Hide scrollbars but keep functionality */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
 }
