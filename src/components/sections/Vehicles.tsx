@@ -46,6 +46,7 @@ export default function Vehicles({ vehicles, setVehicles }: Props) {
       insurance: v.insurance, policyNumber: v.policyNumber,
     });
     setShowForm(true);
+    window.scrollTo(0, 0);
   };
 
   const handleSave = () => {
@@ -178,10 +179,10 @@ export default function Vehicles({ vehicles, setVehicles }: Props) {
                         onClick={() => openEdit(selected)}
                         className="bg-white/20 hover:bg-white/30 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition"
                       >✏️ Edytuj</button>
-                      <button
-                        onClick={() => setConfirmId(selected.id)}
-                        className="bg-white/20 hover:bg-red-500/70 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition"
-                      >🗑 Usuń</button>
+                       <button
+                         onClick={() => { setConfirmId(selected.id); window.scrollTo(0, 0); }}
+                         className="bg-white/20 hover:bg-red-500/70 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition"
+                       >🗑 Usuń</button>
                     </div>
                   </div>
                   <div className="relative mt-4 flex gap-6">

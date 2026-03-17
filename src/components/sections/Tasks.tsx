@@ -120,6 +120,7 @@ export default function Tasks({ tasks, setTasks, members }: Props) {
     setEditId(null);
     setForm(emptyForm(selectedDate));
     setShowForm(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const openEdit = (task: Task) => {
@@ -133,6 +134,7 @@ export default function Tasks({ tasks, setTasks, members }: Props) {
       dueDate: task.dueDate,
     });
     setShowForm(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleSave = () => {
@@ -150,6 +152,11 @@ export default function Tasks({ tasks, setTasks, members }: Props) {
   const handleDelete = (id: string) => {
     setTasks(prev => prev.filter(t => t.id !== id));
     setConfirmId(null);
+  };
+
+  const openDelete = (id: string) => {
+    setConfirmId(id);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleStatusChange = (id: string, status: Task['status']) => {
@@ -342,7 +349,7 @@ export default function Tasks({ tasks, setTasks, members }: Props) {
                           ✏️ Edytuj
                         </button>
                         <button
-                          onClick={() => setConfirmId(task.id)}
+                          onClick={() => openDelete(task.id)}
                           className="text-xs px-3 py-1.5 rounded-lg bg-red-500 text-white hover:bg-red-600 font-medium transition shadow-sm"
                         >
                           🗑 Usuń

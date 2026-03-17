@@ -74,6 +74,7 @@ export default function Members({ members, setMembers, familyName, setFamilyName
       responsibilities: member.responsibilities,
     });
     setShowForm(true);
+    window.scrollTo(0, 0);
   };
 
   const handleDelete = (id: string) => {

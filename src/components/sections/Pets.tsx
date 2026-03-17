@@ -97,6 +97,7 @@ const emptyForm = (): Omit<Pet, 'id'> => {
       notes: pet.notes,
     });
     setShowForm(true);
+    window.scrollTo(0, 0);
   };
 
   const handleSave = () => {
@@ -363,10 +364,10 @@ const emptyForm = (): Omit<Pet, 'id'> => {
                         onClick={() => openEdit(selected)}
                         className="bg-white/20 hover:bg-white/30 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition"
                       >✏️ Edytuj</button>
-                      <button
-                        onClick={() => setConfirmId(selected.id)}
-                        className="bg-white/20 hover:bg-red-500/70 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition"
-                      >🗑 Usuń</button>
+                       <button
+                         onClick={() => { setConfirmId(selected.id); window.scrollTo(0, 0); }}
+                         className="bg-white/20 hover:bg-red-500/70 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition"
+                       >🗑 Usuń</button>
                     </div>
                   </div>
                 </div>

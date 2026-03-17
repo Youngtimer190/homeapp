@@ -101,6 +101,7 @@ export default function Meals({ meals, setMeals }: Props) {
     setEditId(meal.id);
     setForm({ name: meal.name, mealLabel: meal.mealLabel, date: meal.date, ingredients: meal.ingredients });
     setShowForm(true);
+    window.scrollTo(0, 0);
   };
 
   const handleSave = () => {
@@ -294,9 +295,9 @@ export default function Meals({ meals, setMeals }: Props) {
                       <span className="text-xs text-orange-500 bg-orange-100 px-2 py-0.5 rounded-full">{labelMeals.length}</span>
                     </div>
                     <div className="divide-y divide-gray-50">
-                      {labelMeals.map(meal => (
-                        <MealCard key={meal.id} meal={meal} onEdit={openEdit} onDelete={id => setConfirmId(id)} />
-                      ))}
+                       {labelMeals.map(meal => (
+                         <MealCard key={meal.id} meal={meal} onEdit={openEdit} onDelete={id => { setConfirmId(id); window.scrollTo(0, 0); }} />
+                       ))}
                     </div>
                   </div>
                 );
@@ -309,9 +310,9 @@ export default function Meals({ meals, setMeals }: Props) {
                     <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">{unlabeledMeals.length}</span>
                   </div>
                   <div className="divide-y divide-gray-50">
-                    {unlabeledMeals.map(meal => (
-                      <MealCard key={meal.id} meal={meal} onEdit={openEdit} onDelete={id => setConfirmId(id)} />
-                    ))}
+                     {unlabeledMeals.map(meal => (
+                       <MealCard key={meal.id} meal={meal} onEdit={openEdit} onDelete={id => { setConfirmId(id); window.scrollTo(0, 0); }} />
+                     ))}
                   </div>
                 </div>
               )}

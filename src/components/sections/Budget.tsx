@@ -115,12 +115,19 @@ export default function Budget({ transactions, setTransactions, memberNames }: P
     setEditId(null);
     setForm(emptyForm());
     setShowForm(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const openEdit = (t: Transaction) => {
     setEditId(t.id);
     setForm({ type: t.type, category: t.category, description: t.description, amount: t.amount, date: t.date });
     setShowForm(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const openDelete = (id: string) => {
+    setConfirmId(id);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleSave = () => {
@@ -305,11 +312,11 @@ export default function Budget({ transactions, setTransactions, memberNames }: P
                     className="w-7 h-7 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-500 flex items-center justify-center text-xs transition"
                     title="Edytuj"
                   >✏️</button>
-                  <button
-                    onClick={() => setConfirmId(t.id)}
-                    className="w-7 h-7 rounded-lg bg-red-50 hover:bg-red-100 text-red-400 hover:text-red-500 flex items-center justify-center text-sm transition"
-                    title="Usuń"
-                  >×</button>
+                   <button
+                     onClick={() => openDelete(t.id)}
+                     className="w-7 h-7 rounded-lg bg-red-50 hover:bg-red-100 text-red-400 hover:text-red-500 flex items-center justify-center text-sm transition"
+                     title="Usuń"
+                   >×</button>
                 </div>
               </div>
             ))}
