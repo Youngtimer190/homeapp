@@ -69,11 +69,11 @@ function AppLayout({ data, isLocalMode, userEmail, onSignOut, onDeleteAccount, o
       />
 
       {/* Main content */}
-      <div className="flex-1 flex flex-col min-w-0 lg:ml-64">
+      <div className="flex-1 flex flex-col min-w-0 lg:pl-64">
 
         {/* Header */}
         <header
-          className="bg-white border-b border-gray-200 px-3 sm:px-6 flex items-center gap-2 sm:gap-4 sticky top-0 z-20 shadow-sm"
+          className="bg-white border-b border-gray-200 px-3 sm:px-6 flex items-center gap-2 sm:gap-4 sticky top-0 z-30 shadow-sm"
           style={{
             paddingTop: `calc(env(safe-area-inset-top, 0px) + 0.625rem)`,
             paddingBottom: '0.625rem',
