@@ -49,7 +49,7 @@ function AppLayout({ data, isLocalMode, userEmail, onSignOut, onDeleteAccount, o
   const handleNavigate = (section: Section) => setActive(section);
 
   return (
-    <div className="bg-gray-50 flex min-h-screen" style={{ fontFamily: "'Inter', sans-serif" }}>
+    <div className="bg-gray-50 flex min-h-[100dvh]" style={{ fontFamily: "'Inter', sans-serif" }}>
       <Sidebar
         active={active}
         onChange={(s) => setActive(s)}

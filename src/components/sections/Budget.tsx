@@ -441,36 +441,38 @@ export default function Budget({ transactions, setTransactions, memberNames }: P
                   {categories.map(c => <option key={c} value={c}>{categoryIcons[c]} {c}</option>)}
                 </select>
               </div>
+
               <div>
-                <label className="block text-xs text-gray-500 mb-1 font-medium">Dodał(a)</label>
-                {memberNames.length === 0 ? (
-                  <select disabled className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm bg-gray-100 text-gray-400 cursor-not-allowed">
-                    <option>Najpierw dodaj członka rodziny</option>
-                  </select>
-                ) : (
+                <label className="block text-xs text-gray-500 mb-1 font-medium">Przypisz do osoby</label>
+                {memberNames.length > 0 ? (
                   <select
-                    value={form.addedBy}
+                    value={form.addedBy || ''}
                     onChange={e => setForm(f => ({ ...f, addedBy: e.target.value }))}
                     className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 bg-white"
                   >
-                    <option value="">Wybierz osobę</option>
+                    <option value="">-- Wybierz osobę --</option>
                     {memberNames.map(name => (
                       <option key={name} value={name}>{name}</option>
                     ))}
                   </select>
+                ) : (
+                  <div className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm bg-gray-50 text-gray-500 italic">
+                    Najpierw dodaj członka rodziny
+                  </div>
                 )}
               </div>
+
             </div>
             <div className="p-5 pt-0 flex gap-3">
-              <button
-                onClick={() => { setShowForm(false); setEditId(null); }}
-                className="flex-1 border border-gray-200 text-gray-700 py-2.5 rounded-xl text-sm font-semibold hover:bg-gray-50 transition"
-              >Anuluj</button>
-              <button
-                onClick={handleSave}
-                disabled={!form.description || form.amount <= 0}
-                className="flex-1 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed text-white py-2.5 rounded-xl text-sm font-semibold transition shadow"
-              >{editId ? 'Zapisz zmiany' : 'Dodaj'}</button>
+               <button
+                 onClick={() => { setShowForm(false); setEditId(null); }}
+                 className="flex-1 border border-gray-200 text-gray-700 py-2.5 rounded-xl text-sm font-semibold hover:bg-gray-50 transition"
+               >Anuluj</button>
+               <button
+                 onClick={handleSave}
+                 disabled={!form.description || form.amount <= 0 || memberNames.length === 0}
+                 className="flex-1 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed text-white py-2.5 rounded-xl text-sm font-semibold transition shadow"
+               >{editId ? 'Zapisz zmiany' : 'Dodaj'}</button>
             </div>
       </Modal>
 
