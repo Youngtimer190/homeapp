@@ -1,5 +1,7 @@
 
 
+import { useEffect } from 'react';
+
 interface ConfirmDialogProps {
   isOpen: boolean;
   title: string;
@@ -17,6 +19,27 @@ export default function ConfirmDialog({
   onConfirm,
   onCancel,
 }: ConfirmDialogProps) {
+  useEffect(() => {
+    if (!isOpen) return;
+    const root = document.getElementById('root');
+    if (root) {
+      root.style.overflow = 'hidden';
+    }
+    return () => {
+      const root = document.getElementById('root');
+      if (root) {
+        root.style.overflow = '';
+      }
+    };
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onCancel(); };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [isOpen, onCancel]);
+
   if (!isOpen) return null;
 
   return (
@@ -27,8 +50,8 @@ export default function ConfirmDialog({
         onClick={onCancel}
       />
 
-      {/* Dialog — centered on all devices */}
-      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 flex flex-col items-center gap-4" style={{ 
+       {/* Dialog — centered on all devices */}
+      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md sm:max-w-sm p-6 flex flex-col items-center gap-4 overflow-y-auto" style={{ 
         maxHeight: 'calc(100dvh - 2rem)',
         marginTop: 'env(safe-area-inset-top, 0px)',
         marginBottom: 'env(safe-area-inset-bottom, 0px)'

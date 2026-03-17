@@ -13,8 +13,16 @@ export default function Modal({ isOpen, onClose, title, children, maxWidth = 'ma
 
   useEffect(() => {
     if (!isOpen) return;
-    document.body.style.overflow = 'hidden';
-    return () => { document.body.style.overflow = ''; };
+    const root = document.getElementById('root');
+    if (root) {
+      root.style.overflow = 'hidden';
+    }
+    return () => {
+      const root = document.getElementById('root');
+      if (root) {
+        root.style.overflow = '';
+      }
+    };
   }, [isOpen]);
 
   useEffect(() => {
@@ -34,17 +42,18 @@ export default function Modal({ isOpen, onClose, title, children, maxWidth = 'ma
         onClick={onClose}
       />
 
-      {/* Mobile layout: panel below app header, full width */}
+      {/* Mobile layout: full screen modal */}
       <div 
-        className="sm:hidden absolute inset-x-0 bottom-0 flex flex-col"
+        className="sm:hidden fixed inset-0 flex flex-col"
         style={{
-          top: 'calc(4rem + env(safe-area-inset-top, 0px))',
-          height: 'calc(100dvh - (4rem + env(safe-area-inset-top, 0px)))',
+          paddingTop: 'env(safe-area-inset-top, 0px)',
+          paddingBottom: 'env(safe-area-inset-bottom, 0px)',
         }}
       >
         <div
           ref={contentRef}
-          className="relative bg-white w-full flex flex-col h-full"
+          className="relative bg-white w-full flex flex-col"
+          style={{ height: 'calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px))' }}
         >
           {/* Header */}
           <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 shrink-0 bg-white">

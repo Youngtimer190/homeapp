@@ -114,9 +114,9 @@ export default function AuthScreen({ onSuccess, onDemoMode }: Props) {
     );
   }
 
-  return (
-    <div className="bg-gradient-to-br from-indigo-50 via-white to-violet-50 flex items-center justify-center p-3 sm:p-4 overflow-y-auto min-h-screen safe-top safe-bottom" style={{ paddingTop: `calc(env(safe-area-inset-top) + 1rem)`, paddingBottom: `calc(env(safe-area-inset-bottom) + 1rem)` }}>
-      <div className="w-full max-w-md">
+   return (
+     <div className="bg-gradient-to-br from-indigo-50 via-white to-violet-50 flex items-start sm:items-center justify-center p-3 sm:p-4 overflow-y-auto h-screen safe-top safe-bottom" style={{ paddingTop: `calc(env(safe-area-inset-top) + 1rem)`, paddingBottom: `calc(env(safe-area-inset-bottom) + 1rem)` }}>
+       <div className="w-full max-w-md my-auto">
 
         {/* Logo */}
         <div className="text-center mb-6 sm:mb-8">
@@ -207,13 +207,13 @@ export default function AuthScreen({ onSuccess, onDemoMode }: Props) {
                 </div>
               )}
 
-              {/* Error */}
-              {error && (
-                <div className="flex items-start gap-2 bg-red-50 border border-red-100 rounded-xl p-3">
-                  <span className="text-red-500 flex-shrink-0">⚠️</span>
-                  <p className="text-sm text-red-600">{error}</p>
-                </div>
-              )}
+               {/* Error - centered on mobile */}
+               {error && (
+                 <div className="flex items-center justify-center gap-2 bg-red-50 border border-red-100 rounded-xl p-4 text-center">
+                   <span className="text-red-500 flex-shrink-0">⚠️</span>
+                   <p className="text-sm text-red-600 font-medium">{error}</p>
+                 </div>
+               )}
 
               {/* Submit */}
               <button

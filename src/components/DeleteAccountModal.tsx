@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface Props {
   userEmail: string;
@@ -12,6 +12,27 @@ export default function DeleteAccountModal({ userEmail, onConfirm, onClose }: Pr
   const [confirmation, setConfirmation] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  // Blokuj scrollowanie tła
+  useEffect(() => {
+    const root = document.getElementById('root');
+    if (root) {
+      root.style.overflow = 'hidden';
+    }
+    return () => {
+      const root = document.getElementById('root');
+      if (root) {
+        root.style.overflow = '';
+      }
+    };
+  }, []);
+
+  // Obsługa Escape
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [onClose]);
 
   const CONFIRM_PHRASE = 'USUŃ KONTO';
 
