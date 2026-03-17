@@ -44,22 +44,6 @@ export default function Shopping({ lists, setLists }: Props) {
     setConfirmListId(null);
   };
 
-  const openAddList = () => {
-    setListForm(emptyList);
-    setShowListModal(true);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const openDeleteList = (id: string) => {
-    setConfirmListId(id);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const openDeleteItem = (id: string) => {
-    setConfirmItemId(id);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
   // ── Item actions ─────────────────────────────────────────────
   const handleOpenAddItem = () => {
     setEditingItem(null);
