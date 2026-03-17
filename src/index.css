@@ -18,8 +18,7 @@ html, body {
   height: 100%;
   min-height: 100dvh;
   min-height: -webkit-fill-available;
-  overflow-x: hidden;
-  -webkit-overflow-scrolling: touch;
+  overflow: hidden;
 }
 
 /* Enable native scroll behavior for address bar hiding on iOS Safari */
@@ -27,28 +26,23 @@ html, body {
   html, body {
     height: -webkit-fill-available;
     min-height: -webkit-fill-available;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
+    overflow: hidden;
     overscroll-behavior-y: none;
-  }
-  
-  /* Allow body to scroll naturally - this helps address bar hide/show */
-  body {
-    position: relative;
-    scroll-behavior: smooth;
   }
   
   /* Main app container */
   #root {
-    min-height: 100dvh;
+    height: 100%;
     min-height: -webkit-fill-available;
-    height: auto;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
   }
   
   /* Force address bar to hide on scroll */
   .ios-scroll-container {
     -webkit-overflow-scrolling: touch;
-    overflow-y: scroll;
+    overflow-y: auto;
     height: 100%;
   }
 }
@@ -67,11 +61,14 @@ html {
 #root {
   display: flex;
   flex-direction: column;
+  height: 100dvh;
+  height: -webkit-fill-available;
   min-height: 100dvh;
   min-height: -webkit-fill-available;
   width: 100%;
   position: relative;
-  overflow: visible;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* Safe area insets for iPhone notch/home bar */
@@ -146,11 +143,18 @@ body {
     min-height: -webkit-fill-available;
   }
   
-  /* Force address bar to hide */
-  html, body {
-    height: 100%;
-    overflow-y: auto;
+  /* Force address bar to hide on scroll */
+  #root {
+    -webkit-transform: translate3d(0,0,0);
+    transform: translate3d(0,0,0);
+    overscroll-behavior-y: none;
+  }
+  
+  /* Enable smooth hiding of address bar */
+  .ios-scroll-container {
     -webkit-overflow-scrolling: touch;
+    overflow-y: auto;
+    height: 100%;
   }
 }
 

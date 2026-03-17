@@ -49,7 +49,7 @@ function AppLayout({ data, isLocalMode, userEmail, onSignOut, onDeleteAccount, o
   const handleNavigate = (section: Section) => setActive(section);
 
   return (
-      <div className="bg-gray-50 flex min-h-[100dvh] ios-scroll-container" style={{ fontFamily: "'Inter', sans-serif" }}>
+      <div className="bg-gray-50 flex h-[100dvh] ios-scroll-container overflow-y-auto" style={{ fontFamily: "'Inter', sans-serif" }}>
       <Sidebar
         active={active}
         onChange={(s) => setActive(s)}
@@ -126,8 +126,8 @@ function AppLayout({ data, isLocalMode, userEmail, onSignOut, onDeleteAccount, o
             )}
           </div>
         </header>
-        <main className="flex-1 overflow-y-auto overflow-x-hidden" style={{ WebkitOverflowScrolling: 'touch' as any }}>
-          <div className="max-w-7xl mx-auto w-full p-3 sm:p-4 lg:p-6" style={{ paddingBottom: `calc(env(safe-area-inset-bottom) + 1.5rem)` }}>
+        <main className="flex-1 overflow-hidden">
+          <div className="max-w-7xl mx-auto w-full p-3 sm:p-4 lg:p-6 h-full overflow-y-auto" style={{ paddingBottom: `calc(env(safe-area-inset-bottom) + 1.5rem)` }}>
             {active === 'dashboard' && (
               <Dashboard
                 transactions={data.transactions}
