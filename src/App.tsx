@@ -58,9 +58,9 @@ function AppLayout({ data, isLocalMode, userEmail, onSignOut, onDeleteAccount, o
         familyName={data.familyName}
       />
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-         <header className="bg-white/95 backdrop-blur-sm border-b border-gray-200 px-3 sm:px-6 flex items-center gap-2 sm:gap-4 sticky top-0 z-50 flex-shrink-0 shadow-md"
-           style={{ paddingTop: `calc(env(safe-area-inset-top) + 1rem)`, paddingBottom: '1rem' }}
-        >
+         <header className="bg-white border-b border-gray-200 px-3 sm:px-6 flex items-center gap-2 sm:gap-4 sticky top-0 z-50 flex-shrink-0 shadow-lg"
+           style={{ paddingTop: `calc(env(safe-area-inset-top) + 0.75rem)`, paddingBottom: '0.75rem' }}
+         >
           <button
             onClick={() => setMobileOpen(true)}
             className="lg:hidden w-9 h-9 rounded-xl bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition flex-shrink-0"

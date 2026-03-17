@@ -416,16 +416,16 @@ function MealCard({
           <p className="text-xs text-gray-400 mt-0.5 truncate">{meal.ingredients}</p>
         )}
       </div>
-      <div className="flex items-center gap-2 ml-3 flex-shrink-0 opacity-100 transition">
+      <div className="flex items-center gap-2 ml-3 flex-shrink-0">
         <button
           onClick={() => onEdit(meal)}
-          className="text-xs px-2.5 py-1 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 font-medium transition"
+          className="text-xs px-3 py-1.5 rounded-lg bg-orange-500 text-white hover:bg-orange-600 font-medium transition shadow-sm"
         >
           ✏️ Edytuj
         </button>
         <button
           onClick={() => onDelete(meal.id)}
-          className="text-xs px-2.5 py-1 rounded-lg bg-red-50 text-red-500 hover:bg-red-100 font-medium transition"
+          className="text-xs px-3 py-1.5 rounded-lg bg-red-500 text-white hover:bg-red-600 font-medium transition shadow-sm"
         >
           🗑 Usuń
         </button>

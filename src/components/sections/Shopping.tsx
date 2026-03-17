@@ -310,21 +310,21 @@ export default function Shopping({ lists, setLists }: Props) {
 
                       </div>
 
-                      {/* Actions */}
-                       <div className="flex items-center gap-2 ml-3 flex-shrink-0 opacity-100 transition">
-                         <button
-                           onClick={() => handleOpenEditItem(item)}
-                           className="text-xs px-2.5 py-1 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 font-medium transition"
-                         >
-                           ✏️ Edytuj
-                         </button>
-                         <button
-                           onClick={() => setConfirmItemId(item.id)}
-                           className="text-xs px-2.5 py-1 rounded-lg bg-red-50 text-red-500 hover:bg-red-100 font-medium transition"
-                         >
-                           🗑 Usuń
-                         </button>
-                       </div>
+                       {/* Actions */}
+                        <div className="flex items-center gap-2 ml-3 flex-shrink-0">
+                          <button
+                            onClick={() => handleOpenEditItem(item)}
+                            className="text-xs px-3 py-1.5 rounded-lg bg-teal-500 text-white hover:bg-teal-600 font-medium transition shadow-sm"
+                          >
+                            ✏️ Edytuj
+                          </button>
+                          <button
+                            onClick={() => setConfirmItemId(item.id)}
+                            className="text-xs px-3 py-1.5 rounded-lg bg-red-500 text-white hover:bg-red-600 font-medium transition shadow-sm"
+                          >
+                            🗑 Usuń
+                          </button>
+                        </div>
                     </div>
                   ))}
                 </div>

@@ -12,6 +12,25 @@ html {
 html, body, #root {
   height: 100%;
   height: -webkit-fill-available;
+  overflow-x: hidden;
+}
+
+/* Prevent address bar hiding issues on iOS Safari */
+@supports (-webkit-touch-callout: none) {
+  html, body, #root {
+    height: -webkit-fill-available;
+    min-height: -webkit-fill-available;
+  }
+  body {
+    width: 100%;
+    overflow-y: scroll;
+    -webkit-overflow-scrolling: touch;
+  }
+  /* Force address bar to hide on scroll */
+  .scroll-container {
+    -webkit-overflow-scrolling: touch;
+    overflow-y: auto;
+  }
 }
 
 /* Remove tap highlight on iOS */
