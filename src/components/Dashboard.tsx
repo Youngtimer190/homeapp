@@ -216,7 +216,7 @@ export default function Dashboard({ transactions, tasks, meals, vehicles, pets, 
             <p className="text-2xl font-bold text-blue-600 mt-1">{monthDoneTasks.length}<span className="text-gray-400 text-base font-normal">/{monthTasks.length}</span></p>
             <p className="text-xs text-gray-500 mt-1">{monthPendingTasks.length} do wykonania w miesiącu · {monthHighPriorityTasks.length} pilnych</p>
            <div className="mt-3 space-y-1">
-             {monthPendingTasks.slice(0, 2).map(t => (
+             {monthPendingTasks.map(t => (
               <div key={t.id} className="flex items-center gap-2 text-xs text-gray-600">
                 <span className="w-1.5 h-1.5 rounded-full bg-blue-400 flex-shrink-0" />
                 <span className="truncate">{t.title}</span>
@@ -237,7 +237,7 @@ export default function Dashboard({ transactions, tasks, meals, vehicles, pets, 
             {Array.from(new Set(todayMeals.map(m => m.mealLabel).filter(Boolean))).join(', ') || 'Brak kategorii'}
           </p>
           <div className="mt-3 space-y-1">
-            {todayMeals.slice(0, 2).map(m => (
+            {todayMeals.map(m => (
               <div key={m.id} className="flex items-center gap-2 text-xs text-gray-600">
                 <span className="w-1.5 h-1.5 rounded-full bg-orange-400 flex-shrink-0" />
                 <span className="truncate">{m.name}</span>
@@ -264,7 +264,7 @@ export default function Dashboard({ transactions, tasks, meals, vehicles, pets, 
             </p>
           )}
           <div className="mt-3 space-y-1">
-            {vehicles.slice(0, 2).map(v => (
+            {vehicles.map(v => (
               <div key={v.id} className="flex items-center gap-2 text-xs text-gray-600">
                 <span className="w-2 h-2 rounded-full flex-shrink-0 bg-violet-400" />
                 <span className="truncate">{v.brand} {v.model}</span>
@@ -291,7 +291,7 @@ export default function Dashboard({ transactions, tasks, meals, vehicles, pets, 
             </p>
           )}
           <div className="mt-3 space-y-1">
-            {pets.slice(0, 2).map(p => (
+            {pets.map(p => (
               <div key={p.id} className="flex items-center gap-2 text-xs text-gray-600">
                 <span className="w-1.5 h-1.5 rounded-full bg-amber-400 flex-shrink-0" />
                 <span className="truncate">{p.name} ({p.species})</span>
@@ -313,7 +313,7 @@ export default function Dashboard({ transactions, tasks, meals, vehicles, pets, 
             {shoppingLists.length} list · {productsToBuyCount} do kupienia
           </p>
           <div className="mt-3 space-y-1">
-            {productsToBuy.slice(0, 3).map((p, idx) => (
+            {productsToBuy.map((p, idx) => (
               <div key={idx} className="flex items-center gap-2 text-xs text-gray-600">
                 <span className="w-1.5 h-1.5 rounded-full bg-green-400 flex-shrink-0" />
                 <span className="truncate">{p.item.name}</span>
