@@ -2,22 +2,28 @@
 <html lang="pl">
   <head>
     <meta charset="UTF-8" />
+    <!--
+      viewport-fit=cover — treść sięga pod notch/home indicator na iPhone
+      WAŻNE: NIE dodajemy maximum-scale=1.0 ani user-scalable=no
+      — blokują chowanie paska adresu w Safari
+    -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-    <meta name="apple-mobile-web-app-title" content="Dom Manager" />
+
+    <title>FitPlaner – Generator & Planer Treningowy</title>
+
+    <!-- iOS Safari meta tagi -->
+    <!-- apple-mobile-web-app-capable=no — działamy w przeglądarce (nie standalone PWA) -->
+    <!-- W trybie standalone Safari inaczej obsługuje pasek adresu -->
     <meta name="mobile-web-app-capable" content="yes" />
-    <meta name="theme-color" content="#ffffff" />
+    <meta name="apple-mobile-web-app-title" content="FitPlaner" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="theme-color" content="#f8fafc" />
+
+    <!-- Prevent iOS from styling phone numbers/links -->
     <meta name="format-detection" content="telephone=no" />
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-    <title>Dom Manager – Zarządzaj Domem</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   </head>
   <body>
     <div id="root"></div>
-    <div id="modal-root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

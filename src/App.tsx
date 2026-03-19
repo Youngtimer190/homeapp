@@ -1,294 +1,191 @@
-import { useState, useEffect } from 'react';
-import { Section } from './types';
+import { useState, useEffect, useRef } from 'react';
+import { View, WorkoutDay } from './types';
 import Sidebar from './components/Sidebar';
 import Dashboard from './components/Dashboard';
-import Budget from './components/sections/Budget';
-import Tasks from './components/sections/Tasks';
-import Shopping from './components/sections/Shopping';
-import Meals from './components/sections/Meals';
-import Vehicles from './components/sections/Vehicles';
-import Pets from './components/sections/Pets';
-import Members from './components/sections/Members';
-import AuthScreen from './components/AuthScreen';
-import Settings from './components/sections/Settings';
-import { useAuth } from './lib/AuthContext';
-import { useSupabaseData } from './lib/useSupabaseData';
-import { useLocalData } from './lib/useLocalData';
+import WorkoutPlanner from './components/WorkoutPlanner';
+import ExerciseLibrary from './components/ExerciseLibrary';
+import Stats from './components/Stats';
+import PlanGenerator from './components/PlanGenerator';
+import AuthScreen from './components/auth/AuthScreen';
+import OfflineBanner from './components/auth/OfflineBanner';
+import DemoBanner from './components/auth/DemoBanner';
+import { useWorkoutStore } from './store/workoutStore';
+import { useAuthStore } from './store/authStore';
 import { isSupabaseConfigured } from './lib/supabase';
-import { useScrollLock } from './hooks/useScrollLock';
 
-type ActiveSection = Section | 'dashboard';
-type AppMode = 'auth' | 'demo' | 'app';
+export default function App() {
+  const [activeView, setActiveView] = useState<View>('dashboard');
+  const [offlineDismissed, setOfflineDismissed] = useState(false);
+  const topRef = useRef<HTMLDivElement>(null);
 
-const sectionTitles: Record<ActiveSection, { label: string; icon: string }> = {
-  dashboard: { label: 'Przegląd',      icon: '🏠' },
-  budget:    { label: 'Budżet',        icon: '💰' },
-  tasks:     { label: 'Zadania',       icon: '✅' },
-  shopping:  { label: 'Lista zakupów', icon: '🛒' },
-  meals:     { label: 'Posiłki',       icon: '🍽️' },
-  vehicles:  { label: 'Pojazdy',       icon: '🚗' },
-  pets:      { label: 'Zwierzęta',     icon: '🐾' },
-  members:   { label: 'Członkowie',    icon: '👨‍👩‍👧‍👦' },
-  settings:  { label: 'Ustawienia',    icon: '⚙️' },
-};
+  // Auth
+  const { user, initialized, isAuthenticated, isDemoMode, loginAsDemo, exitDemoMode } = useAuthStore();
 
-interface AppLayoutProps {
-  data: ReturnType<typeof useLocalData>;
-  isLocalMode: boolean;
-  userEmail?: string;
-  onSignOut?: () => void;
-  onDeleteAccount?: (password: string) => Promise<{ error: string | null }>;
-  onExitDemo?: () => void;
-}
+  // Workout store — pass userId for cloud sync
+  const {
+    days,
+    weekMeta,
+    goToPrevWeek,
+    goToNextWeek,
+    goToCurrentWeek,
+    copyFromPrevWeek,
+    toggleRestDay,
+    addExercise,
+    removeExercise,
+    updateExercise,
+    replaceExercise,
+    moveExercise,
+    resetWeek,
+    loadGeneratedPlan,
+    customExercises,
+    addCustomExercise,
+    updateCustomExercise,
+    deleteCustomExercise,
+    syncing,
+  } = useWorkoutStore(user?.id);
 
-function AppLayout({ data, isLocalMode, userEmail, onSignOut, onDeleteAccount, onExitDemo }: AppLayoutProps) {
-  const [active, setActive] = useState<ActiveSection>('dashboard');
-  const [mobileOpen, setMobileOpen] = useState(false);
+  // Scroll to top on every view change
+  useEffect(() => {
+    topRef.current?.scrollIntoView({ behavior: 'auto', block: 'start' });
+    window.scrollTo(0, 0);
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+  }, [activeView]);
 
-  // Lock scroll when sidebar is open on mobile
-  useScrollLock(mobileOpen);
+  const scrollToTop = () => {
+    topRef.current?.scrollIntoView({ behavior: 'auto', block: 'start' });
+    window.scrollTo(0, 0);
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+  };
 
-  const memberNames = data.members.map(m => m.name.split(' ')[0]);
-  const handleNavigate = (section: Section) => setActive(section);
+  const handleViewChange = (view: View) => {
+    setActiveView(view);
+    // Extra call — some Safari versions need this before state update
+    scrollToTop();
+  };
 
-  const handleSidebarChange = (s: ActiveSection) => {
-    setActive(s);
-    setMobileOpen(false);
+  const handleApplyGeneratedPlan = (generatedDays: WorkoutDay[]) => {
+    loadGeneratedPlan(generatedDays);
+    setActiveView('planner');
+    // scrollToTop via useEffect([activeView]) + extra direct call
+    scrollToTop();
+  };
+
+  // ── Loading screen while auth initializes ──
+  if (isSupabaseConfigured && !initialized) {
+    return (
+      <div className="bg-gradient-to-br from-slate-900 via-violet-950 to-slate-900 flex items-center justify-center" style={{ minHeight: '100dvh' }}>
+        <div className="text-center">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-500 to-indigo-600 shadow-2xl shadow-violet-500/30 mb-6">
+            <span className="text-3xl">🏋️</span>
+          </div>
+          <div className="flex items-center gap-2 text-slate-400 justify-center">
+            <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+            </svg>
+            <span className="text-sm">Ładowanie...</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Auth screen (only when Supabase configured + not authenticated) ──
+  if (isSupabaseConfigured && !isAuthenticated) {
+    return <AuthScreen onDemoLogin={loginAsDemo} />;
+  }
+
+  const renderView = () => {
+    switch (activeView) {
+      case 'dashboard':
+        return (
+          <Dashboard
+            days={days}
+            onGoToPlanner={() => handleViewChange('planner')}
+          />
+        );
+      case 'generator':
+        return (
+          <PlanGenerator
+            onApplyPlan={handleApplyGeneratedPlan}
+            onGoToPlanner={() => handleViewChange('planner')}
+          />
+        );
+      case 'planner':
+        return (
+          <WorkoutPlanner
+            days={days}
+            weekMeta={weekMeta}
+            onToggleRest={toggleRestDay}
+            onAddExercise={addExercise}
+            onRemoveExercise={removeExercise}
+            onUpdateExercise={updateExercise}
+            onReplaceExercise={replaceExercise}
+            onMoveExercise={moveExercise}
+            onResetWeek={resetWeek}
+            onPrevWeek={goToPrevWeek}
+            onNextWeek={goToNextWeek}
+            onGoToCurrentWeek={goToCurrentWeek}
+            onCopyFromPrevWeek={copyFromPrevWeek}
+            customExercises={customExercises}
+            onSaveCustomExercise={addCustomExercise}
+            onDeleteCustomExercise={deleteCustomExercise}
+          />
+        );
+      case 'library':
+        return (
+          <ExerciseLibrary
+            customExercises={customExercises}
+            onAddCustomExercise={addCustomExercise}
+            onUpdateCustomExercise={updateCustomExercise}
+            onDeleteCustomExercise={deleteCustomExercise}
+          />
+        );
+      case 'stats':
+        return <Stats days={days} />;
+      default:
+        return null;
+    }
   };
 
   return (
-    <div className="flex min-h-dvh bg-gray-50" style={{ fontFamily: "'Inter', sans-serif" }}>
+    <div className="min-h-screen bg-slate-50">
+      {/* Invisible anchor at absolute top for scrollIntoView */}
+      <div ref={topRef} style={{ position: 'absolute', top: 0, left: 0, height: 0, width: 0 }} />
 
-      {/* Sidebar */}
-      <Sidebar
-        active={active}
-        onChange={handleSidebarChange}
-        mobileOpen={mobileOpen}
-        onClose={() => setMobileOpen(false)}
-        familyName={data.familyName}
-      />
+      <Sidebar activeView={activeView} onViewChange={handleViewChange} />
 
-      {/* Main content */}
-      <div className="flex-1 flex flex-col min-w-0 lg:pl-64">
+      <div className="main-content">
+        {/* Demo banner */}
+        {isDemoMode && (
+          <DemoBanner onExit={exitDemoMode} />
+        )}
 
-        {/* Header */}
-        <header
-          className="bg-white border-b border-gray-200 px-3 sm:px-6 flex items-center gap-2 sm:gap-4 sticky top-0 z-30 shadow-sm"
-          style={{
-            paddingTop: `calc(env(safe-area-inset-top, 0px) + 0.625rem)`,
-            paddingBottom: '0.625rem',
-          }}
-        >
-          {/* Hamburger */}
-          <button
-            onClick={() => setMobileOpen(!mobileOpen)}
-            className="lg:hidden w-9 h-9 rounded-xl bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition flex-shrink-0"
-            aria-label="Menu"
-          >
-            <span className="text-gray-600 text-lg leading-none">{mobileOpen ? '✕' : '☰'}</span>
-          </button>
+        {/* Offline banner */}
+        {!isSupabaseConfigured && !offlineDismissed && (
+          <OfflineBanner onDismiss={() => setOfflineDismissed(true)} />
+        )}
 
-          {/* Breadcrumb */}
-          <div className="flex items-center gap-1.5 min-w-0 flex-1">
-            <button
-              onClick={() => setActive('dashboard')}
-              className={`text-sm font-medium transition flex-shrink-0 ${active === 'dashboard' ? 'text-gray-900' : 'text-gray-400 hover:text-gray-700'}`}
-            >
-              Dom Manager
-            </button>
-            {active !== 'dashboard' && (
-              <>
-                <span className="text-gray-300 flex-shrink-0">/</span>
-                <span className="text-sm font-semibold text-gray-900 truncate">
-                  {sectionTitles[active].icon} {sectionTitles[active].label}
-                </span>
-              </>
-            )}
+        {/* Sync indicator */}
+        {syncing && isSupabaseConfigured && (
+          <div className="bg-violet-500/10 border-b border-violet-500/20 px-4 py-2 flex items-center gap-2">
+            <svg className="w-3.5 h-3.5 text-violet-400 animate-spin flex-shrink-0" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+            </svg>
+            <p className="text-violet-400 text-xs font-medium">Synchronizowanie danych...</p>
           </div>
+        )}
 
-          {/* Right side */}
-          <div className="flex items-center gap-2 flex-shrink-0">
-            <div className="hidden md:flex items-center gap-2 text-xs text-gray-400 bg-gray-50 px-3 py-1.5 rounded-lg">
-              <span>{data.tasks.filter(t => t.status !== 'done').length} zadań</span>
-              <span className="text-gray-300">·</span>
-              <span>{data.members.length} osób</span>
-            </div>
-
-            {isLocalMode ? (
-              <div className="flex items-center gap-2">
-                <div className="flex items-center gap-1.5 px-2.5 py-1.5 bg-amber-50 text-amber-700 rounded-lg text-xs font-medium">
-                  <span>💾</span>
-                  <span className="hidden sm:inline">Demo</span>
-                </div>
-                {onExitDemo && (
-                  <button
-                    onClick={onExitDemo}
-                    className="flex items-center gap-1.5 px-2.5 py-1.5 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 rounded-lg text-xs font-semibold transition"
-                  >
-                    <span>🔑</span>
-                    <span className="hidden sm:inline">Zaloguj</span>
-                  </button>
-                )}
-              </div>
-            ) : (
-              <div className="flex items-center gap-2">
-                <div className="hidden sm:flex flex-col items-end">
-                  <span className="text-xs font-medium text-gray-700 truncate max-w-[140px]">{userEmail}</span>
-                  <span className="text-xs text-gray-400">zalogowany</span>
-                </div>
-                {onSignOut && (
-                  <button
-                    onClick={onSignOut}
-                    className="flex items-center gap-1.5 px-2.5 py-1.5 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg text-xs font-semibold transition"
-                  >
-                    🚪 <span className="hidden sm:inline">Wyloguj</span>
-                  </button>
-                )}
-              </div>
-            )}
-          </div>
-        </header>
-
-        {/* Page content */}
-        <main
-          className="flex-1"
-          style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 1.5rem)' }}
-        >
-          <div className="max-w-5xl mx-auto w-full px-3 py-4 sm:px-6 sm:py-6">
-            {active === 'dashboard' && (
-              <Dashboard
-                transactions={data.transactions}
-                tasks={data.tasks}
-                meals={data.meals}
-                vehicles={data.vehicles}
-                pets={data.pets}
-                members={data.members}
-                shoppingLists={data.shoppingLists}
-                onNavigate={handleNavigate}
-              />
-            )}
-            {active === 'budget' && (
-              <Budget transactions={data.transactions} setTransactions={data.setTransactions} memberNames={memberNames} />
-            )}
-            {active === 'tasks' && (
-              <Tasks tasks={data.tasks} setTasks={data.setTasks} members={memberNames} />
-            )}
-            {active === 'shopping' && (
-              <Shopping lists={data.shoppingLists} setLists={data.setShoppingLists} />
-            )}
-            {active === 'meals' && (
-              <Meals meals={data.meals} setMeals={data.setMeals} />
-            )}
-            {active === 'vehicles' && (
-              <Vehicles vehicles={data.vehicles} setVehicles={data.setVehicles} />
-            )}
-            {active === 'pets' && (
-              <Pets pets={data.pets} setPets={data.setPets} />
-            )}
-            {active === 'members' && (
-              <Members
-                members={data.members}
-                setMembers={data.setMembers}
-                familyName={data.familyName}
-                setFamilyName={data.setFamilyName}
-              />
-            )}
-            {active === 'settings' && (
-              <Settings
-                userEmail={userEmail}
-                onSignOut={onSignOut}
-                onDeleteAccount={onDeleteAccount}
-                isLocalMode={isLocalMode}
-              />
-            )}
+        {/* Main content */}
+        <main>
+          <div className="max-w-5xl mx-auto px-3 sm:px-5 lg:px-8 py-4 sm:py-6">
+            {renderView()}
           </div>
         </main>
       </div>
     </div>
   );
-}
-
-// ── Local / Demo mode ──────────────────────────────────────────────────────────
-function LocalApp({ onExitDemo }: { onExitDemo: () => void }) {
-  const data = useLocalData();
-  return <AppLayout data={data} isLocalMode={true} onExitDemo={onExitDemo} />;
-}
-
-// ── Supabase mode ──────────────────────────────────────────────────────────────
-function SupabaseApp({ onExitToAuth }: { onExitToAuth: () => void }) {
-  const { user, signOut, deleteAccount } = useAuth();
-
-  const {
-    transactions, setTransactions,
-    tasks, setTasks,
-    meals, setMeals,
-    vehicles, setVehicles,
-    pets, setPets,
-    members, setMembers,
-    shoppingLists, setShoppingLists,
-    familyName, setFamilyName,
-  } = useSupabaseData(user?.id);
-
-  const handleSignOut = async () => {
-    await signOut();
-    onExitToAuth();
-  };
-
-  const supabaseData = {
-    transactions, setTransactions,
-    tasks, setTasks,
-    meals, setMeals,
-    vehicles, setVehicles,
-    pets, setPets,
-    members, setMembers,
-    shoppingLists, setShoppingLists,
-    familyName, setFamilyName,
-    loading: false,
-  } as unknown as ReturnType<typeof useLocalData>;
-
-  return (
-    <AppLayout
-      data={supabaseData}
-      isLocalMode={false}
-      userEmail={user?.email}
-      onSignOut={handleSignOut}
-      onDeleteAccount={deleteAccount}
-    />
-  );
-}
-
-// ── Root ───────────────────────────────────────────────────────────────────────
-export default function App() {
-  const { user, loading: authLoading } = useAuth();
-  const [appMode, setAppMode] = useState<AppMode>(() => {
-    if (!isSupabaseConfigured) return 'auth';
-    try {
-      const keys = Object.keys(localStorage);
-      const authKey = keys.find(k => k.startsWith('sb-') && k.endsWith('-auth-token'));
-      if (authKey) {
-        const raw = localStorage.getItem(authKey);
-        if (raw) {
-          const parsed = JSON.parse(raw);
-          if (parsed?.expires_at && parsed.expires_at * 1000 > Date.now()) return 'app';
-        }
-      }
-    } catch {}
-    return 'auth';
-  });
-
-  useEffect(() => {
-    if (authLoading) return;
-    if (isSupabaseConfigured) {
-      if (user && appMode !== 'app' && appMode !== 'demo') setAppMode('app');
-      else if (!user && appMode === 'app') setAppMode('auth');
-    } else {
-      setAppMode('auth');
-    }
-  }, [user, authLoading]);
-
-  if (appMode === 'demo') return <LocalApp onExitDemo={() => setAppMode('auth')} />;
-  if (appMode === 'app' && isSupabaseConfigured && (user || authLoading)) return <SupabaseApp onExitToAuth={() => setAppMode('auth')} />;
-  if (appMode === 'app' && !isSupabaseConfigured) return <LocalApp onExitDemo={() => setAppMode('auth')} />;
-
-  return <AuthScreen onSuccess={() => setAppMode('app')} onDemoMode={() => setAppMode('demo')} />;
 }
