@@ -10,6 +10,7 @@ import Vehicles from './components/sections/Vehicles';
 import Pets from './components/sections/Pets';
 import Members from './components/sections/Members';
 import AuthScreen from './components/AuthScreen';
+import ResetPasswordScreen from './components/ResetPasswordScreen';
 import Settings from './components/sections/Settings';
 import { useAuth } from './lib/AuthContext';
 import { useSupabaseData } from './lib/useSupabaseData';
@@ -45,7 +46,6 @@ function AppLayout({ data, isLocalMode, userEmail, onSignOut, onDeleteAccount, o
   const [active, setActive] = useState<ActiveSection>('dashboard');
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  // Lock scroll when sidebar is open on mobile
   useScrollLock(mobileOpen);
 
   const memberNames = data.members.map(m => m.name.split(' ')[0]);
@@ -259,7 +259,7 @@ function SupabaseApp({ onExitToAuth }: { onExitToAuth: () => void }) {
 
 // ── Root ───────────────────────────────────────────────────────────────────────
 export default function App() {
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, isPasswordRecovery } = useAuth();
   const [appMode, setAppMode] = useState<AppMode>(() => {
     if (!isSupabaseConfigured) return 'auth';
     try {
@@ -285,6 +285,9 @@ export default function App() {
       setAppMode('auth');
     }
   }, [user, authLoading]);
+
+  // Gdy Supabase wykryje event PASSWORD_RECOVERY — pokaż ekran zmiany hasła
+  if (isPasswordRecovery) return <ResetPasswordScreen />;
 
   if (appMode === 'demo') return <LocalApp onExitDemo={() => setAppMode('auth')} />;
   if (appMode === 'app' && isSupabaseConfigured && (user || authLoading)) return <SupabaseApp onExitToAuth={() => setAppMode('auth')} />;
