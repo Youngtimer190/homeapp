@@ -213,12 +213,12 @@ export default function Dashboard({ transactions, tasks, meals, vehicles, pets, 
             <span className="text-xs text-gray-400 group-hover:text-blue-500 transition">Przejdź →</span>
           </div>
             <h4 className="font-semibold text-gray-900">Zadania w tym miesiącu</h4>
-            <p className="text-2xl font-bold text-blue-600 mt-1">{monthDoneTasks.length}<span className="text-gray-400 text-base font-normal">/{monthTasks.length}</span></p>
+            <p className="text-2xl font-bold mt-1"><span className="text-emerald-500">{monthDoneTasks.length}</span><span className="text-red-400 text-base font-normal">/{monthTasks.length}</span></p>
             <p className="text-xs text-gray-500 mt-1">{monthPendingTasks.length} do wykonania w miesiącu · {monthHighPriorityTasks.length} pilnych</p>
            <div className="mt-3 space-y-1">
              {monthPendingTasks.map(t => (
               <div key={t.id} className="flex items-center gap-2 text-xs text-gray-600">
-                <span className="w-1.5 h-1.5 rounded-full bg-blue-400 flex-shrink-0" />
+                <span className="w-1.5 h-1.5 rounded-full bg-red-400 flex-shrink-0" />
                 <span className="truncate">{t.title}</span>
               </div>
             ))}
