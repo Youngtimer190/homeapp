@@ -77,25 +77,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const timeout = setTimeout(() => setLoading(false), 1500);
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === 'USER_UPDATED') {
-        // Wymuś odświeżenie sesji żeby pobrać aktualny email
-        const { data } = await supabase.auth.getSession();
-        const freshSession = data.session;
-        setSession(freshSession);
-        setUser(freshSession?.user ?? null);
-        setIsPasswordRecovery(false);
-        if (freshSession?.user) ensureFamilyRecord(freshSession.user.id);
-      } else {
-        setSession(session);
-        setUser(session?.user ?? null);
+      setSession(session);
+      setUser(session?.user ?? null);
 
-        if (event === 'PASSWORD_RECOVERY') {
-          setIsPasswordRecovery(true);
-        } else if (event === 'SIGNED_IN') {
-          if (session?.user) ensureFamilyRecord(session.user.id);
-        } else if (event === 'SIGNED_OUT') {
-          setIsPasswordRecovery(false);
-        }
+      if (event === 'PASSWORD_RECOVERY') {
+        setIsPasswordRecovery(true);
+      } else if (event === 'USER_UPDATED') {
+        setIsPasswordRecovery(false);
+        if (session?.user) ensureFamilyRecord(session.user.id);
+      } else if (event === 'SIGNED_IN') {
+        if (session?.user) ensureFamilyRecord(session.user.id);
+      } else if (event === 'SIGNED_OUT') {
+        setIsPasswordRecovery(false);
       }
 
       setLoading(false);
@@ -164,15 +157,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const updateEmail = async (newEmail: string): Promise<{ error: string | null }> => {
     if (!isSupabaseConfigured) return { error: 'Supabase nie jest skonfigurowany.' };
-    const { error } = await supabase.auth.updateUser({ email: newEmail });
-    if (error) {
-      if (error.message.includes('already registered') || error.message.includes('already exists'))
-        return { error: 'Ten adres e-mail jest już zajęty.' };
-      if (error.message.includes('Unable to validate') || error.message.includes('invalid'))
-        return { error: 'Nieprawidłowy adres e-mail.' };
-      return { error: error.message };
+    try {
+      const { error } = await Promise.race([
+        supabase.auth.updateUser({ email: newEmail }),
+        new Promise<{ error: { message: string } }>(resolve =>
+          setTimeout(() => resolve({ error: { message: 'Przekroczono czas oczekiwania. Spróbuj ponownie.' } }), 10000)
+        ),
+      ]);
+      if (error) {
+        if (error.message.includes('already registered') || error.message.includes('already exists'))
+          return { error: 'Ten adres e-mail jest już zajęty.' };
+        if (error.message.includes('Unable to validate') || error.message.includes('invalid'))
+          return { error: 'Nieprawidłowy adres e-mail.' };
+        return { error: error.message };
+      }
+      return { error: null };
+    } catch (err) {
+      return { error: 'Wystąpił nieoczekiwany błąd. Spróbuj ponownie.' };
     }
-    return { error: null };
   };
 
   const deleteAccount = async (password: string): Promise<{ error: string | null }> => {
