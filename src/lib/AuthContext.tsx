@@ -10,6 +10,7 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
   deleteAccount: (password: string) => Promise<{ error: string | null }>;
+  resetPassword: (email: string) => Promise<{ error: string | null }>;
   isOnline: boolean;
 }
 
@@ -140,6 +141,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await supabase.auth.signOut();
   };
 
+  const resetPassword = async (email: string): Promise<{ error: string | null }> => {
+    if (!isSupabaseConfigured) return { error: 'Supabase nie jest skonfigurowany.' };
+
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}`,
+    });
+
+    if (error) {
+      if (error.message.includes('rate limit') || error.message.includes('over_email_send_rate_limit')) {
+        return { error: 'Zbyt wiele prób. Poczekaj chwilę i spróbuj ponownie.' };
+      }
+      return { error: error.message };
+    }
+
+    return { error: null };
+  };
+
   const deleteAccount = async (password: string): Promise<{ error: string | null }> => {
     if (!isSupabaseConfigured) return { error: 'Supabase nie jest skonfigurowany.' };
     if (!user) return { error: 'Brak zalogowanego użytkownika.' };
@@ -170,7 +188,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ session, user, loading, signUp, signIn, signOut, deleteAccount, isOnline: isSupabaseConfigured }}>
+    <AuthContext.Provider value={{ session, user, loading, signUp, signIn, signOut, deleteAccount, resetPassword, isOnline: isSupabaseConfigured }}>
       {children}
     </AuthContext.Provider>
   );
