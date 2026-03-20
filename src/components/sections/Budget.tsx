@@ -460,7 +460,7 @@ export default function Budget({ transactions, setTransactions, memberNames }: P
                      onChange={e => setForm(f => ({ ...f, addedBy: e.target.value }))}
                      className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 bg-white"
                    >
-                     <option value="">-- Wybierz osobę --</option>
+                     <option value="">Wybierz osobę</option>
                      {memberNames.map(name => (
                        <option key={name} value={name}>{name}</option>
                      ))}
