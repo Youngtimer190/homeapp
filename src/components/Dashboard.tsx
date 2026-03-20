@@ -202,7 +202,7 @@ export default function Dashboard({ transactions, tasks, meals, vehicles, pets, 
             <span className="text-red-500">↓ {fmt(expense)}</span>
           </div>
           <div className="mt-3 h-1.5 bg-gray-100 rounded-full overflow-hidden">
-            <div className="h-full bg-emerald-400 rounded-full" style={{ width: `${income > 0 ? Math.min((expense/income)*100, 100) : 0}%` }} />
+            <div className={`h-full rounded-full ${income <= 0 ? 'bg-gray-300' : expense / income < 0.75 ? 'bg-emerald-400' : expense / income < 1 ? 'bg-amber-400' : 'bg-red-500'}`} style={{ width: `${income > 0 ? Math.min((expense/income)*100, 100) : 0}%` }} />
           </div>
         </button>
 
