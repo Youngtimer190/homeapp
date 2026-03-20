@@ -77,18 +77,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const timeout = setTimeout(() => setLoading(false), 1500);
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      setSession(session);
-      setUser(session?.user ?? null);
+      if (event === 'USER_UPDATED') {
+        // Wymuś odświeżenie sesji żeby pobrać aktualny email
+        const { data } = await supabase.auth.getSession();
+        const freshSession = data.session;
+        setSession(freshSession);
+        setUser(freshSession?.user ?? null);
+        setIsPasswordRecovery(false);
+        if (freshSession?.user) ensureFamilyRecord(freshSession.user.id);
+      } else {
+        setSession(session);
+        setUser(session?.user ?? null);
 
-      if (event === 'PASSWORD_RECOVERY') {
-        setIsPasswordRecovery(true);
-      } else if (event === 'USER_UPDATED') {
-        setIsPasswordRecovery(false);
-        if (session?.user) ensureFamilyRecord(session.user.id);
-      } else if (event === 'SIGNED_IN') {
-        if (session?.user) ensureFamilyRecord(session.user.id);
-      } else if (event === 'SIGNED_OUT') {
-        setIsPasswordRecovery(false);
+        if (event === 'PASSWORD_RECOVERY') {
+          setIsPasswordRecovery(true);
+        } else if (event === 'SIGNED_IN') {
+          if (session?.user) ensureFamilyRecord(session.user.id);
+        } else if (event === 'SIGNED_OUT') {
+          setIsPasswordRecovery(false);
+        }
       }
 
       setLoading(false);
