@@ -263,7 +263,7 @@ export default function AuthScreen({ onSuccess, onDemoMode }: Props) {
                 </div>
               )}
 
-              {/* Link "Zapomniałem hasła" — tylko w trybie logowania */}
+              {/* Link "Nie pamiętasz hasła?" — tylko w trybie logowania */}
               {mode === 'login' && (
                 <div className="flex justify-end -mt-1">
                   <button
@@ -271,7 +271,7 @@ export default function AuthScreen({ onSuccess, onDemoMode }: Props) {
                     onClick={() => switchMode('reset')}
                     className="text-xs text-indigo-500 hover:text-indigo-700 font-medium hover:underline transition"
                   >
-                    Zapomniałem hasła
+                    Nie pamiętasz hasła?
                   </button>
                 </div>
               )}
