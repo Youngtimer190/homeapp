@@ -192,7 +192,7 @@ export default function Shopping({ lists, setLists }: Props) {
               <div className="flex items-start justify-between mb-4">
                 <div>
                   <h3 className="text-lg font-bold text-gray-900">{selectedList.name}</h3>
-                  <p className="text-xs text-gray-400 mt-0.5">Utworzona: {selectedList.createdAt}</p>
+                  <p className="text-xs text-gray-400 mt-0.5">Utworzona: {new Date(selectedList.createdAt).toLocaleDateString('pl-PL', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
                 </div>
                 <div className="flex items-center gap-2">
                   <button
