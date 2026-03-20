@@ -89,7 +89,11 @@ export default function Budget({ transactions, setTransactions, memberNames }: P
 
   const filtered = monthTransactions
     .filter(t => filterType === 'all' ? true : t.type === filterType)
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    .sort((a, b) => {
+      const dateDiff = new Date(b.date).getTime() - new Date(a.date).getTime();
+      if (dateDiff !== 0) return dateDiff;
+      return b.id.localeCompare(a.id); // nowsze id na górze gdy ta sama data
+    });
 
   const byCategory = categories.map(cat => ({
     cat,
