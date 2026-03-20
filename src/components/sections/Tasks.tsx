@@ -431,15 +431,21 @@ export default function Tasks({ tasks, setTasks, members }: Props) {
            </div>
           <div className="grid grid-cols-2 gap-3">
              <div>
-               <label className="block text-xs text-gray-500 mb-1 ml-1">Przypisz osobę</label>
-               <select
-                 value={form.assignedTo}
-                 onChange={e => setForm(f => ({ ...f, assignedTo: e.target.value }))}
-                 className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white"
-               >
-                 <option value="">Wybierz osobę</option>
-                 {members.map(m => <option key={m} value={m}>{m}</option>)}
-               </select>
+               <label className="block text-xs text-gray-500 mb-1 ml-1">Przypisz osobę (opcjonalnie)</label>
+               {members.length > 0 ? (
+                 <select
+                   value={form.assignedTo}
+                   onChange={e => setForm(f => ({ ...f, assignedTo: e.target.value }))}
+                   className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white"
+                 >
+                   <option value="">Wybierz osobę</option>
+                   {members.map(m => <option key={m} value={m}>{m}</option>)}
+                 </select>
+               ) : (
+                 <div className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm bg-gray-50 text-gray-400 italic">
+                   Brak członków rodziny — pole opcjonalne
+                 </div>
+               )}
              </div>
              <div>
                <label className="block text-xs text-gray-500 mb-1 ml-1">Termin</label>
