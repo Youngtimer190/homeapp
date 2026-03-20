@@ -149,22 +149,22 @@ export default function Dashboard({ transactions, tasks, meals, vehicles, pets, 
             {new Date().toLocaleDateString('pl-PL', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
           </p>
            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4 mt-4 sm:mt-6">
-             <div className="bg-white/15 rounded-xl sm:rounded-2xl p-3 sm:p-4 backdrop-blur-sm">
+             <button onClick={() => onNavigate('budget')} className="bg-white/15 rounded-xl sm:rounded-2xl p-3 sm:p-4 backdrop-blur-sm text-left hover:bg-white/25 active:bg-white/30 transition-colors cursor-pointer">
                <p className="text-white/70 text-xs">Saldo</p>
                <p className="text-base sm:text-xl font-bold mt-0.5 truncate">{fmt(balance)}</p>
-             </div>
-             <div className="bg-white/15 rounded-xl sm:rounded-2xl p-3 sm:p-4 backdrop-blur-sm">
-                <p className="text-white/70 text-xs">Zadania dzisiaj</p>
-                 <p className="text-base sm:text-xl font-bold mt-0.5">{todayDoneTasks.length}/{todayTasks.length}</p>
-             </div>
-             <div className="bg-white/15 rounded-xl sm:rounded-2xl p-3 sm:p-4 backdrop-blur-sm">
+             </button>
+             <button onClick={() => onNavigate('tasks')} className="bg-white/15 rounded-xl sm:rounded-2xl p-3 sm:p-4 backdrop-blur-sm text-left hover:bg-white/25 active:bg-white/30 transition-colors cursor-pointer">
+               <p className="text-white/70 text-xs">Zadania dzisiaj</p>
+               <p className="text-base sm:text-xl font-bold mt-0.5">{todayDoneTasks.length}/{todayTasks.length}</p>
+             </button>
+             <button onClick={() => onNavigate('meals')} className="bg-white/15 rounded-xl sm:rounded-2xl p-3 sm:p-4 backdrop-blur-sm text-left hover:bg-white/25 active:bg-white/30 transition-colors cursor-pointer">
                <p className="text-white/70 text-xs">Posiłki dzisiaj</p>
                <p className="text-base sm:text-xl font-bold mt-0.5">{todayMeals.length}</p>
-             </div>
-              <div className="bg-white/15 rounded-xl sm:rounded-2xl p-3 sm:p-4 backdrop-blur-sm">
-                <p className="text-white/70 text-xs">Do kupienia</p>
-                <p className="text-base sm:text-xl font-bold mt-0.5">{productsToBuyCount}</p>
-              </div>
+             </button>
+             <button onClick={() => onNavigate('shopping')} className="bg-white/15 rounded-xl sm:rounded-2xl p-3 sm:p-4 backdrop-blur-sm text-left hover:bg-white/25 active:bg-white/30 transition-colors cursor-pointer">
+               <p className="text-white/70 text-xs">Do kupienia</p>
+               <p className="text-base sm:text-xl font-bold mt-0.5">{productsToBuyCount}</p>
+             </button>
            </div>
         </div>
       </div>
