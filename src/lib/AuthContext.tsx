@@ -13,6 +13,7 @@ interface AuthContextType {
   deleteAccount: (password: string) => Promise<{ error: string | null }>;
   resetPassword: (email: string) => Promise<{ error: string | null }>;
   updatePassword: (newPassword: string) => Promise<{ error: string | null }>;
+  updateEmail: (newEmail: string) => Promise<{ error: string | null }>;
   isOnline: boolean;
 }
 
@@ -154,6 +155,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { error: null };
   };
 
+  const updateEmail = async (newEmail: string): Promise<{ error: string | null }> => {
+    if (!isSupabaseConfigured) return { error: 'Supabase nie jest skonfigurowany.' };
+    const { error } = await supabase.auth.updateUser({ email: newEmail });
+    if (error) {
+      if (error.message.includes('already registered') || error.message.includes('already exists'))
+        return { error: 'Ten adres e-mail jest już zajęty.' };
+      if (error.message.includes('Unable to validate') || error.message.includes('invalid'))
+        return { error: 'Nieprawidłowy adres e-mail.' };
+      return { error: error.message };
+    }
+    return { error: null };
+  };
+
   const deleteAccount = async (password: string): Promise<{ error: string | null }> => {
     if (!isSupabaseConfigured) return { error: 'Supabase nie jest skonfigurowany.' };
     if (!user) return { error: 'Brak zalogowanego użytkownika.' };
@@ -179,7 +193,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   return (
     <AuthContext.Provider value={{
       session, user, loading, isPasswordRecovery,
-      signUp, signIn, signOut, deleteAccount, resetPassword, updatePassword,
+      signUp, signIn, signOut, deleteAccount, resetPassword, updatePassword, updateEmail,
       isOnline: isSupabaseConfigured,
     }}>
       {children}
