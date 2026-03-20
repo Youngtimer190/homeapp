@@ -298,7 +298,7 @@ export default function Budget({ transactions, setTransactions, memberNames }: P
                   <p className="text-sm font-medium text-gray-900 truncate">{t.description}</p>
                   <p className="text-xs text-gray-400">
                     {t.category} · {fmtDate(t.date)}
-                    {t.addedBy && <span className="ml-1 text-gray-300">· 👤 {t.addedBy}</span>}
+                    {t.addedBy && <span className="ml-1 text-gray-500">· 👤 {t.addedBy}</span>}
                   </p>
                 </div>
                 <div className="text-right flex-shrink-0">
