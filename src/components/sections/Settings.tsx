@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import DeleteAccountModal from '../DeleteAccountModal';
+import { useAuth } from '../../lib/AuthContext';
 
 interface Props {
   userEmail?: string;
@@ -9,14 +10,34 @@ interface Props {
 }
 
 export default function Settings({ userEmail, onSignOut, onDeleteAccount, isLocalMode }: Props) {
+  const { updateEmail } = useAuth();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
+
+  // Zmiana emaila
+  const [newEmail, setNewEmail] = useState('');
+  const [emailLoading, setEmailLoading] = useState(false);
+  const [emailError, setEmailError] = useState('');
+  const [emailSuccess, setEmailSuccess] = useState(false);
 
   const handleSignOut = async () => {
     if (!onSignOut) return;
     setSigningOut(true);
     await onSignOut();
     setSigningOut(false);
+  };
+
+  const handleEmailChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setEmailError('');
+    setEmailSuccess(false);
+    if (!newEmail.trim()) { setEmailError('Podaj nowy adres e-mail.'); return; }
+    if (newEmail.trim() === userEmail) { setEmailError('Nowy adres e-mail jest taki sam jak obecny.'); return; }
+    setEmailLoading(true);
+    const { error } = await updateEmail(newEmail.trim());
+    setEmailLoading(false);
+    if (error) setEmailError(error);
+    else { setEmailSuccess(true); setNewEmail(''); }
   };
 
   return (
@@ -51,6 +72,43 @@ export default function Settings({ userEmail, onSignOut, onDeleteAccount, isLoca
                   Aktywne
                 </span>
               </div>
+            </div>
+
+            {/* Zmiana emaila */}
+            <div className="p-4 rounded-xl border border-gray-100">
+              <p className="text-sm font-medium text-gray-900 mb-3">Zmień adres e-mail</p>
+              {emailSuccess ? (
+                <div className="flex items-start gap-3 bg-emerald-50 border border-emerald-100 rounded-xl p-3">
+                  <span className="text-emerald-500 flex-shrink-0">✅</span>
+                  <div>
+                    <p className="text-sm font-medium text-emerald-800">Link potwierdzający wysłany!</p>
+                    <p className="text-xs text-emerald-600 mt-0.5">Sprawdź nową skrzynkę e-mail i kliknij link, aby potwierdzić zmianę adresu.</p>
+                  </div>
+                </div>
+              ) : (
+                <form onSubmit={handleEmailChange} className="space-y-3">
+                  <input
+                    type="email"
+                    value={newEmail}
+                    onChange={e => { setNewEmail(e.target.value); setEmailError(''); }}
+                    placeholder="Nowy adres e-mail"
+                    className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-transparent transition"
+                  />
+                  {emailError && (
+                    <div className="flex items-center gap-2 bg-red-50 border border-red-100 rounded-xl p-3">
+                      <span className="text-red-500 flex-shrink-0">⚠️</span>
+                      <p className="text-xs text-red-600">{emailError}</p>
+                    </div>
+                  )}
+                  <button
+                    type="submit"
+                    disabled={emailLoading}
+                    className="w-full px-4 py-2.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 rounded-xl text-sm font-semibold transition disabled:opacity-50"
+                  >
+                    {emailLoading ? '⏳ Wysyłanie...' : '📧 Wyślij link potwierdzający'}
+                  </button>
+                </form>
+              )}
             </div>
 
             {/* Wyloguj */}
