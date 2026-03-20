@@ -453,7 +453,7 @@ export default function Budget({ transactions, setTransactions, memberNames }: P
                </div>
 
                <div>
-                 <label className="block text-xs text-gray-500 mb-1 ml-1">Przypisz do osoby</label>
+                 <label className="block text-xs text-gray-500 mb-1 ml-1">Przypisz do osoby (opcjonalnie)</label>
                  {memberNames.length > 0 ? (
                    <select
                      value={form.addedBy || ''}
@@ -466,8 +466,8 @@ export default function Budget({ transactions, setTransactions, memberNames }: P
                      ))}
                    </select>
                  ) : (
-                   <div className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm bg-gray-50 text-gray-500 italic">
-                     Najpierw dodaj członka rodziny
+                   <div className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm bg-gray-50 text-gray-400 italic">
+                     Brak członków rodziny — pole opcjonalne
                    </div>
                  )}
                </div>
@@ -480,7 +480,7 @@ export default function Budget({ transactions, setTransactions, memberNames }: P
                >Anuluj</button>
                <button
                  onClick={handleSave}
-                 disabled={!form.description || form.amount <= 0 || memberNames.length === 0}
+                 disabled={!form.description || form.amount <= 0}
                  className="flex-1 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed text-white py-2.5 rounded-xl text-sm font-semibold transition shadow"
                >{editId ? 'Zapisz zmiany' : 'Dodaj'}</button>
             </div>
