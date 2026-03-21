@@ -48,16 +48,21 @@ function getDaysInMonth(year: number, month: number) {
   return new Date(year, month + 1, 0).getDate();
 }
 
-// Monday = 0 ... Sunday = 6
 function getFirstDayOfWeek(year: number, month: number) {
   const d = new Date(year, month, 1).getDay();
-  return (d + 6) % 7; // convert Sunday=0 to Monday=0
+  return (d + 6) % 7;
 }
 
 const emptyForm = (dueDate: string): Omit<Task, 'id'> => ({
   title: '', description: '', assignedTo: '', priority: 'medium', status: 'todo',
-  dueDate,
+  dueDate, dueDateEnd: undefined,
 });
+
+// Check if a task spans a given date (single day or range)
+function taskCoversDate(task: Task, dateStr: string): boolean {
+  if (!task.dueDateEnd) return task.dueDate === dateStr;
+  return dateStr >= task.dueDate && dateStr <= task.dueDateEnd;
+}
 
 export default function Tasks({ tasks, setTasks, members }: Props) {
   const today = new Date();
@@ -67,13 +72,13 @@ export default function Tasks({ tasks, setTasks, members }: Props) {
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm(toYMD(today)));
+  const [isRange, setIsRange] = useState(false);
   const [confirmId, setConfirmId] = useState<string | null>(null);
   const [filterStatus, setFilterStatus] = useState<string>('all');
 
   const isCurrentMonth = viewYear === today.getFullYear() && viewMonth === today.getMonth();
   const todayYMD = toYMD(today);
 
-  // --- Calendar navigation ---
   const prevMonth = () => {
     if (viewMonth === 0) { setViewYear(y => y - 1); setViewMonth(11); }
     else setViewMonth(m => m - 1);
@@ -88,7 +93,6 @@ export default function Tasks({ tasks, setTasks, members }: Props) {
     setSelectedDate(todayYMD);
   };
 
-  // --- Calendar grid ---
   const daysInMonth = getDaysInMonth(viewYear, viewMonth);
   const firstDow = getFirstDayOfWeek(viewYear, viewMonth);
   const calendarCells: (number | null)[] = [
@@ -98,15 +102,14 @@ export default function Tasks({ tasks, setTasks, members }: Props) {
   while (calendarCells.length % 7 !== 0) calendarCells.push(null);
 
   const monthPrefix = `${viewYear}-${String(viewMonth + 1).padStart(2, '0')}`;
-  const monthTasks = tasks.filter(t => t.dueDate.startsWith(monthPrefix));
-  const dayTasks = tasks.filter(t => t.dueDate === selectedDate);
+  const monthTasks = tasks.filter(t => t.dueDate.startsWith(monthPrefix) || (t.dueDateEnd && t.dueDateEnd >= `${monthPrefix}-01`));
+  const dayTasks = tasks.filter(t => taskCoversDate(t, selectedDate));
 
   const tasksCountByDay = (day: number) => {
     const dateStr = `${monthPrefix}-${String(day).padStart(2, '0')}`;
-    return tasks.filter(t => t.dueDate === dateStr).length;
+    return tasks.filter(t => taskCoversDate(t, dateStr)).length;
   };
 
-  // --- Filtering by status ---
   const filteredTasks = filterStatus === 'all' ? dayTasks : dayTasks.filter(t => t.status === filterStatus);
   const dayCounts = {
     all: dayTasks.length,
@@ -115,10 +118,10 @@ export default function Tasks({ tasks, setTasks, members }: Props) {
     done: dayTasks.filter(t => t.status === 'done').length,
   };
 
-  // --- CRUD ---
   const openAdd = () => {
     setEditId(null);
     setForm(emptyForm(selectedDate));
+    setIsRange(false);
     setShowForm(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -132,21 +135,28 @@ export default function Tasks({ tasks, setTasks, members }: Props) {
       priority: task.priority,
       status: task.status,
       dueDate: task.dueDate,
+      dueDateEnd: task.dueDateEnd,
     });
+    setIsRange(!!task.dueDateEnd);
     setShowForm(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleSave = () => {
     if (!form.title.trim()) return;
+    const taskData = {
+      ...form,
+      dueDateEnd: isRange && form.dueDateEnd ? form.dueDateEnd : undefined,
+    };
     if (editId) {
-      setTasks(prev => prev.map(t => t.id === editId ? { ...form, id: editId } : t));
+      setTasks(prev => prev.map(t => t.id === editId ? { ...taskData, id: editId } : t));
     } else {
-      setTasks(prev => [...prev, { ...form, id: Date.now().toString() }]);
+      setTasks(prev => [...prev, { ...taskData, id: Date.now().toString() }]);
     }
     setShowForm(false);
     setEditId(null);
     setForm(emptyForm(selectedDate));
+    setIsRange(false);
   };
 
   const handleDelete = (id: string) => {
@@ -166,13 +176,18 @@ export default function Tasks({ tasks, setTasks, members }: Props) {
   const isOverdue = (d: string) => new Date(d) < new Date();
   const fmtDate = (d: string) => new Date(d).toLocaleDateString('pl-PL');
 
-  // --- Selected date display ---
   const selDateObj = parseYMD(selectedDate);
   const selDisplay = selDateObj.toLocaleDateString('pl-PL', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 
+  // Check if a day is within any range task for highlighting
+  const isInRangeTask = (dateStr: string) => {
+    return tasks.some(t => t.dueDateEnd && dateStr > t.dueDate && dateStr < t.dueDateEnd);
+  };
+  const isRangeStart = (dateStr: string) => tasks.some(t => t.dueDateEnd && t.dueDate === dateStr);
+  const isRangeEnd = (dateStr: string) => tasks.some(t => t.dueDateEnd && t.dueDateEnd === dateStr);
+
   return (
     <div className="space-y-4 sm:space-y-6">
-      {/* Header */}
       <div className="flex items-center justify-between gap-3">
         <div className="min-w-0">
           <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Zadania</h2>
@@ -188,50 +203,33 @@ export default function Tasks({ tasks, setTasks, members }: Props) {
         </button>
       </div>
 
-      {/* Main content: calendar + tasks */}
       <div className="grid lg:grid-cols-5 gap-4 sm:gap-6">
         {/* Calendar panel */}
         <div className="lg:col-span-2 space-y-4">
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 sm:p-5">
-            {/* Month navigation */}
             <div className="flex items-center justify-between mb-4">
-              <button
-                onClick={prevMonth}
-                className="w-8 h-8 rounded-lg hover:bg-gray-100 flex items-center justify-center text-gray-600 transition"
-              >‹</button>
+              <button onClick={prevMonth} className="w-8 h-8 rounded-lg hover:bg-gray-100 flex items-center justify-center text-gray-600 transition">‹</button>
               <div className="text-center">
-                <p className="font-bold text-gray-900 text-sm">
-                  {MONTH_NAMES[viewMonth]} {viewYear}
-                </p>
-                {isCurrentMonth && (
-                  <span className="text-xs text-blue-500 font-medium">Bieżący miesiąc</span>
-                )}
+                <p className="font-bold text-gray-900 text-sm">{MONTH_NAMES[viewMonth]} {viewYear}</p>
+                {isCurrentMonth && <span className="text-xs text-blue-500 font-medium">Bieżący miesiąc</span>}
               </div>
-              <button
-                onClick={nextMonth}
-                className="w-8 h-8 rounded-lg hover:bg-gray-100 flex items-center justify-center text-gray-600 transition"
-              >›</button>
+              <button onClick={nextMonth} className="w-8 h-8 rounded-lg hover:bg-gray-100 flex items-center justify-center text-gray-600 transition">›</button>
             </div>
 
             {!isCurrentMonth && (
               <div className="mb-3 text-center">
-                <button
-                  onClick={goToday}
-                  className="text-xs text-blue-500 hover:text-blue-700 font-semibold underline underline-offset-2 transition"
-                >
+                <button onClick={goToday} className="text-xs text-blue-500 hover:text-blue-700 font-semibold underline underline-offset-2 transition">
                   Wróć do dziś
                 </button>
               </div>
             )}
 
-            {/* Day headers */}
             <div className="grid grid-cols-7 mb-1">
               {DAY_NAMES.map(d => (
                 <div key={d} className="text-center text-xs font-semibold text-gray-400 py-1">{d}</div>
               ))}
             </div>
 
-            {/* Calendar cells */}
             <div className="grid grid-cols-7 gap-0.5">
               {calendarCells.map((day, i) => {
                 if (!day) return <div key={i} />;
@@ -239,6 +237,9 @@ export default function Tasks({ tasks, setTasks, members }: Props) {
                 const isSelected = dateStr === selectedDate;
                 const isToday = dateStr === todayYMD;
                 const count = tasksCountByDay(day);
+                const inRange = isInRangeTask(dateStr);
+                const rangeStart = isRangeStart(dateStr);
+                const rangeEnd = isRangeEnd(dateStr);
                 return (
                   <button
                     key={i}
@@ -248,6 +249,10 @@ export default function Tasks({ tasks, setTasks, members }: Props) {
                         ? 'bg-blue-500 text-white shadow'
                         : isToday
                         ? 'bg-blue-50 text-blue-600 ring-2 ring-blue-300'
+                        : inRange
+                        ? 'bg-violet-100 text-violet-700'
+                        : rangeStart || rangeEnd
+                        ? 'bg-violet-200 text-violet-800'
                         : 'hover:bg-gray-100 text-gray-700'
                       }`}
                   >
@@ -257,22 +262,16 @@ export default function Tasks({ tasks, setTasks, members }: Props) {
                         {count}
                       </span>
                     )}
+                    {(rangeStart) && !isSelected && <span className="absolute top-0.5 right-0.5 w-1.5 h-1.5 rounded-full bg-violet-400" />}
                   </button>
                 );
               })}
             </div>
 
-            {/* Legend */}
-            <div className="mt-4 pt-3 border-t border-gray-100 flex items-center gap-4 text-xs text-gray-400">
-              <span className="flex items-center gap-1.5">
-                <span className="w-3 h-3 rounded-full bg-blue-500 inline-block" /> wybrany
-              </span>
-              <span className="flex items-center gap-1.5">
-                <span className="w-3 h-3 rounded-full bg-blue-100 ring-1 ring-blue-300 inline-block" /> dziś
-              </span>
-              <span className="flex items-center gap-1.5 text-blue-400 font-semibold">
-                3 <span className="text-gray-400 font-normal">= liczba zadań</span>
-              </span>
+            <div className="mt-4 pt-3 border-t border-gray-100 flex flex-wrap items-center gap-3 text-xs text-gray-400">
+              <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-blue-500 inline-block" /> wybrany</span>
+              <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-blue-100 ring-1 ring-blue-300 inline-block" /> dziś</span>
+              <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-violet-200 inline-block" /> zakres</span>
             </div>
           </div>
 
@@ -310,10 +309,7 @@ export default function Tasks({ tasks, setTasks, members }: Props) {
                   {dayCounts.all > 0 ? `${dayCounts.all} zadań (${dayCounts.todo} do zrobienia)` : 'Brak zadań na ten dzień'}
                 </p>
               </div>
-              <button
-                onClick={openAdd}
-                className="text-xs px-3 py-1.5 bg-blue-100 text-blue-600 hover:bg-blue-200 rounded-lg font-semibold transition"
-              >
+              <button onClick={openAdd} className="text-xs px-3 py-1.5 bg-blue-100 text-blue-600 hover:bg-blue-200 rounded-lg font-semibold transition">
                 + Dodaj
               </button>
             </div>
@@ -323,10 +319,7 @@ export default function Tasks({ tasks, setTasks, members }: Props) {
                 <p className="text-4xl mb-3">✅</p>
                 <p className="text-gray-500 font-medium">Brak zadań w tej kategorii</p>
                 <p className="text-gray-400 text-sm mt-1">Dodaj nowe zadanie lub zmień filtr</p>
-                <button
-                  onClick={openAdd}
-                  className="mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-semibold transition"
-                >
+                <button onClick={openAdd} className="mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-semibold transition">
                   + Dodaj zadanie
                 </button>
               </div>
@@ -342,23 +335,15 @@ export default function Tasks({ tasks, setTasks, members }: Props) {
                         {task.title}
                       </h4>
                       <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => openEdit(task)}
-                          className="text-xs px-3 py-1.5 rounded-lg bg-orange-500 text-white hover:bg-orange-600 font-medium transition shadow-sm"
-                        >
+                        <button onClick={() => openEdit(task)} className="text-xs px-3 py-1.5 rounded-lg bg-orange-500 text-white hover:bg-orange-600 font-medium transition shadow-sm">
                           ✏️ Edytuj
                         </button>
-                        <button
-                          onClick={() => openDelete(task.id)}
-                          className="text-xs px-3 py-1.5 rounded-lg bg-red-500 text-white hover:bg-red-600 font-medium transition shadow-sm"
-                        >
+                        <button onClick={() => openDelete(task.id)} className="text-xs px-3 py-1.5 rounded-lg bg-red-500 text-white hover:bg-red-600 font-medium transition shadow-sm">
                           🗑 Usuń
                         </button>
                       </div>
                     </div>
-                    {task.description && (
-                      <p className="text-xs text-gray-500">{task.description}</p>
-                    )}
+                    {task.description && <p className="text-xs text-gray-500">{task.description}</p>}
                     <div className="flex flex-wrap gap-1.5">
                       <span className={`text-xs px-2 py-1 rounded-lg font-medium ${priorityColor[task.priority]}`}>
                         {priorityLabel[task.priority]}
@@ -366,6 +351,11 @@ export default function Tasks({ tasks, setTasks, members }: Props) {
                       <span className={`text-xs px-2 py-1 rounded-lg font-medium ${statusColor[task.status]}`}>
                         {statusIcon[task.status]} {statusLabel[task.status]}
                       </span>
+                      {task.dueDateEnd && (
+                        <span className="text-xs px-2 py-1 rounded-lg font-medium bg-violet-100 text-violet-700">
+                          📅 Zakres dat
+                        </span>
+                      )}
                     </div>
                     <div className="flex items-center justify-between text-xs text-gray-400">
                       {task.assignedTo && (
@@ -377,13 +367,14 @@ export default function Tasks({ tasks, setTasks, members }: Props) {
                         </span>
                       )}
                       {task.dueDate && (
-                        <span className={`${task.status !== 'done' && isOverdue(task.dueDate) ? 'text-red-500 font-semibold' : ''}`}>
-                          {task.status !== 'done' && isOverdue(task.dueDate) ? '⚠️ ' : '📅 '}
-                          {fmtDate(task.dueDate)}
+                        <span className={`${task.status !== 'done' && !task.dueDateEnd && isOverdue(task.dueDate) ? 'text-red-500 font-semibold' : ''}`}>
+                          {task.dueDateEnd
+                            ? `${fmtDate(task.dueDate)} – ${fmtDate(task.dueDateEnd)}`
+                            : `${task.status !== 'done' && isOverdue(task.dueDate) ? '⚠️ ' : '📅 '}${fmtDate(task.dueDate)}`
+                          }
                         </span>
                       )}
                     </div>
-                    {/* Status changer */}
                     <div className="flex gap-1 pt-1 border-t border-gray-50">
                       {statuses.map(s => (
                         <button
@@ -406,87 +397,121 @@ export default function Tasks({ tasks, setTasks, members }: Props) {
         </div>
       </div>
 
-      {/* Modal for add/edit task */}
+      {/* Modal */}
       <Modal isOpen={showForm} onClose={() => setShowForm(false)} title={editId ? 'Edytuj zadanie' : 'Nowe zadanie'}>
         <div className="p-5 space-y-4">
-           <div>
-             <label className="block text-xs text-gray-500 mb-1 ml-1">Tytuł zadania *</label>
-             <input
-               type="text"
-               placeholder="np. Zrobić zakupy"
-               value={form.title}
-               onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
-               className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
-             />
-           </div>
-           <div>
-             <label className="block text-xs text-gray-500 mb-1 ml-1">Opis (opcjonalnie)</label>
-             <textarea
-               placeholder="Dodatkowy opis zadania"
-               value={form.description}
-               onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
-               rows={2}
-               className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none"
-             />
-           </div>
-          <div className="grid grid-cols-2 gap-3">
-             <div>
-               <label className="block text-xs text-gray-500 mb-1 ml-1">Przypisz osobę (opcjonalnie)</label>
-               {members.length > 0 ? (
-                 <select
-                   value={form.assignedTo}
-                   onChange={e => setForm(f => ({ ...f, assignedTo: e.target.value }))}
-                   className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white"
-                 >
-                   <option value="">Wybierz osobę</option>
-                   {members.map(m => <option key={m} value={m}>{m}</option>)}
-                 </select>
-               ) : (
-                 <div className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm bg-gray-50 text-gray-400 italic">
-                   Brak członków rodziny — pole opcjonalne
-                 </div>
-               )}
-             </div>
-             <div>
-               <label className="block text-xs text-gray-500 mb-1 ml-1">Termin</label>
-               <input
-                 type="date"
-                 value={form.dueDate}
-                 onChange={e => setForm(f => ({ ...f, dueDate: e.target.value }))}
-                 className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
-               />
-             </div>
+          <div>
+            <label className="block text-xs text-gray-500 mb-1 ml-1">Tytuł zadania *</label>
+            <input
+              type="text"
+              placeholder="np. Wyjazd służbowy"
+              value={form.title}
+              onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
+              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+            />
           </div>
+          <div>
+            <label className="block text-xs text-gray-500 mb-1 ml-1">Opis (opcjonalnie)</label>
+            <textarea
+              placeholder="Dodatkowy opis zadania"
+              value={form.description}
+              onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
+              rows={2}
+              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none"
+            />
+          </div>
+
           <div className="grid grid-cols-2 gap-3">
-             <div>
-               <label className="block text-xs text-gray-500 mb-1 ml-1">Priorytet</label>
-               <select
-                 value={form.priority}
-                 onChange={e => setForm(f => ({ ...f, priority: e.target.value as Task['priority'] }))}
-                 className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white"
-               >
-                 {priorities.map(p => <option key={p} value={p}>{priorityLabel[p]}</option>)}
-               </select>
-             </div>
-             <div>
-               <label className="block text-xs text-gray-500 mb-1 ml-1">Status</label>
-               <select
-                 value={form.status}
-                 onChange={e => setForm(f => ({ ...f, status: e.target.value as Task['status'] }))}
-                 className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white"
-               >
-                 {statuses.map(s => <option key={s} value={s}>{statusLabel[s]}</option>)}
-               </select>
-             </div>
+            <div>
+              <label className="block text-xs text-gray-500 mb-1 ml-1">Przypisz osobę (opcjonalnie)</label>
+              {members.length > 0 ? (
+                <select
+                  value={form.assignedTo}
+                  onChange={e => setForm(f => ({ ...f, assignedTo: e.target.value }))}
+                  className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white"
+                >
+                  <option value="">Wybierz osobę</option>
+                  {members.map(m => <option key={m} value={m}>{m}</option>)}
+                </select>
+              ) : (
+                <div className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm bg-gray-50 text-gray-400 italic">
+                  Brak członków rodziny — pole opcjonalne
+                </div>
+              )}
+            </div>
+            <div>
+              <label className="block text-xs text-gray-500 mb-1 ml-1">
+                {isRange ? 'Data rozpoczęcia' : 'Termin'}
+              </label>
+              <input
+                type="date"
+                value={form.dueDate}
+                onChange={e => setForm(f => ({ ...f, dueDate: e.target.value }))}
+                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+              />
+            </div>
+          </div>
+
+          {/* Range toggle */}
+          <label className="flex items-center gap-3 cursor-pointer select-none p-3 bg-violet-50 rounded-xl border border-violet-100">
+            <div
+              onClick={() => {
+                setIsRange(r => !r);
+                if (isRange) setForm(f => ({ ...f, dueDateEnd: undefined }));
+              }}
+              className={`w-10 h-6 rounded-full transition-colors flex-shrink-0 flex items-center px-0.5 ${isRange ? 'bg-violet-500' : 'bg-gray-300'}`}
+            >
+              <span className={`w-5 h-5 bg-white rounded-full shadow transition-transform ${isRange ? 'translate-x-4' : 'translate-x-0'}`} />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-800">Zakres dat</p>
+              <p className="text-xs text-gray-500">Zaznacz wiele dni, np. wyjazd służbowy</p>
+            </div>
+          </label>
+
+          {isRange && (
+            <div>
+              <label className="block text-xs text-gray-500 mb-1 ml-1">Data zakończenia</label>
+              <input
+                type="date"
+                value={form.dueDateEnd ?? ''}
+                min={form.dueDate}
+                onChange={e => setForm(f => ({ ...f, dueDateEnd: e.target.value }))}
+                className="w-full border border-violet-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400"
+              />
+            </div>
+          )}
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs text-gray-500 mb-1 ml-1">Priorytet</label>
+              <select
+                value={form.priority}
+                onChange={e => setForm(f => ({ ...f, priority: e.target.value as Task['priority'] }))}
+                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white"
+              >
+                {priorities.map(p => <option key={p} value={p}>{priorityLabel[p]}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs text-gray-500 mb-1 ml-1">Status</label>
+              <select
+                value={form.status}
+                onChange={e => setForm(f => ({ ...f, status: e.target.value as Task['status'] }))}
+                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white"
+              >
+                {statuses.map(s => <option key={s} value={s}>{statusLabel[s]}</option>)}
+              </select>
+            </div>
           </div>
         </div>
         <div className="p-5 pt-0 flex gap-3">
-          <button onClick={() => setShowForm(false)} className="flex-1 border border-gray-200 text-gray-700 py-2.5 rounded-xl text-sm font-semibold hover:bg-gray-50 transition">
+          <button onClick={() => { setShowForm(false); setIsRange(false); }} className="flex-1 border border-gray-200 text-gray-700 py-2.5 rounded-xl text-sm font-semibold hover:bg-gray-50 transition">
             Anuluj
           </button>
           <button
             onClick={handleSave}
-            disabled={!form.title.trim()}
+            disabled={!form.title.trim() || (isRange && !form.dueDateEnd)}
             className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white py-2.5 rounded-xl text-sm font-semibold transition shadow"
           >
             {editId ? 'Zapisz zmiany' : 'Dodaj'}
