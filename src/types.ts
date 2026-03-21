@@ -35,6 +35,7 @@ export interface Task {
   priority: 'low' | 'medium' | 'high';
   status: 'todo' | 'in-progress' | 'done';
   dueDate: string;
+  dueDateEnd?: string;
 }
 
 // Meals
