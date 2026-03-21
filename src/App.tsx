@@ -320,5 +320,19 @@ export default function App() {
   if (appMode === 'app' && isSupabaseConfigured && (user || authLoading)) return <SupabaseApp onExitToAuth={() => setAppMode('auth')} />;
   if (appMode === 'app' && !isSupabaseConfigured) return <LocalApp onExitDemo={() => setAppMode('auth')} />;
 
+  // Podczas ładowania sesji (authLoading) — pokazuj ekran ładowania zamiast ekranu logowania
+  if (authLoading && isSupabaseConfigured) {
+    return (
+      <div className="min-h-dvh bg-gradient-to-br from-indigo-50 via-white to-violet-50 flex items-center justify-center" style={{ fontFamily: "'Inter', sans-serif" }}>
+        <div className="text-center">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-2xl shadow-lg mb-4 animate-pulse">
+            <span className="text-3xl">🏠</span>
+          </div>
+          <p className="text-gray-400 text-sm font-medium">Ładowanie...</p>
+        </div>
+      </div>
+    );
+  }
+
   return <AuthScreen onSuccess={() => setAppMode('app')} onDemoMode={() => setAppMode('demo')} />;
 }
