@@ -404,7 +404,7 @@ export default function Tasks({ tasks, setTasks, members }: Props) {
             <label className="block text-xs text-gray-500 mb-1 ml-1">Tytuł zadania *</label>
             <input
               type="text"
-              placeholder="np. Wyjazd służbowy"
+              placeholder="np. Wyrzucić śmieci"
               value={form.title}
               onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
               className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
@@ -455,9 +455,17 @@ export default function Tasks({ tasks, setTasks, members }: Props) {
           {/* Range toggle */}
           <label className="flex items-center gap-3 cursor-pointer select-none p-3 bg-violet-50 rounded-xl border border-violet-100">
             <div
-              onClick={() => {
-                setIsRange(r => !r);
-                if (isRange) setForm(f => ({ ...f, dueDateEnd: undefined }));
+            onClick={() => {
+                const turningOn = !isRange;
+                setIsRange(turningOn);
+                if (turningOn) {
+                  // ustaw datę zakończenia jako następny dzień od daty rozpoczęcia
+                  const nextDay = new Date(form.dueDate);
+                  nextDay.setDate(nextDay.getDate() + 1);
+                  setForm(f => ({ ...f, dueDateEnd: toYMD(nextDay) }));
+                } else {
+                  setForm(f => ({ ...f, dueDateEnd: undefined }));
+                }
               }}
               className={`w-10 h-6 rounded-full transition-colors flex-shrink-0 flex items-center px-0.5 ${isRange ? 'bg-violet-500' : 'bg-gray-300'}`}
             >
