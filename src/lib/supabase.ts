@@ -12,7 +12,14 @@ export const isSupabaseConfigured =
 
 // Klient publiczny (anon key) — do normalnych operacji
 export const supabase = isSupabaseConfigured
-  ? createClient(supabaseUrl, supabaseAnonKey)
+  ? createClient(supabaseUrl, supabaseAnonKey, {
+      auth: {
+        autoRefreshToken: true,      // automatyczne odświeżanie tokena
+        persistSession: true,        // zapisuj sesję w localStorage
+        detectSessionInUrl: true,    // wykrywaj sesję z URL (reset hasła, email)
+        storageKey: 'dom-manager-auth', // stały klucz — iOS nie zgubi sesji
+      },
+    })
   : createClient('https://placeholder.supabase.co', 'placeholder-key');
 
 // Klient administracyjny (service_role) — tylko do usuwania konta
@@ -21,6 +28,6 @@ export const supabaseAdmin = isSupabaseConfigured && supabaseServiceRoleKey !== 
       auth: {
         autoRefreshToken: false,
         persistSession: false,
-      }
+      },
     })
   : null;
