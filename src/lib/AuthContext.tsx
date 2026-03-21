@@ -22,21 +22,36 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 function getSessionFromStorage(): { user: User | null; session: Session | null } {
   if (!isSupabaseConfigured) return { user: null, session: null };
   try {
+    // Nowy klucz (po zmianie storageKey)
+    const raw = localStorage.getItem('dom-manager-auth');
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      const expiresAt = parsed?.expires_at;
+      if (expiresAt && expiresAt * 1000 > Date.now()) {
+        return {
+          user: parsed?.user ?? null,
+          session: parsed as Session ?? null,
+        };
+      }
+    }
+    // Fallback: stary klucz sb-...-auth-token
     const keys = Object.keys(localStorage);
     const authKey = keys.find(k => k.startsWith('sb-') && k.endsWith('-auth-token'));
-    if (!authKey) return { user: null, session: null };
-    const raw = localStorage.getItem(authKey);
-    if (!raw) return { user: null, session: null };
-    const parsed = JSON.parse(raw);
-    const expiresAt = parsed?.expires_at;
-    if (!expiresAt || expiresAt * 1000 < Date.now()) return { user: null, session: null };
-    return {
-      user: parsed?.user ?? null,
-      session: parsed as Session ?? null,
-    };
-  } catch {
-    return { user: null, session: null };
-  }
+    if (authKey) {
+      const raw2 = localStorage.getItem(authKey);
+      if (raw2) {
+        const parsed = JSON.parse(raw2);
+        const expiresAt = parsed?.expires_at;
+        if (expiresAt && expiresAt * 1000 > Date.now()) {
+          return {
+            user: parsed?.user ?? null,
+            session: parsed as Session ?? null,
+          };
+        }
+      }
+    }
+  } catch {}
+  return { user: null, session: null };
 }
 
 async function ensureFamilyRecord(userId: string) {
