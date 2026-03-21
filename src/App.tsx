@@ -287,12 +287,18 @@ export default function App() {
   const [appMode, setAppMode] = useState<AppMode>(() => {
     if (!isSupabaseConfigured) return 'auth';
     try {
+      const raw = localStorage.getItem('dom-manager-auth');
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed?.expires_at && parsed.expires_at * 1000 > Date.now()) return 'app';
+      }
+      // fallback: stary klucz sb-...-auth-token (przed zmianą storageKey)
       const keys = Object.keys(localStorage);
       const authKey = keys.find(k => k.startsWith('sb-') && k.endsWith('-auth-token'));
       if (authKey) {
-        const raw = localStorage.getItem(authKey);
-        if (raw) {
-          const parsed = JSON.parse(raw);
+        const raw2 = localStorage.getItem(authKey);
+        if (raw2) {
+          const parsed = JSON.parse(raw2);
           if (parsed?.expires_at && parsed.expires_at * 1000 > Date.now()) return 'app';
         }
       }
