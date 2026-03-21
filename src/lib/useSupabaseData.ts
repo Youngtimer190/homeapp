@@ -98,10 +98,11 @@ function taskFromRow(r: Record<string, unknown>): Task {
     priority: r.priority as Task['priority'],
     status: r.status as Task['status'],
     dueDate: r.due_date as string,
+    dueDateEnd: r.due_date_end as string | undefined,
   };
 }
 function taskToRow(t: Task): Record<string, unknown> {
-  return { id: t.id, title: t.title, description: t.description, assigned_to: t.assignedTo, priority: t.priority, status: t.status, due_date: t.dueDate };
+  return { id: t.id, title: t.title, description: t.description, assigned_to: t.assignedTo, priority: t.priority, status: t.status, due_date: t.dueDate, due_date_end: t.dueDateEnd ?? null };
 }
 
 // ── Meals ─────────────────────────────────────────────────────────────────────
