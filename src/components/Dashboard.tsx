@@ -94,17 +94,29 @@ export default function Dashboard({ transactions, tasks, meals, vehicles, pets, 
   if (balance < 0) alerts.push({ type: 'error', message: `Budżet ujemny: ${fmt(balance)}`, section: 'budget' });
   if (highPriorityTasks.length > 0) alerts.push({ type: 'warning', message: `${highPriorityTasks.length} pilnych zadań do wykonania`, section: 'tasks' });
 
-  // Tasks due within 7 days
+  // Tasks overdue and due within 7 days
+  const overdueTasks = tasks.filter(task => {
+    if (task.status === 'done') return false;
+    const days = daysUntil(task.dueDate);
+    return days !== null && days < 0;
+  });
   const nearDeadlineTasks = tasks.filter(task => {
     if (task.status === 'done') return false;
     const days = daysUntil(task.dueDate);
-    return days !== null && days <= 7;
+    return days !== null && days >= 0 && days <= 7;
   });
+  if (overdueTasks.length > 0) {
+    alerts.push({
+      type: 'error',
+      message: `${overdueTasks.length} przeterminowanych zadań do wykonania`,
+      section: 'tasks'
+    });
+  }
   if (nearDeadlineTasks.length > 0) {
-    alerts.push({ 
-      type: 'warning', 
-      message: `${nearDeadlineTasks.length} zadań z terminem w ciągu 7 dni`, 
-      section: 'tasks' 
+    alerts.push({
+      type: 'warning',
+      message: `${nearDeadlineTasks.length} zadań z terminem w ciągu 7 dni`,
+      section: 'tasks'
     });
   }
 
