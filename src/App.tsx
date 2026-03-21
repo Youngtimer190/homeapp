@@ -10,7 +10,6 @@ import Vehicles from './components/sections/Vehicles';
 import Pets from './components/sections/Pets';
 import Members from './components/sections/Members';
 import AuthScreen from './components/AuthScreen';
-import ResetPasswordScreen from './components/ResetPasswordScreen';
 import Settings from './components/sections/Settings';
 import { useAuth } from './lib/AuthContext';
 import { useSupabaseData } from './lib/useSupabaseData';
@@ -46,6 +45,7 @@ function AppLayout({ data, isLocalMode, userEmail, onSignOut, onDeleteAccount, o
   const [active, setActive] = useState<ActiveSection>('dashboard');
   const [mobileOpen, setMobileOpen] = useState(false);
 
+  // Lock scroll when sidebar is open on mobile
   useScrollLock(mobileOpen);
 
   const memberNames = data.members.map(m => m.name.split(' ')[0]);
@@ -227,12 +227,36 @@ function SupabaseApp({ onExitToAuth }: { onExitToAuth: () => void }) {
     members, setMembers,
     shoppingLists, setShoppingLists,
     familyName, setFamilyName,
+    loading,
   } = useSupabaseData(user?.id);
 
   const handleSignOut = async () => {
     await signOut();
     onExitToAuth();
   };
+
+  if (loading) {
+    return (
+      <div className="flex min-h-dvh bg-gray-50 items-center justify-center" style={{ fontFamily: "'Inter', sans-serif" }}>
+        <div className="w-full max-w-sm px-6 space-y-6 animate-pulse">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-gray-200" />
+            <div className="space-y-2 flex-1">
+              <div className="h-3 bg-gray-200 rounded-full w-32" />
+              <div className="h-2 bg-gray-100 rounded-full w-24" />
+            </div>
+          </div>
+          <div className="h-32 bg-gray-200 rounded-2xl" />
+          <div className="grid grid-cols-2 gap-3">
+            <div className="h-24 bg-gray-200 rounded-2xl" />
+            <div className="h-24 bg-gray-200 rounded-2xl" />
+            <div className="h-24 bg-gray-200 rounded-2xl" />
+            <div className="h-24 bg-gray-200 rounded-2xl" />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const supabaseData = {
     transactions, setTransactions,
@@ -259,7 +283,7 @@ function SupabaseApp({ onExitToAuth }: { onExitToAuth: () => void }) {
 
 // ── Root ───────────────────────────────────────────────────────────────────────
 export default function App() {
-  const { user, loading: authLoading, isPasswordRecovery } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [appMode, setAppMode] = useState<AppMode>(() => {
     if (!isSupabaseConfigured) return 'auth';
     try {
@@ -285,9 +309,6 @@ export default function App() {
       setAppMode('auth');
     }
   }, [user, authLoading]);
-
-  // Gdy Supabase wykryje event PASSWORD_RECOVERY — pokaż ekran zmiany hasła
-  if (isPasswordRecovery) return <ResetPasswordScreen />;
 
   if (appMode === 'demo') return <LocalApp onExitDemo={() => setAppMode('auth')} />;
   if (appMode === 'app' && isSupabaseConfigured && (user || authLoading)) return <SupabaseApp onExitToAuth={() => setAppMode('auth')} />;
