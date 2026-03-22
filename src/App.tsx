@@ -316,12 +316,23 @@ export default function App() {
     }
   }, [user, authLoading]);
 
+  // Bufor — nawet po authLoading czekamy chwilę zanim pokażemy ekran logowania
+  // zabezpieczenie przed iOS który czasem zwraca sesję z opóźnieniem
+  const [graceExpired, setGraceExpired] = useState(false);
+  useEffect(() => {
+    if (!authLoading && !user && isSupabaseConfigured) {
+      const t = setTimeout(() => setGraceExpired(true), 800);
+      return () => clearTimeout(t);
+    }
+    if (user) setGraceExpired(false);
+  }, [authLoading, user]);
+
   if (appMode === 'demo') return <LocalApp onExitDemo={() => setAppMode('auth')} />;
   if (appMode === 'app' && isSupabaseConfigured && (user || authLoading)) return <SupabaseApp onExitToAuth={() => setAppMode('auth')} />;
   if (appMode === 'app' && !isSupabaseConfigured) return <LocalApp onExitDemo={() => setAppMode('auth')} />;
 
-  // Podczas ładowania sesji (authLoading) — pokazuj ekran ładowania zamiast ekranu logowania
-  if (authLoading && isSupabaseConfigured) {
+  // Pokazuj ekran ładowania dopóki authLoading LUB bufor nie wygasł
+  if ((authLoading || !graceExpired) && isSupabaseConfigured) {
     return (
       <div className="min-h-dvh bg-gradient-to-br from-indigo-50 via-white to-violet-50 flex items-center justify-center" style={{ fontFamily: "'Inter', sans-serif" }}>
         <div className="text-center">
