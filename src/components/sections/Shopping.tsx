@@ -203,10 +203,9 @@ export default function Shopping({ lists, setLists }: Props) {
                   </button>
                   <button
                     onClick={() => setConfirmListId(selectedList.id)}
-                    className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition"
-                    title="Usuń listę"
+                    className="flex items-center gap-1.5 px-3 py-2 bg-red-500 text-white text-sm rounded-xl hover:bg-red-600 transition font-medium"
                   >
-                    🗑
+                    Usuń
                   </button>
                 </div>
               </div>
