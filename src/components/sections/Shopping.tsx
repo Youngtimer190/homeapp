@@ -15,6 +15,7 @@ export default function Shopping({ lists, setLists }: Props) {
   const [showListModal, setShowListModal] = useState(false);
   const [showItemModal, setShowItemModal] = useState(false);
   const [editingItem, setEditingItem] = useState<ShoppingItem | null>(null);
+  const [editingList, setEditingList] = useState<ShoppingList | null>(null);
   const [listForm, setListForm] = useState(emptyList);
   const [itemForm, setItemForm] = useState(emptyItem);
   const [filter, setFilter] = useState<'all' | 'pending' | 'done'>('all');
@@ -24,17 +25,37 @@ export default function Shopping({ lists, setLists }: Props) {
   const selectedList = lists.find(l => l.id === selectedListId) ?? null;
 
   // ── List actions ─────────────────────────────────────────────
-  const handleAddList = () => {
-    if (!listForm.name.trim()) return;
-    const newList: ShoppingList = {
-      id: Date.now().toString(),
-      name: listForm.name.trim(),
-      createdAt: new Date().toISOString().split('T')[0],
-      items: [],
-    };
-    setLists(prev => [...prev, newList]);
-    setSelectedListId(newList.id);
+  const handleOpenAddList = () => {
+    setEditingList(null);
     setListForm(emptyList);
+    setShowListModal(true);
+  };
+
+  const handleOpenEditList = () => {
+    if (!selectedList) return;
+    setEditingList(selectedList);
+    setListForm({ name: selectedList.name });
+    setShowListModal(true);
+  };
+
+  const handleSaveList = () => {
+    if (!listForm.name.trim()) return;
+    if (editingList) {
+      setLists(prev => prev.map(l => l.id === editingList.id
+        ? { ...l, name: listForm.name.trim() }
+        : l));
+    } else {
+      const newList: ShoppingList = {
+        id: Date.now().toString(),
+        name: listForm.name.trim(),
+        createdAt: new Date().toISOString().split('T')[0],
+        items: [],
+      };
+      setLists(prev => [...prev, newList]);
+      setSelectedListId(newList.id);
+    }
+    setListForm(emptyList);
+    setEditingList(null);
     setShowListModal(false);
   };
 
@@ -131,7 +152,7 @@ export default function Shopping({ lists, setLists }: Props) {
           <p className="text-sm text-gray-500 mt-0.5 hidden sm:block">Zarządzaj listami zakupów dla całej rodziny</p>
         </div>
         <button
-          onClick={() => { setListForm(emptyList); setShowListModal(true); }}
+          onClick={handleOpenAddList}
           className="flex items-center gap-2 px-4 py-2.5 bg-teal-600 text-white rounded-xl hover:bg-teal-700 transition font-medium shadow-sm"
         >
           <span className="text-lg">+</span> Nowa lista
@@ -174,7 +195,7 @@ export default function Shopping({ lists, setLists }: Props) {
           <h3 className="text-lg font-semibold text-gray-700 mb-2">Brak list zakupów</h3>
           <p className="text-gray-400 mb-6">Utwórz swoją pierwszą listę zakupów</p>
           <button
-            onClick={() => { setListForm(emptyList); setShowListModal(true); }}
+            onClick={handleOpenAddList}
             className="px-6 py-2.5 bg-teal-600 text-white rounded-xl hover:bg-teal-700 transition font-medium"
           >
             + Nowa lista
@@ -192,18 +213,24 @@ export default function Shopping({ lists, setLists }: Props) {
               <div className="flex items-start justify-between mb-4">
                 <div>
                   <h3 className="text-lg font-bold text-gray-900">{selectedList.name}</h3>
-                  <p className="text-xs text-gray-400 mt-0.5">Utworzona: {new Date(selectedList.createdAt).toLocaleDateString('pl-PL', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+                  <p className="text-xs text-gray-400 mt-0.5">Utworzona: {new Date(selectedList.createdAt).toLocaleDateString('pl-PL', { day: '2-digit', month: '2-digit', year: 'numeric' })}</p>
                 </div>
                 <div className="flex items-center gap-2">
                   <button
                     onClick={handleOpenAddItem}
-                    className="flex items-center gap-1.5 px-3 py-2 bg-teal-600 text-white text-sm rounded-xl hover:bg-teal-700 transition font-medium"
+                    className="flex items-center gap-1.5 px-3 py-2 bg-teal-600 text-white text-xs rounded-xl hover:bg-teal-700 transition font-medium"
                   >
                     <span>+</span> Dodaj produkt
                   </button>
                   <button
+                    onClick={handleOpenEditList}
+                    className="flex items-center gap-1.5 px-3 py-2 bg-orange-500 text-white text-xs rounded-xl hover:bg-orange-600 transition font-medium"
+                  >
+                    ✏️ Edytuj
+                  </button>
+                  <button
                     onClick={() => setConfirmListId(selectedList.id)}
-                    className="flex items-center gap-1.5 px-3 py-2 bg-red-500 text-white text-sm rounded-xl hover:bg-red-600 transition font-medium"
+                    className="flex items-center gap-1.5 px-3 py-2 bg-red-500 text-white text-xs rounded-xl hover:bg-red-600 transition font-medium"
                   >
                     Usuń
                   </button>
@@ -403,8 +430,10 @@ export default function Shopping({ lists, setLists }: Props) {
         <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md">
             <div className="flex items-center justify-between p-6 border-b border-gray-100">
-              <h3 className="text-lg font-bold text-gray-900">🛒 Nowa lista zakupów</h3>
-              <button onClick={() => setShowListModal(false)} className="text-gray-400 hover:text-gray-600 text-xl">✕</button>
+              <h3 className="text-lg font-bold text-gray-900">
+                {editingList ? '✏️ Edytuj listę' : '🛒 Nowa lista zakupów'}
+              </h3>
+              <button onClick={() => { setShowListModal(false); setEditingList(null); }} className="text-gray-400 hover:text-gray-600 text-xl">✕</button>
             </div>
             <div className="p-6 space-y-4">
                <div>
@@ -421,15 +450,15 @@ export default function Shopping({ lists, setLists }: Props) {
                </div>
             </div>
             <div className="flex gap-3 p-6 pt-0">
-              <button onClick={() => setShowListModal(false)} className="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-50 transition">
+              <button onClick={() => { setShowListModal(false); setEditingList(null); }} className="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-50 transition">
                 Anuluj
               </button>
               <button
-                onClick={handleAddList}
+                onClick={handleSaveList}
                 disabled={!listForm.name.trim()}
                 className="flex-1 px-4 py-2.5 bg-teal-600 text-white rounded-xl text-sm font-medium hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
               >
-                Utwórz listę
+                {editingList ? 'Zapisz zmiany' : 'Utwórz listę'}
               </button>
             </div>
           </div>
