@@ -213,7 +213,7 @@ export default function Dashboard({ transactions, tasks, meals, vehicles, pets, 
           </div>
           <h4 className="font-semibold text-gray-900">Budżet</h4>
           <p className={`text-2xl font-bold mt-1 ${balance >= 0 ? 'text-emerald-600' : 'text-red-500'}`}>{fmt(balance)}</p>
-          <div className="flex gap-4 mt-3 text-xs text-gray-500">
+          <div className="flex gap-4 mt-3 text-sm text-gray-500">
             <span className="text-emerald-600">↑ {fmt(income)}</span>
             <span className="text-red-500">↓ {fmt(expense)}</span>
           </div>
@@ -229,7 +229,7 @@ export default function Dashboard({ transactions, tasks, meals, vehicles, pets, 
             <span className="text-xs text-gray-400 group-hover:text-blue-500 transition">Przejdź →</span>
           </div>
             <h4 className="font-semibold text-gray-900">Zadania w tym miesiącu</h4>
-            <p className="text-2xl font-bold mt-1"><span className="text-emerald-500">{monthDoneTasks.length}</span><span className="text-red-400 text-base font-normal">/{monthTasks.length}</span></p>
+            <p className="text-2xl font-bold mt-1"><span className="text-emerald-500">{monthDoneTasks.length}</span><span className="text-red-400">/{monthTasks.length}</span></p>
             <p className="text-xs text-gray-500 mt-1">{monthPendingTasks.length} do wykonania w miesiącu · {monthHighPriorityTasks.length} pilnych</p>
            <div className="mt-3 space-y-1">
              {monthPendingTasks.map(t => (
