@@ -75,6 +75,10 @@ export default function Dashboard({ transactions, tasks, meals, vehicles, pets, 
     .filter(v => !v.unlimitedInspection && v.nextService)
     .sort((a, b) => new Date(a.nextService).getTime() - new Date(b.nextService).getTime())[0];
 
+  const upcomingInsuranceVehicle = vehicles
+    .filter(v => v.insurance)
+    .sort((a, b) => new Date(a.insurance).getTime() - new Date(b.insurance).getTime())[0];
+
   const upcomingPet = pets
     .filter(p => !p.noNextVisit && p.nextVisit)
     .sort((a, b) => new Date(a.nextVisit).getTime() - new Date(b.nextVisit).getTime())[0];
@@ -272,6 +276,14 @@ export default function Dashboard({ transactions, tasks, meals, vehicles, pets, 
               Badanie tech. {upcomingVehicle.brand}: {(() => {
                 const d = daysUntil(upcomingVehicle.nextService);
                 return d === null ? '—' : d < 0 ? 'Przekroczony!' : `za ${d} dni`;
+              })()}
+            </p>
+          )}
+          {upcomingInsuranceVehicle && (
+            <p className="text-xs text-gray-500 mt-1">
+              Ubezpieczenie {upcomingInsuranceVehicle.brand}: {(() => {
+                const d = daysUntil(upcomingInsuranceVehicle.insurance);
+                return d === null ? '—' : d < 0 ? 'Wygasło!' : `wygasa za ${d} dni`;
               })()}
             </p>
           )}
