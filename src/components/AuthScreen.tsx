@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Home } from 'lucide-react';
 import { useAuth } from '../lib/AuthContext';
 import { isSupabaseConfigured } from '../lib/supabase';
 
@@ -162,7 +163,7 @@ export default function AuthScreen({ onSuccess, onDemoMode }: Props) {
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-2xl shadow-lg mb-4">
-            <span className="text-3xl">🏠</span>
+            <Home className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-2xl font-bold text-gray-900">Dom Manager</h1>
           <p className="text-gray-500 text-sm mt-1">Zarządzaj swoim domem w jednym miejscu</p>
