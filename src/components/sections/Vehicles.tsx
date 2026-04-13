@@ -225,15 +225,15 @@ export default function Vehicles({ vehicles, setVehicles }: Props) {
                       </p>
                     )}
                   </div>
-<div className="bg-gray-50 rounded-xl p-4">
+<div className="bg-gray-50 rounded-xl p-4 col-span-2">
 <p className="text-xs text-gray-500 mb-1">🔑 Numer VIN</p>
-<p className="font-semibold text-gray-900 break-all text-sm">{selected.vin || '—'}</p>
+<p className="font-semibold text-gray-900">{selected.vin || '—'}</p>
 </div>
-<div className="bg-gray-50 rounded-xl p-4">
-<p className="text-xs text-gray-500 mb-1">🏛️ Towarzystwo</p>
+<div className="bg-gray-50 rounded-xl p-4 col-span-2">
+<p className="text-xs text-gray-500 mb-1">🏛️ Towarzystwo ubezpieczeniowe</p>
 <p className="font-semibold text-gray-900">{selected.insuranceCompany || '—'}</p>
 <p className="text-xs text-gray-500 mb-1 mt-2">📄 Numer polisy</p>
-<p className="font-semibold text-gray-900 break-all text-sm">{selected.policyNumber || '—'}</p>
+<p className="font-semibold text-gray-900">{selected.policyNumber || '—'}</p>
 </div>
                 </div>
               </div>
