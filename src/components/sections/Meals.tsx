@@ -131,9 +131,7 @@ export default function Meals({ meals, setMeals }: Props) {
 
   // --- Format selected date for display ---
   const selDateObj = parseYMD(selectedDate);
-  const DAY_FULL = ['Niedziela','Poniedziałek','Wtorek','Środa','Czwartek','Piątek','Sobota'];
-  const selDayName = DAY_FULL[selDateObj.getDay()];
-  const selDisplay = `${selDayName}, ${selDateObj.getDate()} ${MONTH_NAMES[selDateObj.getMonth()]} ${selDateObj.getFullYear()}`;
+const selDisplay = selDateObj.toLocaleDateString('pl-PL', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 
   return (
     <div className="space-y-6">

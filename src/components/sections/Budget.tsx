@@ -9,10 +9,11 @@ interface Props {
   memberNames: string[];
 }
 
-const categories = ['Wynagrodzenie', 'Zakupy', 'Rachunki', 'Rozrywka', 'Transport', 'Zdrowie', 'Jedzenie', 'Inne'];
+const categories = ['Wynagrodzenie', 'Oszczędności', 'Zakupy', 'Rachunki', 'Rozrywka', 'Transport', 'Zdrowie', 'Jedzenie', 'Inne'];
+const incomeCategories = ['Wynagrodzenie', 'Oszczędności', 'Inne'];
 
 const categoryIcons: Record<string, string> = {
-  Wynagrodzenie: '💼', Zakupy: '🛍️', Rachunki: '🔌', Rozrywka: '🎬',
+  Wynagrodzenie: '💼', Oszczędności: '🏦', Zakupy: '🛍️', Rachunki: '🔌', Rozrywka: '🎬',
   Transport: '⛽', Zdrowie: '💊', Jedzenie: '🍽️', Inne: '📌',
 };
 
@@ -38,7 +39,7 @@ const emptyForm = (): Omit<Transaction, 'id'> => {
   const today = new Date();
   return {
     type: 'expense',
-    category: 'Inne',
+    category: 'Zakupy',
     description: '',
     amount: 0,
     date: today.toISOString().split('T')[0],
@@ -404,11 +405,11 @@ export default function Budget({ transactions, setTransactions, memberNames }: P
             <div className="p-5 space-y-4">
               <div className="flex rounded-xl overflow-hidden border border-gray-200">
                 <button
-                  onClick={() => setForm(f => ({ ...f, type: 'expense' }))}
+                  onClick={() => setForm(f => ({ ...f, type: 'expense', category: 'Zakupy' }))}
                   className={`flex-1 py-2.5 text-sm font-semibold transition ${form.type === 'expense' ? 'bg-red-500 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
                 >💸 Wydatek</button>
                 <button
-                  onClick={() => setForm(f => ({ ...f, type: 'income' }))}
+                  onClick={() => setForm(f => ({ ...f, type: 'income', category: 'Wynagrodzenie' }))}
                   className={`flex-1 py-2.5 text-sm font-semibold transition ${form.type === 'income' ? 'bg-emerald-500 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
                 >💰 Przychód</button>
               </div>
@@ -452,7 +453,7 @@ export default function Budget({ transactions, setTransactions, memberNames }: P
                    onChange={e => setForm(f => ({ ...f, category: e.target.value }))}
                    className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 bg-white"
                  >
-                   {categories.map(c => <option key={c} value={c}>{categoryIcons[c]} {c}</option>)}
+                   {(form.type === 'income' ? incomeCategories : categories.filter(c => c !== 'Wynagrodzenie' && c !== 'Oszczędności')).map(c => <option key={c} value={c}>{categoryIcons[c]} {c}</option>)}
                  </select>
                </div>
 
