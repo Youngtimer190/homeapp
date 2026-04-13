@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Home } from 'lucide-react';
 import { Section } from './types';
 import Sidebar from './components/Sidebar';
 import Dashboard from './components/Dashboard';
@@ -237,22 +238,12 @@ function SupabaseApp({ onExitToAuth }: { onExitToAuth: () => void }) {
 
   if (loading) {
     return (
-      <div className="flex min-h-dvh bg-gray-50 items-center justify-center" style={{ fontFamily: "'Inter', sans-serif" }}>
-        <div className="w-full max-w-sm px-6 space-y-6 animate-pulse">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gray-200" />
-            <div className="space-y-2 flex-1">
-              <div className="h-3 bg-gray-200 rounded-full w-32" />
-              <div className="h-2 bg-gray-100 rounded-full w-24" />
-            </div>
+      <div className="min-h-dvh bg-gradient-to-br from-indigo-50 via-white to-violet-50 flex items-center justify-center" style={{ fontFamily: "'Inter', sans-serif" }}>
+        <div className="text-center">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-2xl shadow-lg mb-4 animate-pulse">
+            <Home className="w-8 h-8 text-white" />
           </div>
-          <div className="h-32 bg-gray-200 rounded-2xl" />
-          <div className="grid grid-cols-2 gap-3">
-            <div className="h-24 bg-gray-200 rounded-2xl" />
-            <div className="h-24 bg-gray-200 rounded-2xl" />
-            <div className="h-24 bg-gray-200 rounded-2xl" />
-            <div className="h-24 bg-gray-200 rounded-2xl" />
-          </div>
+          <p className="text-gray-400 text-sm font-medium">Ładowanie danych...</p>
         </div>
       </div>
     );
@@ -337,7 +328,7 @@ export default function App() {
       <div className="min-h-dvh bg-gradient-to-br from-indigo-50 via-white to-violet-50 flex items-center justify-center" style={{ fontFamily: "'Inter', sans-serif" }}>
         <div className="text-center">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-2xl shadow-lg mb-4 animate-pulse">
-            <span className="text-3xl">🏠</span>
+            <Home className="w-8 h-8 text-white" />
           </div>
           <p className="text-gray-400 text-sm font-medium">Ładowanie...</p>
         </div>
