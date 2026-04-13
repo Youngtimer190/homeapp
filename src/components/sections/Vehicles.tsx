@@ -20,6 +20,7 @@ const emptyForm = (): Omit<Vehicle, 'id'> => {
     name: '', brand: '', model: '', year: 0,
     licensePlate: '', vin: '', fuelType: '', lastService: today, nextService: today,
     unlimitedInspection: false, mileage: 0, insurance: today, policyNumber: '',
+    insuranceCompany: '',
   };
 };
 
@@ -44,6 +45,7 @@ export default function Vehicles({ vehicles, setVehicles }: Props) {
       lastService: v.lastService, nextService: v.nextService,
       unlimitedInspection: v.unlimitedInspection, mileage: v.mileage,
       insurance: v.insurance, policyNumber: v.policyNumber,
+    insuranceCompany: v.insuranceCompany,
     });
     setShowForm(true);
     window.scrollTo(0, 0);
@@ -185,12 +187,6 @@ export default function Vehicles({ vehicles, setVehicles }: Props) {
                        >🗑 Usuń</button>
                     </div>
                   </div>
-                  <div className="relative mt-4 flex gap-6">
-                    <div>
-                      <p className="text-white/70 text-xs">Przebieg</p>
-                      <p className="text-xl font-bold">{fmt(selected.mileage)} km</p>
-                    </div>
-                  </div>
                 </div>
 
                 {/* Details grid */}
@@ -229,30 +225,16 @@ export default function Vehicles({ vehicles, setVehicles }: Props) {
                       </p>
                     )}
                   </div>
-                  <div className="bg-gray-50 rounded-xl p-4">
-                    <p className="text-xs text-gray-500 mb-1">🔧 Ostatnie badanie techniczne</p>
-                    <p className="font-semibold text-gray-900">{fmtDate(selected.lastService)}</p>
-                  </div>
-                  <div className="bg-gray-50 rounded-xl p-4">
-                    <p className="text-xs text-gray-500 mb-1">⛽ Paliwo</p>
-                    <p className="font-semibold text-gray-900">{selected.fuelType}</p>
-                  </div>
-
-                  {/* VIN */}
-                  {selected.vin && (
-                    <div className="bg-gray-50 rounded-xl p-4 col-span-2">
-                      <p className="text-xs text-gray-500 mb-1">🔑 Numer VIN</p>
-                      <p className="font-semibold text-gray-900 font-mono tracking-wide text-sm">{selected.vin}</p>
-                    </div>
-                  )}
-
-                  {/* Policy number */}
-                  {selected.policyNumber && (
-                    <div className="bg-gray-50 rounded-xl p-4 col-span-2">
-                      <p className="text-xs text-gray-500 mb-1">📄 Numer polisy ubezpieczeniowej</p>
-                      <p className="font-semibold text-gray-900">{selected.policyNumber}</p>
-                    </div>
-                  )}
+<div className="bg-gray-50 rounded-xl p-4">
+<p className="text-xs text-gray-500 mb-1">🔑 Numer VIN</p>
+<p className="font-semibold text-gray-900">{selected.vin || '—'}</p>
+</div>
+<div className="bg-gray-50 rounded-xl p-4">
+<p className="text-xs text-gray-500 mb-1">🏛️ Towarzystwo</p>
+<p className="font-semibold text-gray-900">{selected.insuranceCompany || '—'}</p>
+<p className="text-xs text-gray-500 mb-1 mt-2">📄 Numer polisy</p>
+<p className="font-semibold text-gray-900 break-all text-sm">{selected.policyNumber || '—'}</p>
+</div>
                 </div>
               </div>
             </div>
@@ -379,13 +361,21 @@ export default function Vehicles({ vehicles, setVehicles }: Props) {
                   className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400" />
               </div>
 
-              {/* Numer polisy */}
-              <div>
-                <label className="block text-xs text-gray-500 mb-1 ml-1">Numer polisy ubezpieczeniowej</label>
-                <input type="text" placeholder="np. POL/2025/001234" value={form.policyNumber}
-                  onChange={e => setForm(f => ({ ...f, policyNumber: e.target.value }))}
-                  className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400" />
-              </div>
+{/* Towarzystwo i numer polisy */}
+<div className="grid grid-cols-2 gap-3">
+<div>
+<label className="block text-xs text-gray-500 mb-1 ml-1">Towarzystwo ubezpieczeniowe</label>
+<input type="text" placeholder="np. PZU, Warta" value={form.insuranceCompany}
+onChange={e => setForm(f => ({ ...f, insuranceCompany: e.target.value }))}
+className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400" />
+</div>
+<div>
+<label className="block text-xs text-gray-500 mb-1 ml-1">Numer polisy</label>
+<input type="text" placeholder="np. POL/2025/001234" value={form.policyNumber}
+onChange={e => setForm(f => ({ ...f, policyNumber: e.target.value }))}
+className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400" />
+</div>
+</div>
 
             </div>
             <div className="p-5 pt-0 flex gap-3">
