@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Home } from 'lucide-react';
+import { Home, LogOut } from 'lucide-react';
 import { Section } from './types';
 import Sidebar from './components/Sidebar';
 import Dashboard from './components/Dashboard';
@@ -142,7 +142,7 @@ function AppLayout({ data, isLocalMode, userEmail, onSignOut, onDeleteAccount, o
                     onClick={onSignOut}
                     className="flex items-center gap-1.5 px-2.5 py-1.5 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg text-xs font-semibold transition"
                   >
-                    🚪 <span className="hidden sm:inline">Wyloguj</span>
+                    <LogOut className="w-4 h-4" /> <span className="hidden sm:inline">Wyloguj</span>
                   </button>
                 )}
               </div>
