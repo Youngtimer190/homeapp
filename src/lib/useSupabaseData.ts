@@ -136,10 +136,11 @@ function vehicleFromRow(r: Record<string, unknown>): Vehicle {
     mileage: r.mileage as number,
     insurance: r.insurance as string,
     policyNumber: r.policy_number as string,
+    insuranceCompany: r.insurance_company as string,
   };
 }
 function vehicleToRow(v: Vehicle): Record<string, unknown> {
-  return { id: v.id, name: v.name, brand: v.brand, model: v.model, year: v.year, license_plate: v.licensePlate, vin: v.vin, fuel_type: v.fuelType, last_service: v.lastService, next_service: v.nextService, unlimited_inspection: v.unlimitedInspection, mileage: v.mileage, insurance: v.insurance, policy_number: v.policyNumber };
+  return { id: v.id, name: v.name, brand: v.brand, model: v.model, year: v.year, license_plate: v.licensePlate, vin: v.vin, fuel_type: v.fuelType, last_service: v.lastService, next_service: v.nextService, unlimited_inspection: v.unlimitedInspection, mileage: v.mileage, insurance: v.insurance, policy_number: v.policyNumber, insurance_company: v.insuranceCompany };
 }
 
 // ── Pets ──────────────────────────────────────────────────────────────────────
