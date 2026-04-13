@@ -199,6 +199,10 @@ export default function Vehicles({ vehicles, setVehicles }: Props) {
                     <p className="text-xs text-gray-500 mb-1">🔧 Ostatnie badanie techniczne</p>
                     <p className="font-semibold text-gray-900">{fmtDate(selected.lastService)}</p>
                   </div>
+                  <div className="bg-gray-50 rounded-xl p-4">
+                    <p className="text-xs text-gray-500 mb-1">⛽ Paliwo</p>
+                    <p className="font-semibold text-gray-900">{selected.fuelType}</p>
+                  </div>
                   {selected.unlimitedInspection ? (
                     <div className="rounded-xl p-4 bg-violet-50">
                       <p className="text-xs mb-1 text-violet-500 opacity-70">⏰ Następne badanie techniczne</p>
@@ -232,10 +236,6 @@ export default function Vehicles({ vehicles, setVehicles }: Props) {
                           : `Za ${daysUntil(selected.insurance)} dni`}
                       </p>
                     )}
-                  </div>
-                  <div className="bg-gray-50 rounded-xl p-4">
-                    <p className="text-xs text-gray-500 mb-1">⛽ Paliwo</p>
-                    <p className="font-semibold text-gray-900">{selected.fuelType}</p>
                   </div>
 
                   {/* VIN */}
