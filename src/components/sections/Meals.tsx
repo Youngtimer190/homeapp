@@ -259,17 +259,12 @@ export default function Meals({ meals, setMeals }: Props) {
 
         {/* Meals for selected day */}
         <div className="lg:col-span-3 space-y-4">
-          <div className="flex items-center justify-between">
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 sm:p-5">
+        <div className="flex items-center justify-between mb-4">
             <div>
               <h3 className="text-base font-bold text-gray-900">{selDisplay}</h3>
               <p className="text-xs text-gray-400 mt-0.5">{dayMeals.length > 0 ? `${dayMeals.length} posiłków` : 'Brak posiłków'}</p>
             </div>
-            <button
-              onClick={openAdd}
-              className="text-xs px-3 py-1.5 bg-orange-100 text-orange-600 hover:bg-orange-200 rounded-lg font-semibold transition"
-            >
-              + Dodaj
-            </button>
           </div>
 
           {dayMeals.length === 0 ? (
@@ -320,7 +315,7 @@ export default function Meals({ meals, setMeals }: Props) {
           )}
         </div>
       </div>
-
+    </div>
       {/* Modal */}
       <Modal isOpen={showForm} onClose={closeModal} title={editId ? 'Edytuj posiłek' : 'Nowy posiłek'}>
             <div className="p-5 space-y-4">
@@ -420,13 +415,13 @@ function MealCard({
       <div className="flex items-center gap-2 ml-3 flex-shrink-0">
          <button
            onClick={() => onEdit(meal)}
-           className="text-xs px-4 py-2 rounded-lg bg-orange-500 text-white hover:bg-orange-600 font-medium transition shadow-sm min-h-[44px] min-w-[44px] flex items-center justify-center"
+           className="text-xs px-3 py-1.5 rounded-lg bg-orange-500 text-white hover:bg-orange-600 font-medium transition shadow-sm"
          >
            ✏️ Edytuj
          </button>
          <button
            onClick={() => onDelete(meal.id)}
-           className="text-xs px-4 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600 font-medium transition shadow-sm min-h-[44px] min-w-[44px] flex items-center justify-center"
+           className="text-xs px-3 py-1.5 rounded-lg bg-red-500 text-white hover:bg-red-600 font-medium transition shadow-sm"
          >
            🗑 Usuń
          </button>

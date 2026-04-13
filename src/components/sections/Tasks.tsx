@@ -309,9 +309,6 @@ export default function Tasks({ tasks, setTasks, members }: Props) {
                   {dayCounts.all > 0 ? `${dayCounts.all} zadań (${dayCounts.todo} do zrobienia)` : 'Brak zadań na ten dzień'}
                 </p>
               </div>
-              <button onClick={openAdd} className="text-xs px-3 py-1.5 bg-blue-100 text-blue-600 hover:bg-blue-200 rounded-lg font-semibold transition">
-                + Dodaj
-              </button>
             </div>
 
             {filteredTasks.length === 0 ? (

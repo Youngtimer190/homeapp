@@ -153,9 +153,11 @@ export default function Shopping({ lists, setLists }: Props) {
         </div>
         <button
           onClick={handleOpenAddList}
-          className="flex items-center gap-2 px-4 py-2.5 bg-teal-600 text-white rounded-xl hover:bg-teal-700 transition font-medium shadow-sm"
+          className="flex items-center gap-1.5 bg-teal-600 hover:bg-teal-700 text-white px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl text-sm font-semibold shadow transition flex-shrink-0"
         >
-          <span className="text-lg">+</span> Nowa lista
+          <span className="text-lg leading-none">+</span>
+      <span className="hidden sm:inline">Dodaj listę</span>
+      <span className="sm:hidden">Dodaj</span>
         </button>
       </div>
 
@@ -193,13 +195,7 @@ export default function Shopping({ lists, setLists }: Props) {
         <div className="bg-white rounded-2xl border border-dashed border-gray-300 p-16 text-center">
           <div className="text-6xl mb-4">🛒</div>
           <h3 className="text-lg font-semibold text-gray-700 mb-2">Brak list zakupów</h3>
-          <p className="text-gray-400 mb-6">Utwórz swoją pierwszą listę zakupów</p>
-          <button
-            onClick={handleOpenAddList}
-            className="px-6 py-2.5 bg-teal-600 text-white rounded-xl hover:bg-teal-700 transition font-medium"
-          >
-            + Nowa lista
-          </button>
+          <p className="text-gray-400">Kliknij "Dodaj listę" powyżej, aby utworzyć pierwszą listę</p>
         </div>
       )}
 
@@ -232,7 +228,7 @@ export default function Shopping({ lists, setLists }: Props) {
                     onClick={() => setConfirmListId(selectedList.id)}
                     className="flex items-center gap-1.5 px-3 py-2 bg-red-500 text-white text-xs rounded-xl hover:bg-red-600 transition font-medium"
                   >
-                    Usuń
+                    🗑 Usuń
                   </button>
                 </div>
               </div>
