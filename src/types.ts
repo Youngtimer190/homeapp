@@ -63,6 +63,7 @@ export interface Vehicle {
   mileage: number;
   insurance: string;
   policyNumber: string;
+  insuranceCompany: string;
 }
 
 // Pets
