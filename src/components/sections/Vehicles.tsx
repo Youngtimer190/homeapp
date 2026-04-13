@@ -227,7 +227,7 @@ export default function Vehicles({ vehicles, setVehicles }: Props) {
                   </div>
 <div className="bg-gray-50 rounded-xl p-4">
 <p className="text-xs text-gray-500 mb-1">🔑 Numer VIN</p>
-<p className="font-semibold text-gray-900">{selected.vin || '—'}</p>
+<p className="font-semibold text-gray-900 break-all text-sm">{selected.vin || '—'}</p>
 </div>
 <div className="bg-gray-50 rounded-xl p-4">
 <p className="text-xs text-gray-500 mb-1">🏛️ Towarzystwo</p>
