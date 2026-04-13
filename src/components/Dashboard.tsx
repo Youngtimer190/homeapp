@@ -144,7 +144,7 @@ export default function Dashboard({ transactions, tasks, meals, vehicles, pets, 
     if (dt !== null && dt <= 14) alerts.push({ type: dt < 0 ? 'error' : 'warning', message: `🕷️ Ochrona kleszcze ${p.name}: ${dt < 0 ? 'nieaktualna!' : `za ${dt} dni`}`, section: 'pets' });
   });
 
-  if (upcomingBirthday && upcomingBirthday.days <= 7) {
+  if (upcomingBirthday && upcomingBirthday.days <= 14) {
     alerts.push({ type: 'info', message: `🎂 Urodziny ${upcomingBirthday.name} za ${upcomingBirthday.days === 0 ? 'DZIŚ!' : `${upcomingBirthday.days} dni`}`, section: 'members' });
   }
 

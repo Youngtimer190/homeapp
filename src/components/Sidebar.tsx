@@ -1,24 +1,38 @@
 import { Section } from '../types';
+import {
+  LayoutDashboard,
+  Wallet,
+  CheckSquare,
+  ShoppingCart,
+  Utensils,
+  Car,
+  PawPrint,
+  Users,
+  Settings,
+  Home,
+  X,
+} from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 
 type NavSection = Section | 'dashboard';
 
 interface NavItem {
   id: NavSection;
   label: string;
-  icon: string;
+  icon: LucideIcon;
   color: string;
   bg: string;
 }
 
 const navItems: NavItem[] = [
-  { id: 'dashboard', label: 'Dashboard',      icon: '🏠', color: 'text-indigo-600',  bg: 'bg-indigo-50' },
-  { id: 'budget',    label: 'Budżet',         icon: '💰', color: 'text-emerald-600', bg: 'bg-emerald-50' },
-  { id: 'tasks',     label: 'Zadania',        icon: '✅', color: 'text-blue-600',    bg: 'bg-blue-50' },
-  { id: 'shopping',  label: 'Lista zakupów',  icon: '🛒', color: 'text-teal-600',    bg: 'bg-teal-50' },
-  { id: 'meals',     label: 'Posiłki',        icon: '🍽️', color: 'text-orange-600',  bg: 'bg-orange-50' },
-  { id: 'vehicles',  label: 'Pojazdy',        icon: '🚗', color: 'text-violet-600',  bg: 'bg-violet-50' },
-  { id: 'pets',      label: 'Zwierzęta',      icon: '🐾', color: 'text-amber-600',   bg: 'bg-amber-50' },
-  { id: 'members',   label: 'Członkowie',     icon: '👨‍👩‍👧‍👦', color: 'text-rose-600',    bg: 'bg-rose-50' },
+  { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, color: 'text-indigo-600', bg: 'bg-indigo-50' },
+  { id: 'budget', label: 'Budżet', icon: Wallet, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+  { id: 'tasks', label: 'Zadania', icon: CheckSquare, color: 'text-blue-600', bg: 'bg-blue-50' },
+  { id: 'shopping', label: 'Lista zakupów', icon: ShoppingCart, color: 'text-teal-600', bg: 'bg-teal-50' },
+  { id: 'meals', label: 'Posiłki', icon: Utensils, color: 'text-orange-600', bg: 'bg-orange-50' },
+  { id: 'vehicles', label: 'Pojazdy', icon: Car, color: 'text-violet-600', bg: 'bg-violet-50' },
+  { id: 'pets', label: 'Zwierzęta', icon: PawPrint, color: 'text-amber-600', bg: 'bg-amber-50' },
+  { id: 'members', label: 'Członkowie', icon: Users, color: 'text-rose-600', bg: 'bg-rose-50' },
 ];
 
 interface Props {
@@ -40,21 +54,21 @@ export default function Sidebar({ active, onChange, mobileOpen, onClose, familyN
         />
       )}
 
-        <aside
-          className={`
-            fixed top-0 left-0 h-full w-64 z-40 flex flex-col
-            bg-white border-r border-gray-100 shadow-2xl
-            transition-transform duration-300 ease-in-out
-            ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}
-            lg:translate-x-0 lg:shadow-sm lg:z-20
-          `}
+      <aside
+        className={`
+          fixed top-0 left-0 h-full w-64 z-40 flex flex-col
+          bg-white border-r border-gray-100 shadow-2xl
+          transition-transform duration-300 ease-in-out
+          ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}
+          lg:translate-x-0 lg:shadow-sm lg:z-20
+        `}
       >
         {/* Logo — safe area top for iOS notch */}
         <div className="flex items-center gap-3 px-4 border-b border-gray-100 flex-shrink-0"
           style={{ paddingTop: `calc(env(safe-area-inset-top) + 1rem)`, paddingBottom: '1rem' }}
         >
           <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-lg shadow flex-shrink-0">
-            🏠
+            <Home className="w-5 h-5 text-white" />
           </div>
           <div className="min-w-0">
             <h1 className="text-sm font-bold text-gray-900 leading-tight truncate">Dom Manager</h1>
@@ -65,7 +79,7 @@ export default function Sidebar({ active, onChange, mobileOpen, onClose, familyN
             onClick={onClose}
             className="ml-auto lg:hidden w-7 h-7 rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500 flex-shrink-0 transition"
           >
-            ✕
+            <X className="w-4 h-4" />
           </button>
         </div>
 
@@ -73,6 +87,7 @@ export default function Sidebar({ active, onChange, mobileOpen, onClose, familyN
         <nav className="flex-1 px-2 py-3 space-y-0.5 overflow-y-auto" style={{ WebkitOverflowScrolling: 'touch' as any }}>
           {navItems.map((item) => {
             const isActive = active === item.id;
+            const Icon = item.icon;
             return (
               <button
                 key={item.id}
@@ -86,7 +101,7 @@ export default function Sidebar({ active, onChange, mobileOpen, onClose, familyN
                   }
                 `}
               >
-                <span className="text-base leading-none flex-shrink-0">{item.icon}</span>
+                <Icon className="w-5 h-5 flex-shrink-0" />
                 <span className="truncate">{item.label}</span>
                 {isActive && (
                   <span className="ml-auto w-1.5 h-4 rounded-full bg-current opacity-70 flex-shrink-0" />
@@ -108,7 +123,7 @@ export default function Sidebar({ active, onChange, mobileOpen, onClose, familyN
                 }
               `}
             >
-              <span className="text-base leading-none flex-shrink-0">⚙️</span>
+              <Settings className="w-5 h-5 flex-shrink-0" />
               <span className="truncate">Ustawienia</span>
               {active === 'settings' && (
                 <span className="ml-auto w-1.5 h-4 rounded-full bg-current opacity-70 flex-shrink-0" />
