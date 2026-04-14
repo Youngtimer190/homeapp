@@ -56,6 +56,7 @@ export default function Budget({ transactions, setTransactions, memberNames }: P
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState<Omit<Transaction, 'id'>>(emptyForm());
   const [filterType, setFilterType] = useState<'all' | 'income' | 'expense'>('all');
+  const [amountInput, setAmountInput] = useState('');
 
   // Navigate months
   const prevMonth = () => {
@@ -119,6 +120,7 @@ export default function Budget({ transactions, setTransactions, memberNames }: P
   const openAdd = () => {
     setEditId(null);
     setForm(emptyForm());
+    setAmountInput('');
     setShowForm(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -126,6 +128,7 @@ export default function Budget({ transactions, setTransactions, memberNames }: P
   const openEdit = (t: Transaction) => {
     setEditId(t.id);
     setForm({ type: t.type, category: t.category, description: t.description, amount: t.amount, date: t.date });
+    setAmountInput(t.amount.toString().replace('.', ','));
     setShowForm(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -427,12 +430,13 @@ export default function Budget({ transactions, setTransactions, memberNames }: P
               <div>
                  <label className="block text-xs text-gray-500 mb-1 ml-1">Kwota (PLN) *</label>
                  <input
-                   type="number"
-                   placeholder="0.00"
+                   type="text"
+                   placeholder="0,00"
                    min="0"
-                   step="0.01"
-                   value={form.amount || ''}
-                   onChange={e => setForm(f => ({ ...f, amount: parseFloat(e.target.value) || 0 }))}
+                   inputMode="decimal"
+                   value={amountInput}
+ onChange={e => {
+ const val = e.target.value; setAmountInput(val); setForm(f => ({ ...f, amount: parseFloat(val.replace(',', '.')) || 0 })); }}
                    className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400"
                  />
                </div>
