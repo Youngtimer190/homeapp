@@ -24,6 +24,7 @@ export interface Transaction {
   amount: number;
   date: string;
   addedBy?: string;
+  notes?: string;
 }
 
 // Tasks
