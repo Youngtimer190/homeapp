@@ -44,6 +44,7 @@ const emptyForm = (): Omit<Transaction, 'id'> => {
     amount: 0,
     date: today.toISOString().split('T')[0],
     addedBy: '',
+    notes: '',
   };
 };
 
@@ -127,7 +128,7 @@ export default function Budget({ transactions, setTransactions, memberNames }: P
 
   const openEdit = (t: Transaction) => {
     setEditId(t.id);
-    setForm({ type: t.type, category: t.category, description: t.description, amount: t.amount, date: t.date });
+    setForm({ type: t.type, category: t.category, description: t.description, amount: t.amount, date: t.date, addedBy: t.addedBy || '', notes: t.notes || '' });
     setAmountInput(t.amount.toString().replace('.', ','));
     setShowForm(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -308,6 +309,9 @@ export default function Budget({ transactions, setTransactions, memberNames }: P
                     {t.category} · {fmtDate(t.date)}
                     {t.addedBy && <span className="ml-1 text-gray-500">· 👤 {t.addedBy}</span>}
                   </p>
+                  {t.notes && (
+                    <p className="text-xs text-gray-500 mt-1 line-clamp-2 italic">📝 {t.notes}</p>
+                  )}
                 </div>
                 <div className="text-right flex-shrink-0">
                   <p className={`text-sm font-bold ${t.type === 'income' ? 'text-emerald-600' : 'text-red-500'}`}>
@@ -424,6 +428,16 @@ export default function Budget({ transactions, setTransactions, memberNames }: P
                    value={form.description}
                    onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
                    className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400"
+                 />
+               </div>
+               <div>
+                 <label className="block text-xs text-gray-500 mb-1 ml-1">Notatki (opcjonalnie)</label>
+                 <textarea
+                   placeholder="Dodatkowe informacje..."
+                   value={form.notes || ''}
+                   onChange={e => setForm(f => ({ ...f, notes: e.target.value }))}
+                   rows={2}
+                   className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 resize-none"
                  />
                </div>
               <div className="grid grid-cols-2 gap-3">
