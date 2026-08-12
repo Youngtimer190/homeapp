@@ -82,10 +82,11 @@ function txFromRow(r: Record<string, unknown>): Transaction {
     amount: r.amount as number,
     date: r.date as string,
     addedBy: r.added_by as string | undefined,
+    notes: r.notes as string | undefined,
   };
 }
 function txToRow(t: Transaction): Record<string, unknown> {
-  return { id: t.id, type: t.type, category: t.category, description: t.description, amount: t.amount, date: t.date, added_by: t.addedBy };
+  return { id: t.id, type: t.type, category: t.category, description: t.description, amount: t.amount, date: t.date, added_by: t.addedBy, notes: t.notes ?? null };
 }
 
 // ── Tasks ─────────────────────────────────────────────────────────────────────
