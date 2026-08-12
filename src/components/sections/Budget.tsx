@@ -35,7 +35,7 @@ function DetailRow({ label, value, icon }: { label: string; value: string; icon:
       <span className="text-lg flex-shrink-0">{icon}</span>
       <div className="flex-1 min-w-0">
         <p className="text-xs text-gray-400 font-medium">{label}</p>
-        <p className="text-sm text-gray-900 truncate">{value}</p>
+        <p className="text-sm text-gray-900 whitespace-pre-wrap break-words">{value}</p>
       </div>
     </div>
   );
@@ -542,6 +542,7 @@ export default function Budget({ transactions, setTransactions, memberNames }: P
           isOpen={true}
           onClose={() => setDetailId(null)}
           title="Szczegóły transakcji"
+          maxWidth="max-w-xl"
         >
           {(() => {
             const t = transactions.find(x => x.id === detailId);
