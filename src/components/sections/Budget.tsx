@@ -29,6 +29,18 @@ const categoryColors: Record<string, string> = {
   Inne: 'from-gray-400 to-gray-500',
 };
 
+function DetailRow({ label, value, icon }: { label: string; value: string; icon: string }) {
+  return (
+    <div className="flex items-start gap-3 p-3 rounded-xl bg-gray-50">
+      <span className="text-lg flex-shrink-0">{icon}</span>
+      <div className="flex-1 min-w-0">
+        <p className="text-xs text-gray-400 font-medium">{label}</p>
+        <p className="text-sm text-gray-900 truncate">{value}</p>
+      </div>
+    </div>
+  );
+}
+
 const MONTHS_PL = [
   'Styczeń', 'Luty', 'Marzec', 'Kwiecień', 'Maj', 'Czerwiec',
   'Lipiec', 'Sierpień', 'Wrzesień', 'Październik', 'Listopad', 'Grudzień',
@@ -55,6 +67,7 @@ export default function Budget({ transactions, setTransactions, memberNames }: P
 
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
+  const [detailId, setDetailId] = useState<string | null>(null);
   const [form, setForm] = useState<Omit<Transaction, 'id'>>(emptyForm());
   const [filterType, setFilterType] = useState<'all' | 'income' | 'expense'>('all');
   const [amountInput, setAmountInput] = useState('');
@@ -299,7 +312,11 @@ export default function Budget({ transactions, setTransactions, memberNames }: P
               </div>
             )}
             {filtered.map(t => (
-              <div key={t.id} className="flex items-center gap-4 px-5 py-3 hover:bg-gray-50 transition group">
+              <div
+                key={t.id}
+                className="flex items-center gap-4 px-5 py-3 hover:bg-gray-50 transition group cursor-pointer"
+                onClick={() => setDetailId(t.id)}
+              >
                 <div className="w-9 h-9 rounded-xl bg-gray-100 flex items-center justify-center text-base flex-shrink-0">
                   {categoryIcons[t.category] || '💳'}
                 </div>
@@ -318,17 +335,19 @@ export default function Budget({ transactions, setTransactions, memberNames }: P
                     {t.type === 'income' ? '+' : '-'}{fmt(t.amount)}
                   </p>
                 </div>
-                <div className="opacity-100 flex items-center gap-1 transition">
+                <div className="flex flex-col gap-1.5 transition">
                   <button
                     onClick={() => openEdit(t)}
-                    className="w-7 h-7 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-500 flex items-center justify-center text-xs transition"
-                    title="Edytuj"
-                  >✏️</button>
-                   <button
-                     onClick={() => openDelete(t.id)}
-                     className="w-7 h-7 rounded-lg bg-red-50 hover:bg-red-100 text-red-400 hover:text-red-500 flex items-center justify-center text-sm transition"
-                     title="Usuń"
-                   >×</button>
+                    className="text-xs px-3 py-1.5 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 font-medium transition shadow-sm text-left"
+                  >
+                    ✏️ Edytuj
+                  </button>
+                  <button
+                    onClick={() => openDelete(t.id)}
+                    className="text-xs px-3 py-1.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 font-medium transition shadow-sm text-left"
+                  >
+                    🗑 Usuń
+                  </button>
                 </div>
               </div>
             ))}
@@ -516,6 +535,64 @@ export default function Budget({ transactions, setTransactions, memberNames }: P
         onConfirm={() => confirmId && handleDelete(confirmId)}
         onCancel={() => setConfirmId(null)}
       />
+
+      {/* Detail Modal */}
+      {detailId && (
+        <Modal
+          isOpen={true}
+          onClose={() => setDetailId(null)}
+          title="Szczegóły transakcji"
+        >
+          {(() => {
+            const t = transactions.find(x => x.id === detailId);
+            if (!t) return null;
+            const typeLabel = t.type === 'income' ? 'Przychód' : 'Wydatek';
+            const typeColor = t.type === 'income' ? 'text-emerald-600 bg-emerald-50' : 'text-red-600 bg-red-50';
+            const typeIcon = t.type === 'income' ? '💰' : '💸';
+            return (
+              <div className="space-y-4">
+                {/* Type badge + Amount */}
+                <div className="flex items-center justify-between p-4 rounded-xl bg-gray-50">
+                  <div className="flex items-center gap-3">
+                    <span className="text-3xl">{categoryIcons[t.category] || '💳'}</span>
+                    <div>
+                      <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">{typeLabel}</p>
+                      <p className={`text-2xl font-bold ${typeColor.replace('bg-', 'bg-')} rounded-full px-4 py-1 inline-flex items-center gap-2`}>
+                        <span>{typeIcon}</span>
+                        <span>{fmt(t.amount)}</span>
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <DetailRow label="Opis" value={t.description} icon="📝" />
+                  {t.notes && <DetailRow label="Notatki" value={t.notes} icon="🗒️" />}
+                  <DetailRow label="Kategoria" value={t.category} icon="🏷️" />
+                  <DetailRow label="Data" value={fmtDate(t.date)} icon="📅" />
+                  {t.addedBy && <DetailRow label="Dodał(a)" value={t.addedBy} icon="👤" />}
+                </div>
+
+                {/* Actions */}
+                <div className="pt-2 border-t border-gray-100 flex flex-col gap-2">
+                  <button
+                    onClick={() => { setDetailId(null); openEdit(t); }}
+                    className="w-full px-4 py-2.5 rounded-xl bg-blue-50 text-blue-600 hover:bg-blue-100 font-semibold text-sm transition"
+                  >
+                    ✏️ Edytuj
+                  </button>
+                  <button
+                    onClick={() => { setDetailId(null); openDelete(t.id); }}
+                    className="w-full px-4 py-2.5 rounded-xl bg-red-50 text-red-600 hover:bg-red-100 font-semibold text-sm transition"
+                  >
+                    🗑 Usuń
+                  </button>
+                </div>
+              </div>
+            );
+          })()}
+        </Modal>
+      )}
     </div>
   );
 }
