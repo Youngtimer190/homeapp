@@ -68,6 +68,7 @@ export default function Budget({ transactions, setTransactions, memberNames }: P
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [detailId, setDetailId] = useState<string | null>(null);
+  const [categoryDetail, setCategoryDetail] = useState<string | null>(null);
   const [form, setForm] = useState<Omit<Transaction, 'id'>>(emptyForm());
   const [filterType, setFilterType] = useState<'all' | 'income' | 'expense'>('all');
   const [amountInput, setAmountInput] = useState('');
@@ -369,8 +370,13 @@ export default function Budget({ transactions, setTransactions, memberNames }: P
           <div className="space-y-3">
             {byCategory.map(({ cat, amount }) => {
               const pct = expense > 0 ? (amount / expense) * 100 : 0;
+              const catExpenses = monthTransactions.filter(t => t.type === 'expense' && t.category === cat);
               return (
-                <div key={cat}>
+                <button
+                  key={cat}
+                  onClick={() => setCategoryDetail(cat)}
+                  className="w-full text-left p-3 rounded-xl bg-gray-50 hover:bg-gray-100 transition"
+                >
                   <div className="flex items-center justify-between text-xs mb-1">
                     <span className="text-gray-600 font-medium">{categoryIcons[cat]} {cat}</span>
                     <div className="text-right">
@@ -384,7 +390,11 @@ export default function Budget({ transactions, setTransactions, memberNames }: P
                       style={{ width: `${pct}%` }}
                     />
                   </div>
-                </div>
+                  <div className="mt-2 flex items-center gap-1.5 text-xs text-gray-400">
+                    <span>{catExpenses.length} transakcj{catExpenses.length === 1 ? 'a' : catExpenses.length < 5 ? 'e' : 'i'}</span>
+                    <span className="ml-auto">👁</span>
+                  </div>
+                </button>
               );
             })}
             {byCategory.length === 0 && (
@@ -594,6 +604,59 @@ export default function Budget({ transactions, setTransactions, memberNames }: P
           })()}
         </Modal>
       )}
+
+      {/* Category Detail Modal */}
+      {categoryDetail && (
+        <Modal
+          isOpen={true}
+          onClose={() => setCategoryDetail(null)}
+          title={`Wydatki: ${categoryIcons[categoryDetail] || '💳'} ${categoryDetail}`}
+          maxWidth="max-w-xl"
+        >
+          {(() => {
+            const catExpenses = monthTransactions.filter(t => t.type === 'expense' && t.category === categoryDetail);
+            if (catExpenses.length === 0) {
+              return (
+                <div className="text-center py-8">
+                  <p className="text-3xl mb-2">📊</p>
+                  <p className="text-gray-400">Brak wydatków w tej kategorii</p>
+                </div>
+              );
+            }
+            const total = catExpenses.reduce((s, t) => s + t.amount, 0);
+            return (
+              <div className="space-y-3">
+                <div className="p-3 rounded-xl bg-gray-50 flex items-center justify-between">
+                  <span className="text-sm text-gray-500">Łącznie: {catExpenses.length} transakcji</span>
+                  <span className="font-bold text-red-600">{fmt(total)}</span>
+                </div>
+                <div className="max-h-80 overflow-y-auto space-y-2">
+                  {catExpenses
+                    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+                    .map(t => (
+                      <button
+                        key={t.id}
+                        onClick={() => { setCategoryDetail(null); setDetailId(t.id); }}
+                        className="w-full text-left p-3 rounded-xl bg-gray-50 hover:bg-gray-100 transition flex items-center justify-between gap-3"
+                      >
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-gray-900 truncate">{t.description}</p>
+                          <p className="text-xs text-gray-400 flex items-center gap-1">
+                            <span>{fmtDate(t.date)}</span>
+                            {t.addedBy && <span>· 👤 {t.addedBy}</span>}
+                          </p>
+                          {t.notes && <p className="text-xs text-gray-500 mt-0.5 line-clamp-1 italic">📝 {t.notes}</p>}
+                        </div>
+                        <span className="text-sm font-bold text-red-600 flex-shrink-0">{fmt(t.amount)}</span>
+                      </button>
+                    ))}
+                </div>
+              </div>
+            );
+          })()}
+        </Modal>
+      )}
+
     </div>
   );
 }
