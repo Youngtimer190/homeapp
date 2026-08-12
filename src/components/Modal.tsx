@@ -30,7 +30,7 @@ export default function Modal({ isOpen, onClose, title, children, maxWidth = 'ma
 
   return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center"
+      className="fixed inset-0 z-50 flex items-center justify-center"
       style={{
         paddingTop: 'env(safe-area-inset-top, 0px)',
         paddingBottom: 'env(safe-area-inset-bottom, 0px)',
@@ -49,11 +49,13 @@ export default function Modal({ isOpen, onClose, title, children, maxWidth = 'ma
         ref={contentRef}
         className={`
           relative bg-white w-full flex flex-col z-10
-          rounded-t-3xl sm:rounded-2xl shadow-2xl
+          rounded-2xl shadow-2xl
+          sm:max-w-lg md:max-w-xl lg:max-w-2xl xl:max-w-3xl
           ${maxWidth}
         `}
         style={{
           maxHeight: 'calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 1rem)',
+          width: '100%',
         }}
       >
         {/* Header */}
