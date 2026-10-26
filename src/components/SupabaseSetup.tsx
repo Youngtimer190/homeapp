@@ -64,11 +64,20 @@ create policy "own" on tasks
 
 create table meals (
   id text primary key, user_id uuid references auth.users not null,
-  name text, meal_label text, date text, ingredients text,
+  name text, meal_label text, date text, ingredients text, notes text,
   created_at timestamptz default now()
 );
 alter table meals enable row level security;
 create policy "own" on meals
+  using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+create table meal_base (
+  id text primary key, user_id uuid references auth.users not null,
+  name text, meal_label text, ingredients text, notes text,
+  created_at timestamptz default now()
+);
+alter table meal_base enable row level security;
+create policy "own" on meal_base
   using (auth.uid() = user_id) with check (auth.uid() = user_id);
 
 create table vehicles (
@@ -121,6 +130,7 @@ create policy "own" on shopping_lists
 -- Dodaj brakujące kolumny dla istniejących tabel
 ALTER TABLE pets ADD COLUMN IF NOT EXISTS birth_date text;
 ALTER TABLE pets ADD COLUMN IF NOT EXISTS age numeric;
+ALTER TABLE meals ADD COLUMN IF NOT EXISTS notes text;
 ALTER TABLE families ADD COLUMN IF NOT EXISTS name text default 'Wpisz nazwę rodziny';`}
             </pre>
           </div>
