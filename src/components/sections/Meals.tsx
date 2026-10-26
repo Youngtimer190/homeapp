@@ -1,11 +1,15 @@
 import { useState } from 'react';
-import { Meal } from '../../types';
+import { Meal, MealBaseItem } from '../../types';
+import { newId } from '../../utils/id';
 import ConfirmDialog from '../ConfirmDialog';
 import Modal from '../Modal';
+import MealBase, { MealBasePicker } from './MealBase';
 
 interface Props {
   meals: Meal[];
   setMeals: (val: Meal[] | ((prev: Meal[]) => Meal[])) => void;
+  mealBase: MealBaseItem[];
+  setMealBase: (val: MealBaseItem[] | ((prev: MealBaseItem[]) => MealBaseItem[])) => void;
 }
 
 const MONTH_NAMES = [
@@ -36,23 +40,34 @@ function getFirstDayOfWeek(year: number, month: number) {
   return (d + 6) % 7; // convert Sunday=0 to Monday=0
 }
 
-const emptyForm = (date: string): Omit<Meal, 'id'> => ({
+interface MealForm {
+  name: string;
+  mealLabel: string;
+  date: string;
+  ingredients: string;
+  notes: string;
+}
+
+const emptyForm = (date: string): MealForm => ({
   name: '',
   mealLabel: '',
   date,
   ingredients: '',
+  notes: '',
 });
 
-export default function Meals({ meals, setMeals }: Props) {
+export default function Meals({ meals, setMeals, mealBase, setMealBase }: Props) {
   const today = new Date();
   const [viewYear, setViewYear] = useState(today.getFullYear());
   const [viewMonth, setViewMonth] = useState(today.getMonth());
   const [selectedDate, setSelectedDate] = useState(toYMD(today));
 
+  const [tab, setTab] = useState<'plan' | 'base'>('plan');
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm(toYMD(today)));
   const [confirmId, setConfirmId] = useState<string | null>(null);
+  const [showBasePicker, setShowBasePicker] = useState(false);
 
   const isCurrentMonth = viewYear === today.getFullYear() && viewMonth === today.getMonth();
   const todayYMD = toYMD(today);
@@ -99,17 +114,30 @@ export default function Meals({ meals, setMeals }: Props) {
 
   const openEdit = (meal: Meal) => {
     setEditId(meal.id);
-    setForm({ name: meal.name, mealLabel: meal.mealLabel, date: meal.date, ingredients: meal.ingredients });
+    setForm({
+      name: meal.name,
+      mealLabel: meal.mealLabel,
+      date: meal.date,
+      ingredients: meal.ingredients,
+      notes: meal.notes || '',
+    });
     setShowForm(true);
     window.scrollTo(0, 0);
   };
 
   const handleSave = () => {
     if (!form.name.trim()) return;
+    const payload = {
+      name: form.name.trim(),
+      mealLabel: form.mealLabel.trim(),
+      date: form.date,
+      ingredients: form.ingredients.trim(),
+      notes: form.notes.trim() || undefined,
+    };
     if (editId) {
-      setMeals(prev => prev.map(m => m.id === editId ? { ...m, ...form } : m));
+      setMeals(prev => prev.map(m => m.id === editId ? { ...m, ...payload } : m));
     } else {
-      setMeals(prev => [...prev, { ...form, id: Date.now().toString() }]);
+      setMeals(prev => [...prev, { ...payload, id: newId() }]);
     }
     setEditId(null);
     setShowForm(false);
@@ -125,6 +153,49 @@ export default function Meals({ meals, setMeals }: Props) {
     setEditId(null);
   };
 
+  // --- Baza posiłków ---
+  const isInBase = (meal: Meal) =>
+    mealBase.some(b => b.name.trim().toLowerCase() === meal.name.trim().toLowerCase());
+
+  // dodanie wpisu z bazy do wybranego dnia (kopia danych)
+  const addBaseItemToDay = (item: MealBaseItem) => {
+    setMeals(prev => [
+      ...prev,
+      {
+        id: newId(),
+        name: item.name,
+        mealLabel: item.mealLabel,
+        date: selectedDate,
+        ingredients: item.ingredients,
+        notes: item.notes,
+      },
+    ]);
+  };
+
+  // zapisanie zaplanowanego posiłku do bazy (aktualizuje istniejący wpis o tej samej nazwie)
+  const saveToBase = (meal: Meal) => {
+    setMealBase(prev => {
+      const existing = prev.find(b => b.name.trim().toLowerCase() === meal.name.trim().toLowerCase());
+      if (existing) {
+        return prev.map(b => b.id === existing.id
+          ? {
+              ...b,
+            mealLabel: b.mealLabel || meal.mealLabel,
+            ingredients: b.ingredients || meal.ingredients,
+            notes: b.notes || meal.notes,
+          }
+          : b);
+      }
+      return [...prev, {
+        id: newId(),
+        name: meal.name.trim(),
+        mealLabel: meal.mealLabel,
+        ingredients: meal.ingredients,
+        notes: meal.notes,
+      }];
+    });
+  };
+
   // --- Grouping meals by label ---
   const groupedLabels = Array.from(new Set(dayMeals.map(m => m.mealLabel).filter(Boolean)));
   const unlabeledMeals = dayMeals.filter(m => !m.mealLabel);
@@ -138,19 +209,66 @@ const selDisplay = selDateObj.toLocaleDateString('pl-PL', { weekday: 'long', day
       {/* Header */}
       <div className="flex items-center justify-between gap-3">
         <div className="min-w-0">
-          <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Plan posiłków</h2>
-          <p className="text-gray-500 text-sm mt-0.5 hidden sm:block">Jadłospis rodziny według dat</p>
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
+            {tab === 'plan' ? 'Plan posiłków' : 'Baza posiłków'}
+          </h2>
+          <p className="text-gray-500 text-sm mt-0.5 hidden sm:block">
+            {tab === 'plan'
+              ? 'Jadłospis rodziny według dat'
+              : 'Twoje powtarzalne posiłki — dodaj je do planu jednym kliknięciem'}
+          </p>
         </div>
+        {tab === 'plan' && (
+          <button
+            onClick={openAdd}
+            className="flex items-center gap-1.5 bg-orange-500 hover:bg-orange-600 text-white px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl text-sm font-semibold shadow transition flex-shrink-0"
+          >
+            <span className="text-lg leading-none">+</span>
+            <span className="hidden sm:inline">Dodaj posiłek</span>
+            <span className="sm:hidden">Dodaj</span>
+          </button>
+        )}
+      </div>
+
+      {/* Zakładki */}
+      <div className="flex items-center gap-2 border-b border-gray-200">
         <button
-          onClick={openAdd}
-          className="flex items-center gap-1.5 bg-orange-500 hover:bg-orange-600 text-white px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl text-sm font-semibold shadow transition flex-shrink-0"
+          onClick={() => setTab('plan')}
+          className={`flex items-center gap-2 px-4 py-2.5 text-sm font-semibold border-b-2 -mb-px transition ${
+            tab === 'plan'
+              ? 'border-orange-500 text-orange-600'
+              : 'border-transparent text-gray-400 hover:text-gray-600'
+          }`}
         >
-          <span className="text-lg leading-none">+</span>
-          <span className="hidden sm:inline">Dodaj posiłek</span>
-          <span className="sm:hidden">Dodaj</span>
+          🍽️ Plan posiłków
+        </button>
+        <button
+          onClick={() => setTab('base')}
+          className={`flex items-center gap-2 px-4 py-2.5 text-sm font-semibold border-b-2 -mb-px transition ${
+            tab === 'base'
+              ? 'border-orange-500 text-orange-600'
+              : 'border-transparent text-gray-400 hover:text-gray-600'
+          }`}
+        >
+          📖 Baza posiłków
+          {mealBase.length > 0 && (
+            <span className="text-xs px-1.5 py-0.5 rounded-full bg-orange-100 text-orange-600">
+              {mealBase.length}
+            </span>
+          )}
         </button>
       </div>
 
+      {tab === 'base' ? (
+        <MealBase
+          mealBase={mealBase}
+          setMealBase={setMealBase}
+          meals={meals}
+          setMeals={setMeals}
+          defaultDate={selectedDate}
+        />
+      ) : (
+        <>
       {/* Stats */}
       <div className="grid grid-cols-3 gap-2 sm:gap-3">
         <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm text-center">
@@ -258,11 +376,17 @@ const selDisplay = selDateObj.toLocaleDateString('pl-PL', { weekday: 'long', day
         {/* Meals for selected day */}
         <div className="lg:col-span-3 space-y-4">
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 sm:p-5">
-        <div className="flex items-center justify-between mb-4">
-            <div>
+        <div className="flex items-center justify-between gap-3 mb-4">
+            <div className="min-w-0">
               <h3 className="text-base font-bold text-gray-900">{selDisplay}</h3>
               <p className="text-xs text-gray-400 mt-0.5">{dayMeals.length > 0 ? `${dayMeals.length} posiłków` : 'Brak posiłków'}</p>
             </div>
+            <button
+              onClick={() => setShowBasePicker(true)}
+              className="flex items-center gap-1.5 px-3 py-2 bg-orange-50 text-orange-600 hover:bg-orange-100 rounded-xl text-xs font-semibold transition flex-shrink-0"
+            >
+              📖 Z bazy
+            </button>
           </div>
 
           {dayMeals.length === 0 ? (
@@ -289,7 +413,14 @@ const selDisplay = selDateObj.toLocaleDateString('pl-PL', { weekday: 'long', day
                     </div>
                     <div className="divide-y divide-gray-50">
                        {labelMeals.map(meal => (
-                         <MealCard key={meal.id} meal={meal} onEdit={openEdit} onDelete={id => { setConfirmId(id); window.scrollTo(0, 0); }} />
+                         <MealCard
+                           key={meal.id}
+                           meal={meal}
+                           onEdit={openEdit}
+                           onDelete={id => { setConfirmId(id); window.scrollTo(0, 0); }}
+                           onSaveToBase={saveToBase}
+                           inBase={isInBase(meal)}
+                         />
                        ))}
                     </div>
                   </div>
@@ -304,7 +435,14 @@ const selDisplay = selDateObj.toLocaleDateString('pl-PL', { weekday: 'long', day
                   </div>
                   <div className="divide-y divide-gray-50">
                      {unlabeledMeals.map(meal => (
-                       <MealCard key={meal.id} meal={meal} onEdit={openEdit} onDelete={id => { setConfirmId(id); window.scrollTo(0, 0); }} />
+                       <MealCard
+                         key={meal.id}
+                         meal={meal}
+                         onEdit={openEdit}
+                         onDelete={id => { setConfirmId(id); window.scrollTo(0, 0); }}
+                         onSaveToBase={saveToBase}
+                         inBase={isInBase(meal)}
+                       />
                      ))}
                   </div>
                 </div>
@@ -364,6 +502,18 @@ const selDisplay = selDateObj.toLocaleDateString('pl-PL', { weekday: 'long', day
                   className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 resize-none"
                 />
               </div>
+
+               {/* Notes */}
+               <div>
+                 <label className="block text-xs text-gray-500 mb-1 ml-1">Notatka / przepis (opcjonalnie)</label>
+                <textarea
+                  placeholder="np. Smażyć 10 min, dodać koperku na koniec"
+                  value={form.notes}
+                  onChange={e => setForm(f => ({ ...f, notes: e.target.value }))}
+                  rows={2}
+                  className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 resize-none"
+                />
+              </div>
             </div>
             <div className="p-5 pt-0 flex gap-3">
               <button
@@ -389,6 +539,16 @@ const selDisplay = selDateObj.toLocaleDateString('pl-PL', { weekday: 'long', day
         onConfirm={() => confirmId && handleDelete(confirmId)}
         onCancel={() => setConfirmId(null)}
       />
+        </>
+      )}
+
+      {/* Modal — wybór posiłku z bazy */}
+      <MealBasePicker
+        isOpen={showBasePicker}
+        onClose={() => setShowBasePicker(false)}
+        items={mealBase}
+        onSelect={addBaseItemToDay}
+      />
     </div>
   );
 }
@@ -397,10 +557,14 @@ function MealCard({
   meal,
   onEdit,
   onDelete,
+  onSaveToBase,
+  inBase,
 }: {
   meal: Meal;
   onEdit: (m: Meal) => void;
   onDelete: (id: string) => void;
+  onSaveToBase: (m: Meal) => void;
+  inBase: boolean;
 }) {
   return (
     <div className="flex items-start justify-between px-5 py-4 hover:bg-gray-50 transition">
@@ -409,8 +573,24 @@ function MealCard({
         {meal.ingredients && (
           <p className="text-xs text-gray-400 mt-0.5 truncate">{meal.ingredients}</p>
         )}
+        {meal.notes && (
+          <p className="text-xs text-gray-500 mt-1 line-clamp-2 italic">📝 {meal.notes}</p>
+        )}
       </div>
       <div className="flex items-center gap-2 ml-3 flex-shrink-0">
+         {inBase ? (
+           <span className="text-xs px-2.5 py-1.5 rounded-lg bg-orange-50 text-orange-600 font-medium">
+             ⭐ W bazie
+           </span>
+         ) : (
+           <button
+             onClick={() => onSaveToBase(meal)}
+             title="Zapisz w bazie posiłków"
+             className="text-xs px-2.5 py-1.5 rounded-lg bg-gray-100 text-gray-600 hover:bg-orange-100 hover:text-orange-600 font-medium transition"
+           >
+             ⭐
+           </button>
+         )}
          <button
            onClick={() => onEdit(meal)}
            className="text-xs px-3 py-1.5 rounded-lg bg-orange-500 text-white hover:bg-orange-600 font-medium transition shadow-sm"

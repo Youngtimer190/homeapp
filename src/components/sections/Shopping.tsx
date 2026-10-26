@@ -438,7 +438,7 @@ export default function Shopping({ lists, setLists }: Props) {
                    type="text"
                    value={listForm.name}
                    onChange={e => setListForm({ ...listForm, name: e.target.value })}
-                   onKeyDown={e => e.key === 'Enter' && handleAddList()}
+                   onKeyDown={e => e.key === 'Enter' && handleSaveList()}
                    placeholder="np. Tygodniowe zakupy, Drogeria..."
                    className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
                    autoFocus

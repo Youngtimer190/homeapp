@@ -83,7 +83,6 @@ export default function Vehicles({ vehicles, setVehicles }: Props) {
   };
 
   const fmtDate = (d: string) => d ? new Date(d).toLocaleDateString('pl-PL') : '—';
-  const fmt = (n: number) => new Intl.NumberFormat('pl-PL').format(n);
 
   const daysUntil = (d: string) => {
     if (!d) return null;
