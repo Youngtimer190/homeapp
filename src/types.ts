@@ -46,6 +46,16 @@ export interface Meal {
   mealLabel: string;
   date: string; // YYYY-MM-DD
   ingredients: string;
+  notes?: string; // notatka / przepis
+}
+
+// Baza posiłków — powtarzalne posiłki do dodania w planie
+export interface MealBaseItem {
+  id: string;
+  name: string;
+  mealLabel: string;
+  ingredients: string;
+  notes?: string; // notatka / przepis
 }
 
 // Vehicles

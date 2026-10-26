@@ -161,6 +161,7 @@ function AppLayout({ data, isLocalMode, userEmail, onSignOut, onDeleteAccount, o
                 transactions={data.transactions}
                 tasks={data.tasks}
                 meals={data.meals}
+                mealBase={data.mealBase}
                 vehicles={data.vehicles}
                 pets={data.pets}
                 members={data.members}
@@ -178,7 +179,12 @@ function AppLayout({ data, isLocalMode, userEmail, onSignOut, onDeleteAccount, o
               <Shopping lists={data.shoppingLists} setLists={data.setShoppingLists} />
             )}
             {active === 'meals' && (
-              <Meals meals={data.meals} setMeals={data.setMeals} />
+              <Meals
+                meals={data.meals}
+                setMeals={data.setMeals}
+                mealBase={data.mealBase}
+                setMealBase={data.setMealBase}
+              />
             )}
             {active === 'vehicles' && (
               <Vehicles vehicles={data.vehicles} setVehicles={data.setVehicles} />
@@ -223,6 +229,7 @@ function SupabaseApp({ onExitToAuth }: { onExitToAuth: () => void }) {
     transactions, setTransactions,
     tasks, setTasks,
     meals, setMeals,
+    mealBase, setMealBase,
     vehicles, setVehicles,
     pets, setPets,
     members, setMembers,
@@ -253,6 +260,7 @@ function SupabaseApp({ onExitToAuth }: { onExitToAuth: () => void }) {
     transactions, setTransactions,
     tasks, setTasks,
     meals, setMeals,
+    mealBase, setMealBase,
     vehicles, setVehicles,
     pets, setPets,
     members, setMembers,
