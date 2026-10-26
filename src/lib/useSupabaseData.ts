@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from './supabase';
-import { Transaction, Task, Meal, Vehicle, Pet, Member, ShoppingList, ShoppingItem } from '../types';
+import { Transaction, Task, Meal, MealBaseItem, Vehicle, Pet, Member, ShoppingList, ShoppingItem } from '../types';
 
 function useTable<T extends { id: string }>(
   table: string,
@@ -114,10 +114,25 @@ function mealFromRow(r: Record<string, unknown>): Meal {
     mealLabel: r.meal_label as string,
     date: r.date as string,
     ingredients: r.ingredients as string,
+    notes: (r.notes as string | null) ?? undefined,
   };
 }
 function mealToRow(m: Meal): Record<string, unknown> {
-  return { id: m.id, name: m.name, meal_label: m.mealLabel, date: m.date, ingredients: m.ingredients };
+  return { id: m.id, name: m.name, meal_label: m.mealLabel, date: m.date, ingredients: m.ingredients, notes: m.notes ?? null };
+}
+
+// ── Meal base (baza posiłków) ─────────────────────────────────────────────────
+function mealBaseFromRow(r: Record<string, unknown>): MealBaseItem {
+  return {
+    id: r.id as string,
+    name: r.name as string,
+    mealLabel: r.meal_label as string,
+    ingredients: r.ingredients as string,
+    notes: (r.notes as string | null) ?? undefined,
+  };
+}
+function mealBaseToRow(m: MealBaseItem): Record<string, unknown> {
+  return { id: m.id, name: m.name, meal_label: m.mealLabel, ingredients: m.ingredients, notes: m.notes ?? null };
 }
 
 // ── Vehicles ──────────────────────────────────────────────────────────────────
@@ -256,6 +271,7 @@ export function useSupabaseData(userId: string | undefined) {
   const transactions = useTable<Transaction>('transactions', userId, txFromRow, txToRow);
   const tasks = useTable<Task>('tasks', userId, taskFromRow, taskToRow);
   const meals = useTable<Meal>('meals', userId, mealFromRow, mealToRow);
+  const mealBase = useTable<MealBaseItem>('meal_base', userId, mealBaseFromRow, mealBaseToRow);
   const vehicles = useTable<Vehicle>('vehicles', userId, vehicleFromRow, vehicleToRow);
   const pets = useTable<Pet>('pets', userId, petFromRow, petToRow);
   const members = useTable<Member>('members', userId, memberFromRow, memberToRow);
@@ -280,13 +296,14 @@ export function useSupabaseData(userId: string | undefined) {
   }, [userId]);
 
   const loading = transactions.loading || tasks.loading || meals.loading ||
-    vehicles.loading || pets.loading || members.loading ||
+    mealBase.loading || vehicles.loading || pets.loading || members.loading ||
     shoppingLists.loading || familyLoading;
 
   return {
     transactions: transactions.data, setTransactions: transactions.setData,
     tasks: tasks.data, setTasks: tasks.setData,
     meals: meals.data, setMeals: meals.setData,
+    mealBase: mealBase.data, setMealBase: mealBase.setData,
     vehicles: vehicles.data, setVehicles: vehicles.setData,
     pets: pets.data, setPets: pets.setData,
     members: members.data, setMembers: members.setData,

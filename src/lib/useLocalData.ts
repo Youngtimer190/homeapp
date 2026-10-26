@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { Transaction, Task, Meal, Vehicle, Pet, Member, ShoppingList } from '../types';
+import { Transaction, Task, Meal, MealBaseItem, Vehicle, Pet, Member, ShoppingList } from '../types';
 
 function useLocalStorage<T>(key: string, initial: T): [T, (val: T | ((prev: T) => T)) => void] {
   const [state, setState] = useState<T>(() => {
@@ -26,6 +26,7 @@ export function useLocalData() {
   const [transactions, setTransactions] = useLocalStorage<Transaction[]>('dm_transactions', []);
   const [tasks, setTasks] = useLocalStorage<Task[]>('dm_tasks', []);
   const [meals, setMeals] = useLocalStorage<Meal[]>('dm_meals', []);
+  const [mealBase, setMealBase] = useLocalStorage<MealBaseItem[]>('dm_mealBase', []);
   const [vehicles, setVehicles] = useLocalStorage<Vehicle[]>('dm_vehicles', []);
   const [pets, setPets] = useLocalStorage<Pet[]>('dm_pets', []);
   const [members, setMembers] = useLocalStorage<Member[]>('dm_members', []);
@@ -44,6 +45,7 @@ export function useLocalData() {
     transactions, setTransactions: wrapSetter<Transaction>(setTransactions),
     tasks, setTasks: wrapSetter<Task>(setTasks),
     meals, setMeals: wrapSetter<Meal>(setMeals),
+    mealBase, setMealBase: wrapSetter<MealBaseItem>(setMealBase),
     vehicles, setVehicles: wrapSetter<Vehicle>(setVehicles),
     pets, setPets: wrapSetter<Pet>(setPets),
     members, setMembers: wrapSetter<Member>(setMembers),
