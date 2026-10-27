@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useId, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useScrollLock } from '../hooks/useScrollLock';
 
@@ -12,6 +12,7 @@ interface ModalProps {
 
 export default function Modal({ isOpen, onClose, title, children, maxWidth = 'max-w-lg' }: ModalProps) {
   const contentRef = useRef<HTMLDivElement>(null);
+  const titleId = useId();
 
   // Lock body scroll when modal is open
   useScrollLock(isOpen);
@@ -30,7 +31,7 @@ export default function Modal({ isOpen, onClose, title, children, maxWidth = 'ma
 
   return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center"
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center"
       style={{
         paddingTop: 'env(safe-area-inset-top, 0px)',
         paddingBottom: 'env(safe-area-inset-bottom, 0px)',
@@ -47,23 +48,26 @@ export default function Modal({ isOpen, onClose, title, children, maxWidth = 'ma
       {/* Modal panel */}
       <div
         ref={contentRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
         className={`
           relative bg-white w-full flex flex-col z-10
-          rounded-2xl shadow-2xl
-          sm:max-w-lg md:max-w-xl lg:max-w-2xl xl:max-w-3xl
+          rounded-t-3xl sm:rounded-2xl shadow-2xl
           ${maxWidth}
         `}
         style={{
           maxHeight: 'calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 1rem)',
-          width: '100%',
         }}
       >
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 shrink-0">
-          <h3 className="text-lg font-bold text-gray-900">{title}</h3>
+          <h3 id={titleId} className="text-lg font-bold text-gray-900 min-w-0 break-words pr-2">{title}</h3>
           <button
+            type="button"
             onClick={onClose}
-            className="w-9 h-9 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-700 text-xl transition"
+            aria-label="Zamknij"
+            className="w-9 h-9 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-700 text-xl transition focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-400"
           >
             ×
           </button>
