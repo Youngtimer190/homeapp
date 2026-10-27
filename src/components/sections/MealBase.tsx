@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Meal, MealBaseItem } from '../../types';
 import { newId } from '../../utils/id';
 import ConfirmDialog from '../ConfirmDialog';
+import MealDetailModal from '../MealDetailModal';
 import Modal from '../Modal';
 
 interface Props {
@@ -68,10 +69,17 @@ export default function MealBase({ mealBase, setMealBase, meals, setMeals, defau
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm);
   const [confirmId, setConfirmId] = useState<string | null>(null);
+  const [detailId, setDetailId] = useState<string | null>(null);
 
   const [targetItem, setTargetItem] = useState<MealBaseItem | null>(null);
   const [targetDate, setTargetDate] = useState(defaultDate);
   const [repeatWeek, setRepeatWeek] = useState(false);
+
+  // --- Podgląd szczegółów ---
+  // trzymamy tylko id, aktualny wpis bierzemy z najświeższych danych
+  const detailItem = detailId ? mealBase.find(i => i.id === detailId) ?? null : null;
+  // podgląd jest widoczny tylko gdy nie jest otwarty żaden inny modal sekcji
+  const previewOpen = detailItem !== null && !showForm && targetItem === null && confirmId === null;
 
   // --- Filtrowanie ---
   const categories = Array.from(new Set(mealBase.map(i => i.mealLabel).filter(Boolean))).sort((a, b) =>
@@ -277,25 +285,32 @@ export default function MealBase({ mealBase, setMealBase, meals, setMeals, defau
           {filtered.map(item => (
             <div
               key={item.id}
-              className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 flex flex-col"
+              className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 flex flex-col transition hover:border-orange-200 hover:shadow-md"
             >
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0 flex-1">
-                  <p className="font-semibold text-gray-900 text-sm break-words">{item.name}</p>
-                  {item.mealLabel && (
-                    <span className="inline-block mt-1 text-xs text-orange-600 bg-orange-50 px-2 py-0.5 rounded-full">
-                      {item.mealLabel}
-                    </span>
-                  )}
-                </div>
-              </div>
+              <button
+                type="button"
+                onClick={() => setDetailId(item.id)}
+                aria-label={`Pokaż szczegóły: ${item.name}`}
+                className="w-full text-left rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400 focus-visible:ring-inset"
+              >
+                <span className="block font-semibold text-gray-900 text-sm break-words">{item.name}</span>
+                {item.mealLabel && (
+                  <span className="inline-block mt-1 text-xs text-orange-600 bg-orange-50 px-2 py-0.5 rounded-full">
+                    {item.mealLabel}
+                  </span>
+                )}
 
-              {item.ingredients && (
-                <p className="text-xs text-gray-400 mt-2 break-words">🧺 {item.ingredients}</p>
-              )}
-              {item.notes && (
-                <p className="text-xs text-gray-500 mt-1 line-clamp-2 italic break-words">📝 {item.notes}</p>
-              )}
+                {item.ingredients && (
+                  <span className="text-xs text-gray-400 mt-2 line-clamp-2 break-words">🧺 {item.ingredients}</span>
+                )}
+                {item.notes && (
+                  <span className="text-xs text-gray-500 mt-1 line-clamp-2 italic break-words">
+                    📝 {item.notes}
+                  </span>
+                )}
+
+                <span className="inline-block mt-2 text-xs font-semibold text-orange-500">Szczegóły ›</span>
+              </button>
 
               <div className="flex items-center gap-2 mt-4">
                 <button
@@ -451,6 +466,21 @@ export default function MealBase({ mealBase, setMealBase, meals, setMeals, defau
           </button>
         </div>
       </Modal>
+
+      {/* Modal — podgląd szczegółów posiłku z bazy */}
+      {detailItem && (
+        <MealDetailModal
+          isOpen={previewOpen}
+          onClose={() => setDetailId(null)}
+          name={detailItem.name}
+          mealLabel={detailItem.mealLabel}
+          ingredients={detailItem.ingredients}
+          notes={detailItem.notes}
+          onAddToDay={() => openAddToDay(detailItem)}
+          onEdit={() => openEdit(detailItem)}
+          onDelete={() => setConfirmId(detailItem.id)}
+        />
+      )}
 
       <ConfirmDialog
         isOpen={confirmId !== null}

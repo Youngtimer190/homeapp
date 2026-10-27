@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Meal, MealBaseItem } from '../../types';
 import { newId } from '../../utils/id';
 import ConfirmDialog from '../ConfirmDialog';
+import MealDetailModal from '../MealDetailModal';
 import Modal from '../Modal';
 import MealBase, { MealBasePicker } from './MealBase';
 
@@ -40,6 +41,15 @@ function getFirstDayOfWeek(year: number, month: number) {
   return (d + 6) % 7; // convert Sunday=0 to Monday=0
 }
 
+function formatMealDate(ymd: string) {
+  return parseYMD(ymd).toLocaleDateString('pl-PL', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  });
+}
+
 interface MealForm {
   name: string;
   mealLabel: string;
@@ -68,6 +78,14 @@ export default function Meals({ meals, setMeals, mealBase, setMealBase }: Props)
   const [form, setForm] = useState(emptyForm(toYMD(today)));
   const [confirmId, setConfirmId] = useState<string | null>(null);
   const [showBasePicker, setShowBasePicker] = useState(false);
+  const [detailId, setDetailId] = useState<string | null>(null);
+
+  // --- Podgląd szczegółów ---
+  // trzymamy tylko id, aktualny posiłek bierzemy z najświeższych danych
+  const detailMeal = detailId ? meals.find(m => m.id === detailId) ?? null : null;
+  // podgląd jest widoczny tylko gdy nie jest otwarty żaden inny modal sekcji
+  const previewOpen =
+    detailMeal !== null && !showForm && confirmId === null && !showBasePicker;
 
   const isCurrentMonth = viewYear === today.getFullYear() && viewMonth === today.getMonth();
   const todayYMD = toYMD(today);
@@ -416,6 +434,7 @@ const selDisplay = selDateObj.toLocaleDateString('pl-PL', { weekday: 'long', day
                          <MealCard
                            key={meal.id}
                            meal={meal}
+                           onDetail={m => setDetailId(m.id)}
                            onEdit={openEdit}
                            onDelete={id => { setConfirmId(id); window.scrollTo(0, 0); }}
                            onSaveToBase={saveToBase}
@@ -438,6 +457,7 @@ const selDisplay = selDateObj.toLocaleDateString('pl-PL', { weekday: 'long', day
                        <MealCard
                          key={meal.id}
                          meal={meal}
+                         onDetail={m => setDetailId(m.id)}
                          onEdit={openEdit}
                          onDelete={id => { setConfirmId(id); window.scrollTo(0, 0); }}
                          onSaveToBase={saveToBase}
@@ -532,6 +552,23 @@ const selDisplay = selDateObj.toLocaleDateString('pl-PL', { weekday: 'long', day
             </div>
       </Modal>
 
+      {/* Modal — podgląd szczegółów posiłku z planu */}
+      {detailMeal && (
+        <MealDetailModal
+          isOpen={previewOpen}
+          onClose={() => setDetailId(null)}
+          name={detailMeal.name}
+          mealLabel={detailMeal.mealLabel}
+          ingredients={detailMeal.ingredients}
+          notes={detailMeal.notes}
+          dateLabel={formatMealDate(detailMeal.date)}
+          onSaveToBase={() => saveToBase(detailMeal)}
+          inBase={isInBase(detailMeal)}
+          onEdit={() => openEdit(detailMeal)}
+          onDelete={() => { setConfirmId(detailMeal.id); window.scrollTo(0, 0); }}
+        />
+      )}
+
       <ConfirmDialog
         isOpen={confirmId !== null}
         title="Usuń posiłek"
@@ -555,54 +592,72 @@ const selDisplay = selDateObj.toLocaleDateString('pl-PL', { weekday: 'long', day
 
 function MealCard({
   meal,
+  onDetail,
   onEdit,
   onDelete,
   onSaveToBase,
   inBase,
 }: {
   meal: Meal;
+  onDetail: (m: Meal) => void;
   onEdit: (m: Meal) => void;
   onDelete: (id: string) => void;
   onSaveToBase: (m: Meal) => void;
   inBase: boolean;
 }) {
   return (
-    <div className="flex items-start justify-between px-5 py-4 hover:bg-gray-50 transition">
-      <div className="flex-1 min-w-0">
-        <p className="font-semibold text-gray-900 text-sm">{meal.name}</p>
+    <div className="px-4 sm:px-5 py-4 hover:bg-gray-50 transition">
+      {/* Nazwa i szczegóły — pełna szerokość wiersza, klik otwiera podgląd */}
+      <button
+        type="button"
+        onClick={() => onDetail(meal)}
+        aria-label={`Pokaż szczegóły: ${meal.name}`}
+        className="w-full text-left rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400 focus-visible:ring-inset"
+      >
+        <span className="block font-semibold text-gray-900 text-sm break-words">{meal.name}</span>
         {meal.ingredients && (
-          <p className="text-xs text-gray-400 mt-0.5 truncate">{meal.ingredients}</p>
+          <span className="text-xs text-gray-400 mt-1 line-clamp-2 break-words">🧺 {meal.ingredients}</span>
         )}
         {meal.notes && (
-          <p className="text-xs text-gray-500 mt-1 line-clamp-2 italic">📝 {meal.notes}</p>
+          <span className="text-xs text-gray-500 mt-1 line-clamp-2 italic break-words">📝 {meal.notes}</span>
         )}
-      </div>
-      <div className="flex items-center gap-2 ml-3 flex-shrink-0">
-         {inBase ? (
-           <span className="text-xs px-2.5 py-1.5 rounded-lg bg-orange-50 text-orange-600 font-medium">
-             ⭐ W bazie
-           </span>
-         ) : (
-           <button
-             onClick={() => onSaveToBase(meal)}
-             title="Zapisz w bazie posiłków"
-             className="text-xs px-2.5 py-1.5 rounded-lg bg-gray-100 text-gray-600 hover:bg-orange-100 hover:text-orange-600 font-medium transition"
-           >
-             ⭐
-           </button>
-         )}
-         <button
-           onClick={() => onEdit(meal)}
-           className="text-xs px-3 py-1.5 rounded-lg bg-orange-500 text-white hover:bg-orange-600 font-medium transition shadow-sm"
-         >
-           ✏️ Edytuj
-         </button>
-         <button
-           onClick={() => onDelete(meal.id)}
-           className="text-xs px-3 py-1.5 rounded-lg bg-red-500 text-white hover:bg-red-600 font-medium transition shadow-sm"
-         >
-           🗑 Usuń
-         </button>
+        <span className="inline-block mt-2 text-xs font-semibold text-orange-500">Szczegóły ›</span>
+      </button>
+
+      {/* Akcje — w osobnym wierszu, żeby nazwa nie zlewała się z przyciskami */}
+      <div className="flex items-center gap-2 mt-3">
+        {inBase ? (
+          <span className="text-xs px-2.5 py-2 rounded-lg bg-orange-50 text-orange-700 font-semibold whitespace-nowrap">
+            ⭐ W bazie
+          </span>
+        ) : (
+          <button
+            type="button"
+            onClick={() => onSaveToBase(meal)}
+            title="Zapisz w bazie posiłków"
+            aria-label={`Zapisz w bazie posiłków: ${meal.name}`}
+            className="w-9 h-9 flex items-center justify-center rounded-lg bg-gray-100 text-gray-600 hover:bg-orange-100 hover:text-orange-600 font-medium transition focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400"
+          >
+            ⭐
+          </button>
+        )}
+
+        <div className="flex items-center gap-2 ml-auto">
+          <button
+            type="button"
+            onClick={() => onEdit(meal)}
+            className="text-xs px-3 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-400"
+          >
+            ✏️ Edytuj
+          </button>
+          <button
+            type="button"
+            onClick={() => onDelete(meal.id)}
+            className="text-xs px-3 py-2 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-red-300"
+          >
+            🗑 Usuń
+          </button>
+        </div>
       </div>
     </div>
   );
